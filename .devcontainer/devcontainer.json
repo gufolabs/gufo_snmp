@@ -1,0 +1,42 @@
+// VScode development container settings:
+// * For format details, see https://aka.ms/devcontainer.json.
+// * For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.202.3/containers/docker-existing-dockerfile
+// * For configuration guidelines see @todo
+{
+    "name": "Gufo SNMP Development Container",
+    "runArgs": [
+        "--init"
+    ],
+    "build": {
+        // Sets the run context to one level up instead of the .devcontainer folder.
+        "context": "..",
+        // Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
+        "dockerfile": "../Dockerfile",
+        // Dockerfile target
+        "target": "dev"
+    },
+    "containerEnv": {
+        "PYTHONPATH": "src"
+    },
+    // Set *default* container specific settings.json values on container create.
+    "settings": {
+        "python.formatting.blackPath": "/usr/local/bin/black",
+        "python.formatting.provider": "black",
+        "python.pythonPath": "/usr/local/bin/python",
+        "[rust]": {
+            "editor.defaultFormatter": "rust-lang.rust-analyzer",
+            "editor.formatOnSave": true,
+        }
+    },
+    // Add the IDs of extensions you want installed when the container is created.
+    "extensions": [
+        "ms-python.python",
+        "ms-vscode.cpptools",
+        "yzhang.markdown-all-in-one",
+        "ms-azuretools.vscode-docker",
+        "be5invis.toml",
+        "redhat.vscode-yaml",
+        "rust-lang.rust-analyzer",
+    ]
+}

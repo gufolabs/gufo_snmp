@@ -1,0 +1,2 @@
+# build requirements
+setuptools-rust==1.5.2
