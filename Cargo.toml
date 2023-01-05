@@ -1,0 +1,17 @@
+[package]
+edition = "2021"
+name = "gufo_snmp"
+version = "0.1.0"
+
+# See more keys and their definitions 
+# at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+crate-type = ["cdylib"]
+name = "gufo_snmp"
+
+[profile.release]
+strip = "debuginfo"
+
+[dependencies]
+nom = "7.1"
+pyo3 = {version = "0.17", features = ["extension-module"]}
