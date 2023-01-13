@@ -9,6 +9,7 @@ use super::super::error::SnmpError;
 use super::BerClass;
 use nom::{Err, IResult, Needed};
 
+#[derive(Debug)]
 pub(crate) struct BerHeader {
     // Object class: universal, application, context-specific, or private
     pub class: BerClass,

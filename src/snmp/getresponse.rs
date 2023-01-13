@@ -10,10 +10,10 @@ use crate::ber::{BerDecoder, SnmpInt, SnmpSequence};
 use crate::error::SnmpError;
 
 pub(crate) struct SnmpGetResponse<'a> {
-    request_id: i64,
-    error_status: i64,
-    error_index: i64,
-    vars: Vec<SnmpVar<'a>>,
+    pub(crate) request_id: i64,
+    pub(crate) error_status: i64,
+    pub(crate) error_index: i64,
+    pub(crate) vars: Vec<SnmpVar<'a>>,
 }
 
 impl<'a> TryFrom<&'a [u8]> for SnmpGetResponse<'a> {
@@ -34,14 +34,14 @@ impl<'a> TryFrom<&'a [u8]> for SnmpGetResponse<'a> {
         let mut v_tail = vb.0;
         let mut vars = Vec::new();
         while !v_tail.is_empty() {
-            let (rest, oid) = SnmpVar::from_ber(v_tail)?;
-            vars.push(oid);
+            let (rest, v) = SnmpVar::from_ber(v_tail)?;
+            vars.push(v);
             v_tail = rest;
         }
         Ok(SnmpGetResponse {
-            request_id: request_id.as_i64(),
-            error_status: error_status.as_i64(),
-            error_index: error_index.as_i64(),
+            request_id: request_id.into(),
+            error_status: error_status.into(),
+            error_index: error_index.into(),
             vars,
         })
     }

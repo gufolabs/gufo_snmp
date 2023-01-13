@@ -5,26 +5,36 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
+use pyo3::{
+    create_exception,
+    exceptions::{PyException, PyNotImplementedError},
+    PyErr,
+};
+
 #[derive(Debug)]
 pub(crate) enum SnmpError {
     /// Too short
     Incomplete,
     /// Other tag is expected
-    UnexpectedTag,
+    UnexpectedTag, // @todo: Expand
     ///
     InvalidTagFormat,
-    /// Uknown SNMP version
-    UnknownVersion,
     /// Unknown PDU type
     UnknownPdu,
     /// Malformed PDU
     InvalidPdu,
     /// Malformed variable data
     InvalidData,
-    /// Unknown data type
-    UnsupportedData,
+    /// Unimplemented tag
+    UnsupportedTag(String),
     /// Data beyound PDU
     TrailingData,
+    /// Unsupported SNMP version
+    InvalidVersion(u8),
+    /// Buffer is too small
+    OutOfBuffer,
+    /// Not implemented still
+    NotImplemented,
 }
 
 impl From<nom::Err<SnmpError>> for SnmpError {
@@ -40,5 +50,36 @@ impl From<nom::Err<SnmpError>> for SnmpError {
 impl From<SnmpError> for nom::Err<SnmpError> {
     fn from(value: SnmpError) -> nom::Err<SnmpError> {
         nom::Err::Failure(value)
+    }
+}
+
+//pyo3::import_exception!(gufo.ping.error, SNMPError);
+//pub(crate) type PySnmpError = SNMPError;
+create_exception!(_fast, SNMPError, PyException);
+pub(crate) type PySnmpError = SNMPError;
+create_exception!(_fast, SNMPDecodeError, PySnmpError);
+pub(crate) type PySnmpDecodeError = SNMPDecodeError;
+create_exception!(_fast, SNMPEncodeError, PySnmpError);
+pub(crate) type PySnmpEncodeError = SNMPEncodeError;
+
+impl From<SnmpError> for PyErr {
+    fn from(value: SnmpError) -> PyErr {
+        match value {
+            SnmpError::Incomplete => PySnmpDecodeError::new_err("incomplete"),
+            SnmpError::UnexpectedTag => PySnmpDecodeError::new_err("unexpected tag"),
+            SnmpError::InvalidTagFormat => PySnmpDecodeError::new_err("invalid tag format"),
+            SnmpError::UnknownPdu => PySnmpDecodeError::new_err("unknown pdu"),
+            SnmpError::InvalidPdu => PySnmpDecodeError::new_err("invalid pdu"),
+            SnmpError::InvalidData => PySnmpDecodeError::new_err("invalid data"),
+            SnmpError::UnsupportedTag(e) => {
+                PySnmpDecodeError::new_err(format!("Unsupported tag: {}", e))
+            }
+            SnmpError::TrailingData => PySnmpDecodeError::new_err("trailing data"),
+            SnmpError::InvalidVersion(v) => {
+                PySnmpDecodeError::new_err(format!("unsupported version: {}", v))
+            }
+            SnmpError::OutOfBuffer => PySnmpEncodeError::new_err("out of buffer"),
+            SnmpError::NotImplemented => PyNotImplementedError::new_err("not implemented"),
+        }
     }
 }

@@ -7,10 +7,12 @@
 
 use crate::ber::{
     BerClass, BerDecoder, BerHeader, SnmpBool, SnmpInt, SnmpNull, SnmpOctetString, SnmpOid,
-    SnmpSequence, TAG_BOOL, TAG_INT, TAG_NULL, TAG_OBJECT_ID, TAG_OCTET_STRING,
+    SnmpSequence, SnmpTimeTicks, ToPython, TAG_BOOL, TAG_INT, TAG_NULL, TAG_OBJECT_ID,
+    TAG_OCTET_STRING,
 };
 use crate::error::SnmpError;
 use nom::{Err, IResult};
+use pyo3::{Py, PyAny, PyObject, Python};
 
 pub(crate) struct SnmpVar<'a> {
     pub(crate) oid: SnmpOid,
@@ -23,14 +25,15 @@ pub(crate) enum SnmpValue<'a> {
     Null,
     OctetString(SnmpOctetString<'a>),
     Oid(SnmpOid),
+    TimeTicks(SnmpTimeTicks),
 }
 
 impl<'a> SnmpVar<'a> {
     pub(crate) fn from_ber(i: &[u8]) -> IResult<&[u8], SnmpVar, SnmpError> {
         // Parse enclosing sequence
-        let (tail, seq) = SnmpSequence::from_ber(i)?;
+        let (_, vs) = SnmpSequence::from_ber(i)?;
         // Parse oid
-        let (tail, oid) = SnmpOid::from_ber(tail)?;
+        let (tail, oid) = SnmpOid::from_ber(vs.0)?;
         // Parse value
         let (tail, value) = SnmpValue::from_ber(tail)?;
         //
@@ -41,26 +44,75 @@ impl<'a> SnmpVar<'a> {
 impl<'a> SnmpValue<'a> {
     pub(crate) fn from_ber(i: &[u8]) -> IResult<&[u8], SnmpValue, SnmpError> {
         let (tail, hdr) = BerHeader::from_ber(i)?;
-        let value = match (hdr.class, hdr.constructed, hdr.tag) {
-            // Universal, Primitive
-            (BerClass::Universal, false, TAG_BOOL) => {
-                SnmpValue::Bool(SnmpBool::decode(tail, &hdr)?)
+        let value = match hdr.constructed {
+            // Primitive types
+            false => match hdr.class {
+                BerClass::Universal => match hdr.tag {
+                    // @todo: TAG_END_OF_CONTENTS
+                    TAG_BOOL => SnmpValue::Bool(SnmpBool::decode(tail, &hdr)?),
+                    TAG_INT => SnmpValue::Int(SnmpInt::decode(tail, &hdr)?),
+                    // @todo: TAG_BIT_STRING
+                    TAG_OCTET_STRING => {
+                        SnmpValue::OctetString(SnmpOctetString::decode(tail, &hdr)?)
+                    }
+                    TAG_NULL => {
+                        SnmpNull::decode(tail, &hdr)?;
+                        SnmpValue::Null
+                    }
+                    TAG_OBJECT_ID => SnmpValue::Oid(SnmpOid::decode(tail, &hdr)?),
+                    //
+                    _ => {
+                        return Err(Err::Failure(SnmpError::UnsupportedTag(format!(
+                            "Universal primitive tag {}: {:X?}",
+                            hdr.tag, i
+                        ))))
+                    }
+                },
+                BerClass::Application => match hdr.tag {
+                    // TAG_APP_IPADDRESS=>{},
+                    // TAG_APP_COUNTER32: =>{},
+                    // TAG_APP_GAUGE32 =>{},
+                    TAG_APP_TIMETICKS => SnmpValue::TimeTicks(SnmpTimeTicks::decode(i, &hdr)?),
+                    // TAG_APP_OPAQUE=> {},
+                    // TAG_APP_NSAPADDRESS=>{},
+                    // TAG_APP_COUNTER64=> {},
+                    // TAG_APP_UINTEGER32=>{},
+                    _ => {
+                        return Err(Err::Failure(SnmpError::UnsupportedTag(format!(
+                            "Application primitive tag {}: {:X?}",
+                            hdr.tag, i
+                        ))))
+                    }
+                },
+                _ => {
+                    return Err(Err::Failure(SnmpError::UnsupportedTag(format!(
+                        "{:?} primitive tag {}: {:X?}",
+                        hdr.class, hdr.tag, i
+                    ))))
+                }
+            },
+            // Constructed types
+            true => {
+                return Err(Err::Failure(SnmpError::UnsupportedTag(format!(
+                    "{:?} constructed tag {}: {:X?}",
+                    hdr.class, hdr.tag, i
+                ))))
             }
-            (BerClass::Universal, false, TAG_INT) => SnmpValue::Int(SnmpInt::decode(tail, &hdr)?),
-            (BerClass::Universal, false, TAG_NULL) => {
-                SnmpNull::decode(tail, &hdr)?;
-                SnmpValue::Null
-            }
-            (BerClass::Universal, false, TAG_OCTET_STRING) => {
-                SnmpValue::OctetString(SnmpOctetString::decode(tail, &hdr)?)
-            }
-            (BerClass::Universal, false, TAG_OBJECT_ID) => {
-                SnmpValue::Oid(SnmpOid::decode(tail, &hdr)?)
-            }
-            // Catch all
-            _ => return Err(Err::Failure(SnmpError::UnsupportedData)),
         };
         Ok((&tail[hdr.length..], value))
+    }
+}
+
+impl<'a> ToPython for &SnmpValue<'a> {
+    fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError> {
+        Ok(match self {
+            SnmpValue::Bool(x) => todo!(),
+            SnmpValue::Int(x) => todo!(),
+            SnmpValue::Null => todo!(),
+            SnmpValue::OctetString(x) => x.try_to_python(py)?,
+            SnmpValue::Oid(x) => x.try_to_python(py)?,
+            SnmpValue::TimeTicks(x) => x.try_to_python(py)?,
+        })
     }
 }
 
@@ -75,7 +127,7 @@ mod tests {
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
         if let SnmpValue::Bool(x) = value {
-            assert_eq!(x.as_bool(), true);
+            assert_eq!(bool::from(x), true);
             Ok(())
         } else {
             Err(SnmpError::UnexpectedTag)
@@ -88,7 +140,8 @@ mod tests {
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
         if let SnmpValue::Int(x) = value {
-            assert_eq!(x.as_i64(), 10);
+            let v: i64 = x.into();
+            assert_eq!(v, 10);
             Ok(())
         } else {
             Err(SnmpError::UnexpectedTag)
@@ -122,7 +175,7 @@ mod tests {
     #[test]
     fn test_object_id() -> Result<(), SnmpError> {
         let data = [0x6u8, 0x8, 0x2b, 0x06, 0x01, 0x02, 0x01, 0x01, 0x05, 0x00];
-        let expected = [1u64, 3, 6, 1, 2, 1, 1, 5, 0];
+        let expected = [1u32, 3, 6, 1, 2, 1, 1, 5, 0];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
         if let SnmpValue::Oid(x) = value {

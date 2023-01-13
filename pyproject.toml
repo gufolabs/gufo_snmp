@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools", "wheel", "setuptools-rust"]
+
+[tool.black]
+line-length = 79
+target-version = ['py39']
+
+[tool.coverage.run]
+omit = ["*tests*", "*examples*"]
+
+[tool.coverage.html]
+directory = "dist/coverage"
+
+[tool.cibuildwheel]
+before-test = "pip install -r {project}/.requirements/test.txt"
+test-command = "pytest -v {project}/tests"
+
+[tool.cibuildwheel.linux]
+before-all = "./tools/build/setup-rust.sh && pip install -r ./.requirements/build.txt"
+manylinux-aarch64-image = "manylinux2014"
+# manylinux-i686-image = "manylinux_2_24"
+# manylinux-ppc64le-image = "manylinux_2_24"
+# manylinux-pypy_aarch64-image = "manylinux_2_24"
+# manylinux-pypy_i686-image = "manylinux_2_24"
+# manylinux-pypy_x86_64-image = "manylinux_2_24"
+# manylinux-s390x-image = "manylinux_2_24"
+manylinux-x86_64-image = "manylinux2014"
+musllinux-aarch64-image = "musllinux_1_1"
+# musllinux-i686-image = "musllinux_1_1"
+# musllinux-ppc64le-image = "musllinux_1_1"
+# musllinux-s390x-image = "musllinux_1_1"
+musllinux-x86_64-image = "musllinux_1_1"

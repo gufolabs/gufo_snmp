@@ -13,6 +13,7 @@ RUN \
     gcc\
     libc6-dev\
     curl\
+    smmpd\
     && /tmp/setup-rust.sh \
     && rustup component add\
     rust-analysis\

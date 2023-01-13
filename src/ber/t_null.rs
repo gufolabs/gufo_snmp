@@ -5,7 +5,8 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, TAG_NULL};
+use super::{BerDecoder, BerEncoder, BerHeader, TAG_NULL};
+use crate::buf::Buffer;
 use crate::error::SnmpError;
 
 pub(crate) struct SnmpNull;
@@ -23,6 +24,15 @@ impl<'a> BerDecoder<'a> for SnmpNull {
     }
 }
 
+const NULL_BER: [u8; 2] = [5u8, 0];
+
+impl BerEncoder for SnmpNull {
+    fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
+        buf.push(&NULL_BER)?;
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -35,5 +45,25 @@ mod tests {
         assert_eq!(tail.len(), 0);
         Ok(())
     }
-    // @todo: test invalid length
+    #[test]
+    fn test_invalid_length() {
+        let data = [5u8, 1, 0];
+        let r = SnmpNull::from_ber(&data);
+        assert!(r.is_err());
+    }
+    #[test]
+    fn test_encode() -> Result<(), Err<SnmpError>> {
+        let mut b = Buffer::default();
+        SnmpNull {}.push_ber(&mut b)?;
+        let expected = [5u8, 0];
+        assert_eq!(b.data(), &expected);
+        Ok(())
+    }
+    #[test]
+    fn test_encode_decode() -> Result<(), Err<SnmpError>> {
+        let mut b = Buffer::default();
+        SnmpNull {}.push_ber(&mut b)?;
+        SnmpNull::from_ber(b.data())?;
+        Ok(())
+    }
 }

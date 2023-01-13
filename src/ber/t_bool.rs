@@ -23,9 +23,9 @@ impl<'a> BerDecoder<'a> for SnmpBool {
     }
 }
 
-impl SnmpBool {
-    pub(crate) fn as_bool(&self) -> bool {
-        self.0
+impl From<SnmpBool> for bool {
+    fn from(value: SnmpBool) -> Self {
+        value.0
     }
 }
 
@@ -47,7 +47,7 @@ mod tests {
         let expected = [false, true, true];
         for i in 0..data.len() {
             let (tail, v) = SnmpBool::from_ber(&data[i])?;
-            assert_eq!(v.as_bool(), expected[i]);
+            assert_eq!(bool::from(v), expected[i]);
             assert_eq!(tail.len(), 0);
         }
         Ok(())

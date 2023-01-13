@@ -15,3 +15,12 @@ strip = "debuginfo"
 [dependencies]
 nom = "7.1"
 pyo3 = {version = "0.17", features = ["extension-module"]}
+rand = "0.8"
+socket2 = {version = "0.4", features = ["all"]}
+
+[dev-dependencies]
+criterion = "0.4"
+
+[[bench]]
+harness = false
+name = "msg"
