@@ -1,0 +1,38 @@
+name: Build Docs
+env:
+  PIP_CACHE_DIR: .pip
+  PYTHONPATH: src
+on:
+  push:
+    paths:
+      - ".github/workflows/build-docs.yml"
+      - ".requirements/docs.txt"
+      - "docs/**"
+      - "examples/**"
+    branches:
+      - master
+jobs:
+  build-push:
+    name: "Build & Push Docs"
+    runs-on: ubuntu-20.04
+    steps:
+      # Checkout source code
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Cache dependencies
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ./.pip
+          key: ${{ runner.os }}-docs-${{ hashFiles('./.requirements/docs.txt') }}
+
+      # Install dependencies
+      - name: Install Dependencies
+        run: |
+          pip install -IU -r ./.requirements/docs.txt
+
+      # Build documentationn
+      - name: Build & Deploy Docs
+        run: |
+          mkdocs gh-deploy --force
