@@ -1,0 +1,4 @@
+include Cargo.toml
+include src/*.rs
+prune __pycache__
+global-exclude *.py[cod]
