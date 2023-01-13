@@ -1,0 +1,68 @@
+site_name: Gufo SNMP
+site_description: Gufo SNMP Documentation
+site_author: Gufo Labs
+site_url: "https://docs.gufolabs.com/gufo_snmp/"
+copyright: "&copy; 2023, Gufo Labs"
+site_dir: dist/docs/
+repo_url: https://github.com/gufolabs/gufo_snmp/
+repo_name: GitHub
+nav:
+  # - Home: index.md
+  # - Installation: installation.md
+  # - Examples:
+  #     - Overview: examples/index.md
+  #     - Single Request: examples/single.md
+  #     - Series of Requests: examples/series.md
+  - Reference: reference/
+  - Developers' Guide:
+      # - Developer's Environment: environment.md
+      # - Building and Testing: testing.md
+      - Common Tasks: devcommon.md
+      # - Code Quality: codequality.md
+      # - Code Base: codebase.md
+      # - Contributing Guide: CONTRIBUTING.md
+      # - Code of Conduct: CODE_OF_CONDUCT.md
+  - Supported Standards: standards.md
+  - Supported BER Types: types.md
+  # - FAQ: faq.md
+  - Changelog: CHANGELOG.md
+  - License: LICENSE.md
+  # Users
+theme:
+  name: material
+  logo: assets/logo.png
+  favicon: assets/logo.png
+watch:
+  - docs/
+  - src/gufo/
+  - examples/
+plugins:
+  - search
+  - gen-files:
+      scripts:
+        - docs/gen_doc_stubs.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - section-index
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_source: false
+            show_submodules: false
+markdown_extensions:
+  - toc:
+      permalink: True
+  - admonition
+  - footnotes
+  - pymdownx.highlight:
+      anchor_linenums: True
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
