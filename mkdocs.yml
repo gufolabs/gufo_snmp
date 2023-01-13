@@ -9,10 +9,9 @@ repo_name: GitHub
 nav:
   # - Home: index.md
   # - Installation: installation.md
-  # - Examples:
-  #     - Overview: examples/index.md
-  #     - Single Request: examples/single.md
-  #     - Series of Requests: examples/series.md
+  - Examples:
+      - Overview: examples/index.md
+      - Single Get Request: examples/get.md
   - Reference: reference/
   - Developers' Guide:
       # - Developer's Environment: environment.md
