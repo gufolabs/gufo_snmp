@@ -22,9 +22,9 @@
 | NsapAddress       | Application |       P |    5 | :material-close: |             | [RFC-1442][RFC-1442] pp 7.1.10 |
 | Counter64         | Application |       P |    6 | :material-close: |             | [RFC-1442][RFC-1442] pp 7.1.11 |
 | UInteger32        | Application |       P |    7 | :material-close: |             | [RFC-1442][RFC-1442] pp 7.1.12 |
-| noSuchObject      | Context     |       P |    0 | :material-close: |             | [RFC-1905][RFC-1095] pp 3      |
-| noSuchInstance    | Context     |       P |    1 | :material-close: |             | [RFC-1905][RFC-1095] pp 3      |
-| endOfMibView      | Context     |       P |    2 | :material-close: |             | [RFC-1905][RFC-1095] pp 3      |
+| noSuchObject      | Context     |       P |    0 | :material-close: |             | [RFC-1905][RFC-1905] pp 3      |
+| noSuchInstance    | Context     |       P |    1 | :material-close: |             | [RFC-1905][RFC-1905] pp 3      |
+| endOfMibView      | Context     |       P |    2 | :material-close: |             | [RFC-1905][RFC-1905] pp 3      |
 
 [^1]: Primitive/Constructed
 [X-690]: https://www.itu.int/rec/T-REC-X.690
