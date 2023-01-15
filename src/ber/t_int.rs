@@ -18,6 +18,9 @@ impl<'a> BerDecoder<'a> for SnmpInt {
 
     // Implement X.690 pp 8.3: Encoding of an integer value
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
+        if h.length == 0 {
+            return Ok(SnmpInt(0));
+        }
         let mut v = 0i64;
         for n in i[..h.length].iter() {
             v = (v << 8) | (*n as i64);
@@ -44,8 +47,16 @@ impl BerEncoder for SnmpInt {
                 let start = buf.len();
                 // Write body
                 let mut left = self.0;
-                while left > 0 {
+                loop {
                     buf.push_u8((left & 0xff) as u8)?;
+                    if left < 0xff {
+                        if left & 0x80 == 0x80 {
+                            // Highest bit is 1
+                            // push leading zero
+                            buf.push_u8(0)?;
+                        }
+                        break;
+                    }
                     left >>= 8;
                 }
                 // Write length
@@ -54,7 +65,42 @@ impl BerEncoder for SnmpInt {
                 buf.push_u8(TAG_INT as u8)?;
                 Ok(())
             }
-            Ordering::Less => Err(SnmpError::NotImplemented),
+            Ordering::Less => {
+                let start = buf.len();
+                let mut left = -self.0;
+                // Calculate used octets
+                let mut ln = 0;
+                while left > 0 {
+                    ln += 1;
+                    left >>= 8;
+                }
+                // Calculate complement
+                let d = 1 << (ln * 8 - 1);
+                left = -self.0;
+                let comp = if d < left { d << 8 } else { d };
+                // Write octets
+                if comp == left {
+                    for _ in 0..ln - 1 {
+                        buf.push_u8(0)?;
+                    }
+                    buf.push_u8(0x80)?;
+                } else {
+                    left = comp - left;
+                    loop {
+                        if left < 0xff {
+                            buf.push_u8(0x80 | (left as u8))?;
+                            break;
+                        }
+                        buf.push_u8((left & 0xff) as u8)?;
+                        left >>= 8;
+                    }
+                }
+                // Write length
+                buf.push_ber_len(buf.len() - start)?;
+                // Write tag
+                buf.push_u8(TAG_INT as u8)?;
+                Ok(())
+            }
         }
     }
 }
@@ -91,15 +137,21 @@ mod tests {
     #[test]
     fn test_parse_ber() -> Result<(), Err<SnmpError>> {
         let data = [
-            vec![2u8, 1, 0],
-            vec![2, 0],
-            vec![2, 1, 0x7f],
-            vec![2, 2, 0, 0x80],
-            vec![2, 2, 1, 0],
-            vec![2, 1, 0x80],
-            vec![2, 1, 0xff, 0x7f],
+            vec![2u8, 1, 0],              // 0
+            vec![2, 0],                   // 0
+            vec![2, 1, 1],                // 1
+            vec![2, 1, 0x7f],             // 127
+            vec![2, 2, 0, 0x80],          // 128
+            vec![2, 2, 1, 0],             // 256
+            vec![2, 1, 0x80],             // -128
+            vec![2, 2, 0xff, 0x7f],       // -129
+            vec![2, 3, 0xff, 0, 1],       // -65535
+            vec![2, 2, 0x20, 0x85],       // 0x2085
+            vec![2, 3, 0x20, 0x85, 0x11], // 0x208511
         ];
-        let expected = [0i64, 0, 127, 128, 256, -1, -128, -129];
+        let expected = [
+            0i64, 0, 1, 127, 128, 256, -128, -129, -65535, 0x2085, 0x208511,
+        ];
         for i in 0..data.len() {
             let (tail, v) = SnmpInt::from_ber(&data[i])?;
             assert_eq!(v.0, expected[i]);
@@ -111,14 +163,16 @@ mod tests {
     #[test]
     fn test_encode() -> Result<(), SnmpError> {
         let mut buf = Buffer::default();
-        let data = [0i64, 10, 500];
+        let data = [0i64, 1, 127, 128, 256, -128, -129, -65535];
         let expected = [
-            vec![2u8, 1, 0],
-            vec![2, 1, 0x7f],
-            vec![2, 2, 0, 0x80],
-            vec![2, 2, 1, 0],
-            vec![2, 1, 0x80],
-            vec![2, 1, 0xff, 0x7f],
+            vec![2u8, 1, 0],        // 0
+            vec![2, 1, 1],          // 1
+            vec![2, 1, 0x7f],       // 127
+            vec![2, 2, 0, 0x80],    // 128
+            vec![2, 2, 1, 0],       // 256
+            vec![2, 1, 0x80],       // -128
+            vec![2, 2, 0xff, 0x7f], // -129
+            vec![2, 3, 0xff, 0, 1], // -65535
         ];
         for i in 0..data.len() {
             let si: SnmpInt = data[i].into();
