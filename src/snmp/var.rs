@@ -31,13 +31,13 @@ pub(crate) enum SnmpValue<'a> {
 impl<'a> SnmpVar<'a> {
     pub(crate) fn from_ber(i: &[u8]) -> IResult<&[u8], SnmpVar, SnmpError> {
         // Parse enclosing sequence
-        let (_, vs) = SnmpSequence::from_ber(i)?;
+        let (rest, vs) = SnmpSequence::from_ber(i)?;
         // Parse oid
         let (tail, oid) = SnmpOid::from_ber(vs.0)?;
         // Parse value
         let (tail, value) = SnmpValue::from_ber(tail)?;
         //
-        Ok((tail, SnmpVar { oid, value }))
+        Ok((rest, SnmpVar { oid, value }))
     }
 }
 

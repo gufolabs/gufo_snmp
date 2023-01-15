@@ -95,7 +95,7 @@ class SnmpSession(object):
             SNMPError: On other SNMP-related errors.
         """
 
-        async def get_response():
+        async def get_response() -> Any:
             while True:
                 r_ev = asyncio.Event()
                 # Wait until data will be available
@@ -120,4 +120,48 @@ class SnmpSession(object):
         return await asyncio.wait_for(get_response(), self._timeout)
 
     async def get_many(self, oids: Iterable[str]) -> Dict[str, Any]:
-        ...
+        """
+        Send SNMP GET request for multiple oids and await for response.
+
+        Args:
+            oids: Iterable of oids in numeric format, no leading dots.
+
+        Returns:
+            Dict where keys are requested oids, values are returned values.
+            Types of values are depends on requested oids.
+
+        Note:
+            There is no guarante that all requested oids are present in
+            result dict. Some values may be missed if not returned by agent.
+
+        Raises:
+            ValueError: On invalid oid format.
+            OSError: When unable to send request.
+            TimeoutError: When timed out.
+            RuntimeError: On Python runtime failure.
+            SNMPError: On other SNMP-related errors.
+        """
+
+        async def get_response() -> Dict[str, Any]:
+            while True:
+                r_ev = asyncio.Event()
+                # Wait until data will be available
+                loop.add_reader(self._fd, r_ev.set)
+                await r_ev.wait()
+                # Read data or get BlockingIOError
+                # if no valid data available.
+                try:
+                    return self._sock.recv_getresponse_many()
+                except BlockingIOError:
+                    continue
+
+        loop = asyncio.get_running_loop()
+        # Wait for socket became writable
+        w_ev = asyncio.Event()
+        loop.add_writer(self._fd, w_ev.set)
+        await w_ev.wait()
+        loop.remove_writer(self._fd)
+        # Send request
+        self._sock.send_get_many(list(oids))
+        # Await response or timeout
+        return await asyncio.wait_for(get_response(), self._timeout)

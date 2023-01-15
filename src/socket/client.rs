@@ -12,10 +12,12 @@ use crate::snmp::get::SnmpGet;
 use crate::snmp::msg::SnmpMessage;
 use crate::snmp::pdu::SnmpPdu;
 use crate::snmp::SnmpVersion;
+use pyo3::exceptions::PyRuntimeError;
 use pyo3::{
     exceptions::PyBlockingIOError,
     exceptions::{PyOSError, PyValueError},
     prelude::*,
+    types::PyDict,
 };
 use rand::Rng;
 use socket2::{Domain, Protocol, SockAddr, Socket, Type};
@@ -121,8 +123,14 @@ impl SnmpClientSocket {
             };
             // Parse response
             let msg = SnmpMessage::try_from(self.buf.as_slice(size))?;
-            // @todo: check version match
-            // @todo: check community match
+            // Check version match
+            if msg.version != self.version {
+                continue; // Mismatched version, not our response.
+            }
+            // Check community match
+            if msg.community != self.community.as_bytes() {
+                continue; // Community mismatch, not our response.
+            }
             match msg.pdu {
                 SnmpPdu::GetResponse(resp) => {
                     // Check request id
@@ -143,6 +151,45 @@ impl SnmpClientSocket {
                         // Multiple response, surely an error
                         _ => return Err(SnmpError::InvalidPdu.into()),
                     }
+                }
+                _ => continue,
+            }
+        }
+    }
+    fn recv_getresponse_many(&mut self, py: Python) -> PyResult<PyObject> {
+        loop {
+            // Receive response
+            let size = match self.io.recv_from(self.buf.as_mut()) {
+                Ok((s, _)) => s,
+                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                    return Err(PyBlockingIOError::new_err("blocked"))
+                }
+                Err(e) => return Err(PyOSError::new_err(e.to_string())),
+            };
+            // Parse response
+            let msg = SnmpMessage::try_from(self.buf.as_slice(size))?;
+            // Check version match
+            if msg.version != self.version {
+                continue; // Mismatched version, not our response.
+            }
+            // Check community match
+            if msg.community != self.community.as_bytes() {
+                continue; // Community mismatch, not our response.
+            }
+            match msg.pdu {
+                SnmpPdu::GetResponse(resp) => {
+                    // Check request id
+                    if resp.request_id != self.request_id {
+                        continue; // Not our request
+                    }
+                    // Check error_index
+                    // Build resulting dict
+                    let dict = PyDict::new(py);
+                    for var in resp.vars.iter() {
+                        dict.set_item(var.oid.try_to_python(py)?, var.value.try_to_python(py)?)
+                            .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
+                    }
+                    return Ok(dict.into());
                 }
                 _ => continue,
             }

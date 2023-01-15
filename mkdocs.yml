@@ -11,7 +11,8 @@ nav:
   # - Installation: installation.md
   - Examples:
       - Overview: examples/index.md
-      - Single Get Request: examples/get.md
+      - Single Item Get Request: examples/get.md
+      - Multi Items Get Request: examples/getmany.md
   - Reference: reference/
   - Developers' Guide:
       # - Developer's Environment: environment.md

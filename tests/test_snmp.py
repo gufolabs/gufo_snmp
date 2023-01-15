@@ -6,7 +6,7 @@
 # ---------------------------------------------------------------------
 
 # Python modules
-from typing import Any
+from typing import Any, Dict
 import tempfile
 import subprocess
 import asyncio
@@ -116,3 +116,32 @@ def test_sys_objectid(snmpd):
     r = asyncio.run(snmp_get("1.3.6.1.2.1.1.2.0"))
     assert isinstance(r, str)
     assert r.startswith("1.3.6.1.4.1.8072.3.2.")
+
+
+def test_get_many(snmpd):
+    async def inner() -> Dict[str, Any]:
+        async with SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            community=SNMP_COMMUNITY,
+            timeout=1.0,
+        ) as session:
+            return await session.get_many(
+                [
+                    "1.3.6.1.2.1.1.2.0",
+                    "1.3.6.1.2.1.1.3.0",
+                    "1.3.6.1.2.1.1.6.0",
+                    "1.3.6.1.2.1.1.4.0",
+                ]
+            )
+
+    r = asyncio.run(inner())
+    assert isinstance(r, dict)
+    assert "1.3.6.1.2.1.1.2.0" in r
+    assert r["1.3.6.1.2.1.1.2.0"].startswith("1.3.6.1.4.1.8072.3.2.")
+    assert "1.3.6.1.2.1.1.3.0" in r
+    assert isinstance(r["1.3.6.1.2.1.1.3.0"], int)
+    assert "1.3.6.1.2.1.1.6.0" in r
+    assert r["1.3.6.1.2.1.1.6.0"] == SNMP_LOCATION.encode()
+    assert "1.3.6.1.2.1.1.4.0" in r
+    assert r["1.3.6.1.2.1.1.4.0"] == SNMP_CONTACT.encode()

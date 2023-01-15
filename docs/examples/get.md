@@ -1,4 +1,4 @@
-# Gufo SNMP Example: Single Get Request
+# Gufo SNMP Example: Single Item Get Request
 
 `Get` is one of the basic SNMP operations allowing to query of the agent 
 for one or more management keys. Let's consider the situation of

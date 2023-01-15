@@ -22,8 +22,8 @@ impl<'a> BerDecoder<'a> for SnmpInt {
             return Ok(SnmpInt(0));
         }
         let mut v = 0i64;
-        for n in i[..h.length].iter() {
-            v = (v << 8) | (*n as i64);
+        for &n in i[..h.length].iter() {
+            v = (v << 8) | (n as i64);
         }
         if i[0] & 0x80 == 0x80 {
             // Negative number
