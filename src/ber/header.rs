@@ -82,17 +82,22 @@ impl BerHeader {
             n => n as usize,
         };
         // Parse length offset
+        // X.690 8.3.1.4-8.3.1.5
         // @todo: Indefinite length
-        let mut length = 0usize;
-        loop {
-            // @todo: check size
-            let n = i[current];
-            current += 1;
-            length = (length << 7) | ((n & 0x7f) as usize);
-            if n & 0x80 == 0 {
-                break;
+        let n = i[current];
+        current += 1;
+        let length = if n & 0x80 == 0 {
+            // Short form, X.690 pp 8.3.1.4
+            n as usize
+        } else {
+            // Long form, X.690 pp 8.1.3.5
+            let mut ln = 0;
+            for _ in 0..n & 0x7f {
+                ln = (ln << 8) + (i[current] as usize);
+                current += 1;
             }
-        }
+            ln
+        };
         // Check content size
         if i[current..].len() < length {
             return Err(Err::Incomplete(Needed::new(length - i[current..].len())));
