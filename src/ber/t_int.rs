@@ -5,9 +5,10 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerEncoder, BerHeader, TAG_INT};
+use super::{BerDecoder, BerEncoder, BerHeader, ToPython, TAG_INT};
 use crate::buf::Buffer;
 use crate::error::SnmpError;
+use pyo3::{IntoPy, Py, PyAny, Python};
 use std::cmp::Ordering;
 
 pub(crate) struct SnmpInt(i64);
@@ -126,6 +127,12 @@ impl From<SnmpInt> for i64 {
 impl SnmpInt {
     pub(crate) fn is_zero(&self) -> bool {
         self.0 == 0
+    }
+}
+
+impl ToPython for &SnmpInt {
+    fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError> {
+        Ok(self.0.into_py(py))
     }
 }
 
