@@ -35,6 +35,8 @@ pub(crate) enum SnmpError {
     OutOfBuffer,
     /// Not implemented still
     NotImplemented,
+    /// No such instance
+    NoSuchInstance,
 }
 
 impl From<nom::Err<SnmpError>> for SnmpError {
@@ -53,14 +55,14 @@ impl From<SnmpError> for nom::Err<SnmpError> {
     }
 }
 
-//pyo3::import_exception!(gufo.ping.error, SNMPError);
-//pub(crate) type PySnmpError = SNMPError;
 create_exception!(_fast, SNMPError, PyException);
 pub(crate) type PySnmpError = SNMPError;
 create_exception!(_fast, SNMPDecodeError, PySnmpError);
 pub(crate) type PySnmpDecodeError = SNMPDecodeError;
 create_exception!(_fast, SNMPEncodeError, PySnmpError);
 pub(crate) type PySnmpEncodeError = SNMPEncodeError;
+create_exception!(_fast, NoSuchInstance, PySnmpError);
+pub(crate) type PyNoSuchInstance = NoSuchInstance;
 
 impl From<SnmpError> for PyErr {
     fn from(value: SnmpError) -> PyErr {
@@ -80,6 +82,7 @@ impl From<SnmpError> for PyErr {
             }
             SnmpError::OutOfBuffer => PySnmpEncodeError::new_err("out of buffer"),
             SnmpError::NotImplemented => PyNotImplementedError::new_err("not implemented"),
+            SnmpError::NoSuchInstance => PyNoSuchInstance::new_err("no such instance"),
         }
     }
 }

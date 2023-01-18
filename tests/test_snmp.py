@@ -15,7 +15,7 @@ import asyncio
 import pytest
 
 # Gufo Labs modules
-from gufo.snmp import SnmpSession
+from gufo.snmp import SnmpSession, NoSuchInstance
 
 SNMPD_ADDRESS = "127.0.0.1"
 SNMPD_PORT = 10161
@@ -101,6 +101,11 @@ def test_get(oid, expected, snmpd):
     assert r == expected
 
 
+def test_get_nosuchinstance(snmpd):
+    with pytest.raises(NoSuchInstance):
+        asyncio.run(snmp_get("1.3.6.1.2.1.1.6"))
+
+
 def test_sys_uptime(snmpd):
     """
     sysUptime.0 returns TimeTicks type
@@ -145,3 +150,30 @@ def test_get_many(snmpd):
     assert r["1.3.6.1.2.1.1.6.0"] == SNMP_LOCATION.encode()
     assert "1.3.6.1.2.1.1.4.0" in r
     assert r["1.3.6.1.2.1.1.4.0"] == SNMP_CONTACT.encode()
+
+
+def test_get_many_skip(snmpd):
+    async def inner() -> Dict[str, Any]:
+        async with SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            community=SNMP_COMMUNITY,
+            timeout=1.0,
+        ) as session:
+            return await session.get_many(
+                [
+                    "1.3.6.1.2.1.1.6",  # Missed
+                    "1.3.6.1.2.1.1.2.0",
+                    "1.3.6.1.2.1.1.3.0",
+                    "1.3.6.1.2.1.1.6.0",
+                    "1.3.6.1.2.1.1.4.0",
+                ]
+            )
+
+    r = asyncio.run(inner())
+    assert len(r) == 4
+    assert "1.3.6.1.2.1.1.6" not in r
+    assert "1.3.6.1.2.1.1.2.0" in r
+    assert "1.3.6.1.2.1.1.3.0" in r
+    assert "1.3.6.1.2.1.1.6.0" in r
+    assert "1.3.6.1.2.1.1.4.0" in r

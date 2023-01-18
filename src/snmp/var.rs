@@ -7,12 +7,13 @@
 
 use crate::ber::{
     BerClass, BerDecoder, BerHeader, SnmpBool, SnmpInt, SnmpNull, SnmpOctetString, SnmpOid,
-    SnmpSequence, SnmpTimeTicks, ToPython, TAG_BOOL, TAG_INT, TAG_NULL, TAG_OBJECT_ID,
+    SnmpSequence, SnmpTimeTicks, ToPython, TAG_BOOL, TAG_CTX_END_OF_MIB_VIEW,
+    TAG_CTX_NO_SUCH_INSTANCE, TAG_CTX_NO_SUCH_OBJECT, TAG_INT, TAG_NULL, TAG_OBJECT_ID,
     TAG_OCTET_STRING,
 };
 use crate::error::SnmpError;
 use nom::{Err, IResult};
-use pyo3::{Py, PyAny, PyObject, Python};
+use pyo3::{Py, PyAny, Python};
 
 pub(crate) struct SnmpVar<'a> {
     pub(crate) oid: SnmpOid,
@@ -26,6 +27,9 @@ pub(crate) enum SnmpValue<'a> {
     OctetString(SnmpOctetString<'a>),
     Oid(SnmpOid),
     TimeTicks(SnmpTimeTicks),
+    NoSuchObject,
+    NoSuchInstance,
+    EndOfMibView,
 }
 
 impl<'a> SnmpVar<'a> {
@@ -84,6 +88,17 @@ impl<'a> SnmpValue<'a> {
                         ))))
                     }
                 },
+                BerClass::Context => match hdr.tag {
+                    TAG_CTX_NO_SUCH_OBJECT => SnmpValue::NoSuchObject,
+                    TAG_CTX_NO_SUCH_INSTANCE => SnmpValue::NoSuchInstance,
+                    TAG_CTX_END_OF_MIB_VIEW => SnmpValue::EndOfMibView,
+                    _ => {
+                        return Err(Err::Failure(SnmpError::UnsupportedTag(format!(
+                            "Context primitive tag {}: {:X?}",
+                            hdr.tag, i
+                        ))))
+                    }
+                },
                 _ => {
                     return Err(Err::Failure(SnmpError::UnsupportedTag(format!(
                         "{:?} primitive tag {}: {:X?}",
@@ -107,11 +122,13 @@ impl<'a> ToPython for &SnmpValue<'a> {
     fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError> {
         Ok(match self {
             SnmpValue::Bool(x) => todo!(),
-            SnmpValue::Int(x) => todo!(),
+            SnmpValue::Int(x) => x.try_to_python(py)?,
             SnmpValue::Null => todo!(),
             SnmpValue::OctetString(x) => x.try_to_python(py)?,
             SnmpValue::Oid(x) => x.try_to_python(py)?,
             SnmpValue::TimeTicks(x) => x.try_to_python(py)?,
+            SnmpValue::NoSuchObject | SnmpValue::NoSuchInstance => todo!("never should be passed"),
+            SnmpValue::EndOfMibView => todo!("never should be passed"),
         })
     }
 }

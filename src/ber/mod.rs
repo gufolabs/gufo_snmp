@@ -35,6 +35,10 @@ pub(crate) const TAG_APP_OPAQUE: usize = 4;
 pub(crate) const TAG_APP_NSAPADDRESS: usize = 5;
 pub(crate) const TAG_APP_COUNTER64: usize = 6;
 pub(crate) const TAG_APP_UINTEGER32: usize = 7;
+// SNMP Context Tags
+pub(crate) const TAG_CTX_NO_SUCH_OBJECT: usize = 0;
+pub(crate) const TAG_CTX_NO_SUCH_INSTANCE: usize = 1;
+pub(crate) const TAG_CTX_END_OF_MIB_VIEW: usize = 2;
 
 pub(crate) mod header;
 pub(crate) use header::BerHeader;

@@ -146,7 +146,15 @@ impl SnmpClientSocket {
                         1 => {
                             let var = &resp.vars[0];
                             let value = &var.value;
-                            return Ok(Some(value.try_to_python(py)?));
+                            match value {
+                                SnmpValue::NoSuchObject
+                                | SnmpValue::NoSuchInstance
+                                | SnmpValue::EndOfMibView => {
+                                    return Err(SnmpError::NoSuchInstance.into())
+                                }
+                                SnmpValue::Null => return Ok(None),
+                                _ => return Ok(Some(value.try_to_python(py)?)),
+                            }
                         }
                         // Multiple response, surely an error
                         _ => return Err(SnmpError::InvalidPdu.into()),
@@ -186,8 +194,15 @@ impl SnmpClientSocket {
                     // Build resulting dict
                     let dict = PyDict::new(py);
                     for var in resp.vars.iter() {
-                        dict.set_item(var.oid.try_to_python(py)?, var.value.try_to_python(py)?)
-                            .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
+                        match &var.value {
+                            SnmpValue::Null
+                            | SnmpValue::NoSuchObject
+                            | SnmpValue::NoSuchInstance
+                            | SnmpValue::EndOfMibView => continue,
+                            _ => dict
+                                .set_item(var.oid.try_to_python(py)?, var.value.try_to_python(py)?)
+                                .map_err(|e| PyRuntimeError::new_err(e.to_string()))?,
+                        }
                     }
                     return Ok(dict.into());
                 }

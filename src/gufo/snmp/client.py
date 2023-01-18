@@ -92,6 +92,7 @@ class SnmpSession(object):
             ValueError: On invalid oid format.
             OSError: When unable to send request.
             TimeoutError: When timed out.
+            NoSuchInstance: When requested key is not found.
             SNMPError: On other SNMP-related errors.
         """
 

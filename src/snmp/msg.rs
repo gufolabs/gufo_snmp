@@ -125,25 +125,37 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_snmpv2_getresponse_stripped() -> Result<(), SnmpError> {
+    fn test_parse_snmpv2_getresponse_exception() -> Result<(), SnmpError> {
         let data = [
             48u8, 40, // Seq 40 bytes
             2, 1, 1, // INTEGER 1, v2C
             4, 6, 112, 117, 98, 108, 105, 99, // "public"
             162, 27, // 27 bytes
-            2, 4, 94, 189, 217, 172, // Request id
+            2, 4, 94, 189, 217, 172, // Request id, 0x5ebdd9ac
             2, 1, 0, // Error status = 0
             2, 1, 0, // Error index = 0
             48, 13, // Varbinds, 13 bytes
             48, 11, // Var, 11 bytes
             6, 7, 43, 6, 1, 2, 1, 1, 6, // Oid 1.3.6.1.2.1.1.6
-            129, 0, //
+            129, 0, // NoSuchObject
         ];
         let msg = SnmpMessage::try_from(data.as_ref())?;
         // Check version
         assert_eq!(msg.version, SnmpVersion::V2C);
         // community == public
         assert_eq!(msg.community, [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63]);
+        //
+        match msg.pdu {
+            SnmpPdu::GetResponse(pdu) => {
+                assert_eq!(pdu.request_id, 0x5ebdd9ac);
+                assert_eq!(pdu.vars.len(), 1);
+                if let SnmpValue::NoSuchInstance = pdu.vars[0].value {
+                } else {
+                    return Err(SnmpError::InvalidData);
+                }
+            }
+            _ => return Err(SnmpError::InvalidPdu),
+        }
         //
         Ok(())
     }
