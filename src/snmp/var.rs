@@ -72,7 +72,7 @@ impl<'a> SnmpValue<'a> {
                     // TAG_APP_IPADDRESS=>{},
                     // TAG_APP_COUNTER32: =>{},
                     // TAG_APP_GAUGE32 =>{},
-                    TAG_APP_TIMETICKS => SnmpValue::TimeTicks(SnmpTimeTicks::decode(i, &hdr)?),
+                    TAG_APP_TIMETICKS => SnmpValue::TimeTicks(SnmpTimeTicks::decode(tail, &hdr)?),
                     // TAG_APP_OPAQUE=> {},
                     // TAG_APP_NSAPADDRESS=>{},
                     // TAG_APP_COUNTER64=> {},
