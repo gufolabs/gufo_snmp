@@ -6,4 +6,4 @@
 // ------------------------------------------------------------------------
 
 pub(crate) mod client;
-pub(crate) use client::SnmpClientSocket;
+pub(crate) use client::{GetNextIter, SnmpClientSocket};

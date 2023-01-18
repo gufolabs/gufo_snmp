@@ -16,7 +16,7 @@ use pyo3::{Py, PyAny, Python};
 // Any instance of this type may have at most
 // 128 sub-identifiers.  Further, each sub-identifier must not
 // exceed the value 2^32-1 (4294967295 decimal).
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub(crate) struct SnmpOid(pub(crate) Vec<u32>);
 
 impl<'a> BerDecoder<'a> for SnmpOid {
@@ -87,6 +87,14 @@ impl SnmpOid {
         }
         Ok(())
     }
+    // Check oid is contained within
+    pub(crate) fn contains(&self, oid: &SnmpOid) -> bool {
+        let sl = self.0.len();
+        if oid.0.len() < sl {
+            return false;
+        }
+        self.0 == &oid.0[..sl]
+    }
 }
 
 impl From<Vec<u32>> for SnmpOid {
@@ -156,5 +164,20 @@ mod test {
             assert_eq!(s.0, expected[i]);
         }
         Ok(())
+    }
+    fn test_contains1() {
+        let oid1 = SnmpOid::from(vec![1, 3, 6]);
+        let oid2 = SnmpOid::from(vec![1, 3]);
+        assert_eq!(oid1.contains(&oid2), false);
+    }
+    fn test_contains2() {
+        let oid1 = SnmpOid::from(vec![1, 3, 6]);
+        let oid2 = SnmpOid::from(vec![1, 2, 5]);
+        assert_eq!(oid1.contains(&oid2), false);
+    }
+    fn test_contains3() {
+        let oid1 = SnmpOid::from(vec![1, 3, 6]);
+        let oid2 = SnmpOid::from(vec![1, 3, 6, 1, 5]);
+        assert_eq!(oid1.contains(&oid2), true);
     }
 }

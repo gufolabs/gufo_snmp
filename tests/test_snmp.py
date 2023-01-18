@@ -177,3 +177,21 @@ def test_get_many_skip(snmpd):
     assert "1.3.6.1.2.1.1.3.0" in r
     assert "1.3.6.1.2.1.1.6.0" in r
     assert "1.3.6.1.2.1.1.4.0" in r
+
+
+def test_getnext(snmpd):
+    """
+    Iterate over whole MIB
+    """
+
+    async def inner():
+        async with SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            community=SNMP_COMMUNITY,
+            timeout=1.0,
+        ) as session:
+            async for _ in session.getnext("1.3.6"):
+                pass
+
+    asyncio.run(inner())

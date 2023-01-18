@@ -8,10 +8,11 @@
 # Python modules
 import enum
 import asyncio
-from typing import Any, Iterable, Dict
+from typing import Any, Tuple, Iterable, Dict, AsyncIterator
 
 # Gufo Labs modules
 from ._fast import SnmpClientSocket
+from .getnext import GetNextIter
 
 
 class SnmpVersion(enum.IntEnum):
@@ -166,3 +167,21 @@ class SnmpSession(object):
         self._sock.send_get_many(list(oids))
         # Await response or timeout
         return await asyncio.wait_for(get_response(), self._timeout)
+
+    def getnext(self, oid: str) -> AsyncIterator[Tuple[str, Any]]:
+        """
+        Iterate over oids.
+
+        Args:
+            oid: Starting oid
+
+        Returns:
+            Asynchronous iterator yielding pair of (oid, value)
+
+        Example:
+            ``` py
+            async for oid, value in session.getnext("1.3.6"):
+                print(oid, value)
+            ```
+        """
+        return GetNextIter(self._sock, oid, self._timeout)
