@@ -14,6 +14,7 @@ nav:
       - Single Item Get Request: examples/get.md
       - Multi Items Get Request: examples/getmany.md
       - Get Next Request: examples/getnext.md
+      - Debugging: examples/debugging.md
   - Reference: reference/
   - Developers' Guide:
       # - Developer's Environment: environment.md
