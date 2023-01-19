@@ -1,0 +1,62 @@
+name: Bug report
+description: Report a bug. For security vulnerabilities see Report a security vulnerability in the templates.
+title: "BUG: <Please write a comprehensive title after the 'BUG: ' prefix>"
+labels: [bug]
+
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Thank you for taking the time to file a bug report. Before creating a new
+        issue, please make sure to take a few minutes to check the issue tracker
+        for existing issues about the bug.
+
+  - type: textarea
+    attributes:
+      label: "Describe the issue:"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Reproduce the code example:"
+      description: >
+        A short code example that reproduces the problem/missing feature. It
+        should be self-contained, i.e., can be copy-pasted into the Python
+        interpreter or run as-is via `python myproblem.py`.
+      placeholder: |
+        from gufo.snmp import SnmpSession
+        << your code here >>
+      render: python
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: "Error message:"
+      description: >
+        Please include full error message, if any.
+      placeholder: |
+        << Full traceback starting from `Traceback: ...` >>
+      render: shell
+
+  - type: textarea
+    attributes:
+      label: "Python version information"
+      description: Output from `import sys; print(sys.version)`
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Gufo Ping version information"
+      description: Output from `import gufo.snmp;print(gufo.snmp.__version__)`
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Operation system version"
+      description: Attach your operation system and version
+    validations:
+      required: true
