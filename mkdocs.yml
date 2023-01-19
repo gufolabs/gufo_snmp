@@ -23,7 +23,7 @@ nav:
       # - Code Quality: codequality.md
       # - Code Base: codebase.md
       - Contributing Guide: CONTRIBUTING.md
-      # - Code of Conduct: CODE_OF_CONDUCT.md
+      - Code of Conduct: CODE_OF_CONDUCT.md
   - Supported Standards: standards.md
   - Supported BER Types: types.md
   # - FAQ: faq.md
