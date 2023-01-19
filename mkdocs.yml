@@ -21,7 +21,7 @@ nav:
       - Building and Testing: testing.md
       - Common Tasks: devcommon.md
       - Code Quality: codequality.md
-      # - Code Base: codebase.md
+      - Code Base: codebase.md
       - Contributing Guide: CONTRIBUTING.md
       - Code of Conduct: CODE_OF_CONDUCT.md
   - Supported Standards: standards.md
