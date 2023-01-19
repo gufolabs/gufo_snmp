@@ -7,8 +7,6 @@
 
 # Python modules
 from typing import Any, Dict
-import tempfile
-import subprocess
 import asyncio
 
 # Third-party modules
@@ -16,6 +14,7 @@ import pytest
 
 # Gufo Labs modules
 from gufo.snmp import SnmpSession, NoSuchInstance
+from gufo.snmp.snmpd import Snmpd
 
 SNMPD_ADDRESS = "127.0.0.1"
 SNMPD_PORT = 10161
@@ -26,43 +25,18 @@ SNMP_CONTACT = "test <test@example.com>"
 SNMP_USER = "rouser"
 
 
-SNMPD_CFG = f"""# Gufo SNMP Test Suite
-master agentx
-agentaddress udp:{SNMPD_ADDRESS}:{SNMPD_PORT}
-# Listen address
-# SNMPv1/SNMPv2c R/O community
-rocommunity {SNMP_COMMUNITY} 127.0.0.1
-# SNMPv3 R/O User
-rouser {SNMP_USER} auth
-# System information
-syslocation {SNMP_LOCATION}
-syscontact  {SNMP_CONTACT}
-#
-sysServices 72
-"""
-
-
 @pytest.fixture(scope="module")
 def snmpd():
-    with tempfile.NamedTemporaryFile(
-        prefix="snmpd-", suffix=".conf", mode="w"
-    ) as f_cfg:
-        f_cfg.write(SNMPD_CFG)
-        f_cfg.flush()
-        proc = subprocess.Popen(
-            [
-                SNMPD_PATH,
-                "-C",  # Ignore default configs
-                "-c",  # Read our config
-                f_cfg.name,
-                "-f",  # No fork
-                "-Lo",  # Log to stdout
-                "-V",  # Verbose
-                "-d",  # Dump packets
-            ]
-        )
+    with Snmpd(
+        path=SNMPD_PATH,
+        address=SNMPD_ADDRESS,
+        port=SNMPD_PORT,
+        community=SNMP_COMMUNITY,
+        location=SNMP_LOCATION,
+        contact=SNMP_CONTACT,
+        user=SNMP_USER,
+    ):
         yield None
-        proc.kill()
 
 
 def test_timeout(snmpd):
