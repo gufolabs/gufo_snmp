@@ -89,6 +89,13 @@ and pass first command-line parameters as address, community, and oid.
 Let's check our script. Run example as:
 
 ```
-$ python3 examples/getnext.py 127.0.0.1 public 1.3.6.1.2.1
-
+$ python3 examples/getnext.py 127.0.0.1 public 1.3.6.1.2.1.1
+1.3.6.1.2.1.1.1.0: b'Linux d280d3a0a307 5.15.49-linuxkit #1 SMP Tue Sep 13 07:51:46 UTC 2022 x86_64'
+1.3.6.1.2.1.1.2.0: 1.3.6.1.4.1.8072.3.2.10
+1.3.6.1.2.1.1.3.0: 36567296
+1.3.6.1.2.1.1.4.0: b'test <test@example.com>'
+1.3.6.1.2.1.1.5.0: b'd280d3a0a307'
+1.3.6.1.2.1.1.6.0: b'Gufo SNMP Test'
+1.3.6.1.2.1.1.7.0: 72
+...
 ```
