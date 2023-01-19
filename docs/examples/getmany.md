@@ -71,10 +71,15 @@ to the given values.
 --8<-- "examples/getmany.py"
 ```
 
-We use `SnmpSession.get_many()` function to query multiple oids. The function is asynchronous and
+We use `SnmpSession.get_many()` function to query multiple OIDs. The function is asynchronous and
 must be awaited. See [SnmpSession.get() reference](../../reference/gufo/snmp/client#gufo.snmp.client.SnmpSession.get_many) for further details.
 
-`get_many()` returns a `dict`, where keys are the requested oids, and values are the query results.
+`get_many()` returns a `dict`, where keys are the requested OIDs, and values are the query results.
+
+!!! note
+
+    `get_many()` ignores non-existent OIDs, so it is up to the application to check
+    the resulting dict for missed keys.
 
 ``` py title="getmany.py" linenums="1" hl_lines="10 11"
 --8<-- "examples/getmany.py"
@@ -88,8 +93,8 @@ In our example we just print all the items.
 ```
 
 Lets run our asyncronous `main()` function via `asyncio.run`
-and pass first command-line parameters as address, community and oids.
-We use the rest of command line as the list of oids to query.
+and pass first command-line parameters as address, community and OIDs.
+We use the rest of command line as the list of OIDs to query.
 
 ## Running
 
