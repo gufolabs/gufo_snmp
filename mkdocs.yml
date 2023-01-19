@@ -8,7 +8,7 @@ repo_url: https://github.com/gufolabs/gufo_snmp/
 repo_name: GitHub
 nav:
   # - Home: index.md
-  # - Installation: installation.md
+  - Installation: installation.md
   - Examples:
       - Overview: examples/index.md
       - Single Item Get Request: examples/get.md
