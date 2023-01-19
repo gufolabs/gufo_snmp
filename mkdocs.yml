@@ -17,8 +17,8 @@ nav:
       - Debugging: examples/debugging.md
   - Reference: reference/
   - Developers' Guide:
-      # - Developer's Environment: environment.md
-      # - Building and Testing: testing.md
+      - Developer's Environment: environment.md
+      - Building and Testing: testing.md
       - Common Tasks: devcommon.md
       - Code Quality: codequality.md
       # - Code Base: codebase.md
