@@ -1,4 +1,9 @@
-# Supported BER types
+# Supported BER Types
+
+*Gufo SNMP* implements minimalistic [X.690 BER][BER] encoder/decoder. It focuses only on types
+and convenctions really used in SNMP protocol.
+
+The currently supported types are:
 
 | Type              | Class       | P/C[^1] |  Tag | Python Type          | Reference                      |
 | ----------------- | ----------- | ------: | ---: | -------------------- | ------------------------------ |
@@ -30,5 +35,6 @@
 [^2]: Handled internally, never exposed
 [^3]: Handled internally, raises NoSuchInstance or ignored.
 [X-690]: https://www.itu.int/rec/T-REC-X.690
+[BER]: https://en.wikipedia.org/wiki/X.690#BER_encoding
 [RFC-1442]: https://datatracker.ietf.org/doc/html/rfc1442
 [RFC-1905]: https://datatracker.ietf.org/doc/html/rfc1905

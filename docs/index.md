@@ -1,20 +1,4 @@
-# Gufo SNMP
-
-*The accelerated Pythonn asyncio SNMP client library.*
-
-[![PyPi version](https://img.shields.io/pypi/v/gufo_snmp.svg)](https://pypi.python.org/pypi/gufo_snmp/)
-![Python Versions](https://img.shields.io/pypi/pyversions/gufo_snmp)
-[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-![Build](https://img.shields.io/github/workflow/status/gufolabs/gufo_snmp/Run%20Tests/master)
-![Sponsors](https://img.shields.io/github/sponsors/gufolabs)
-
----
-
-**Documentation**: [https://docs.gufolabs.com/gufo_snmp/](https://docs.gufolabs.com/gufo_snmp/)
-
-**Source Code**: [https://github.com/gufolabs/gufo_snmp/](https://github.com/gufolabs/gufo_snmp/)
-
----
+# Gufo SNMP Documentation
 
 *Gufo SNMP* is the accelerated Python asyncio SNMP client library.
 It consists of a clean Python API for high-efficient BER parser
