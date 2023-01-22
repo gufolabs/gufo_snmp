@@ -5,15 +5,16 @@
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
+import asyncio
+
 # Python modules
 from typing import Any, Dict
-import asyncio
 
 # Third-party modules
 import pytest
 
 # Gufo Labs modules
-from gufo.snmp import SnmpSession, NoSuchInstance
+from gufo.snmp import NoSuchInstance, SnmpSession
 from gufo.snmp.snmpd import Snmpd
 
 SNMPD_ADDRESS = "127.0.0.1"
@@ -151,6 +152,31 @@ def test_get_many_skip(snmpd):
     assert "1.3.6.1.2.1.1.3.0" in r
     assert "1.3.6.1.2.1.1.6.0" in r
     assert "1.3.6.1.2.1.1.4.0" in r
+
+
+def test_getmany_long_request(snmpd):
+    async def inner() -> Dict[str, Any]:
+        async with SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            community=SNMP_COMMUNITY,
+            timeout=1.0,
+        ) as session:
+            return await session.get_many(oids)
+
+    oids = [
+        "1.3.6.1.2.1.1.1.0",
+        "1.3.6.1.2.1.1.2.0",
+        "1.3.6.1.2.1.1.3.0",
+        "1.3.6.1.2.1.1.4.0",
+        "1.3.6.1.2.1.1.5.0",
+        "1.3.6.1.2.1.1.6.0",
+        "1.3.6.1.2.1.1.7.0",
+    ]
+    r = asyncio.run(inner())
+    assert len(r) == len(oids)
+    for oid in oids:
+        assert oid in r
 
 
 def test_getnext(snmpd):

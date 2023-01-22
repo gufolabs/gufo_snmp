@@ -58,14 +58,20 @@ impl Buffer {
         Ok(())
     }
     pub(crate) fn push_ber_len(&mut self, v: usize) -> Result<(), SnmpError> {
-        let mut left = v;
-        // Push least significant 7 bits
-        self.push_u8((left & 0x7f) as u8)?;
-        left >>= 7;
-        while left > 0 {
-            //  Push next least significant 7 bits with highest-bit set
-            self.push_u8(((left & 0x7f) as u8) | 0x80)?;
-            left >>= 7;
+        if v < 128 {
+            // Short form, X.690 pp 8.3.1.4
+            self.push_u8(v as u8)?;
+        } else {
+            // Long form, X.690 pp 8.1.3.5
+            let mut left = v;
+            let start = self.len();
+            while left > 0 {
+                self.push_u8((left & 0xff) as u8)?;
+                left >>= 8;
+            }
+            let size = self.len() - start;
+            // Push size with high-bit set
+            self.push_u8((size | 0x80) as u8)?;
         }
         Ok(())
     }
@@ -121,6 +127,47 @@ mod tests {
         b.push(&chunk)?;
         assert_eq!(b.len(), chunk.len());
         assert_eq!(b.data(), chunk);
+        Ok(())
+    }
+
+    #[test]
+    fn test_push_ber_len_short1() -> Result<(), SnmpError> {
+        let mut b = Buffer::default();
+        b.push_ber_len(1)?;
+        assert_eq!(b.len(), 1);
+        assert_eq!(b.data(), &[1]);
+        Ok(())
+    }
+    #[test]
+    fn test_push_ber_len_short2() -> Result<(), SnmpError> {
+        let mut b = Buffer::default();
+        b.push_ber_len(127)?;
+        assert_eq!(b.len(), 1);
+        assert_eq!(b.data(), &[127]);
+        Ok(())
+    }
+    #[test]
+    fn test_push_ber_len_long1() -> Result<(), SnmpError> {
+        let mut b = Buffer::default();
+        b.push_ber_len(128)?;
+        assert_eq!(b.len(), 2);
+        assert_eq!(b.data(), &[0x81, 128]);
+        Ok(())
+    }
+    #[test]
+    fn test_push_ber_len_long2() -> Result<(), SnmpError> {
+        let mut b = Buffer::default();
+        b.push_ber_len(255)?;
+        assert_eq!(b.len(), 2);
+        assert_eq!(b.data(), &[0x81, 255]);
+        Ok(())
+    }
+    #[test]
+    fn test_push_ber_len_long3() -> Result<(), SnmpError> {
+        let mut b = Buffer::default();
+        b.push_ber_len(256)?;
+        assert_eq!(b.len(), 3);
+        assert_eq!(b.data(), &[0x82, 1, 0]);
         Ok(())
     }
 }
