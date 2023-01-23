@@ -6,14 +6,16 @@ ENV \
     CARGO_HOME=/usr/local/cargo\
     RUST_ARCH=x86_64-unknown-linux-gnu
 RUN \
-    apt-get update \
+    set -x \
+    && apt-get clean \
+    && apt-get update \
     && apt-get install -y --no-install-recommends\
     git\
     ca-certificates\
     gcc\
     libc6-dev\
     curl\
-    smmpd\
+    snmpd\
     && /tmp/setup-rust.sh \
     && rustup component add\
     rust-analysis\
