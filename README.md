@@ -1,6 +1,6 @@
 # Gufo SNMP
 
-*The accelerated Pythonn asyncio SNMP client library.*
+*The accelerated Python asyncio SNMP client library.*
 
 [![PyPi version](https://img.shields.io/pypi/v/gufo_snmp.svg)](https://pypi.python.org/pypi/gufo_snmp/)
 ![Python Versions](https://img.shields.io/pypi/pyversions/gufo_snmp)

@@ -1,29 +1,46 @@
 # ---------------------------------------------------------------------
-# Gufo SNMP: SnmpSession
+# Gufo SNMP: GetNextIter
 # ---------------------------------------------------------------------
 # Copyright (C) 2023, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
+"""GetNextIter iterator."""
+
+
 # Python modules
-from typing import Any, Tuple
 import asyncio
+from typing import Any, Tuple
 
 # Gufo Labs Modules
-from ._fast import GetNextIter as _Iter, SnmpClientSocket
+from ._fast import GetNextIter as _Iter
+from ._fast import SnmpClientSocket
+from .typing import ValueType
 
 
 class GetNextIter(object):
-    def __init__(self, sock: SnmpClientSocket, oid: str, timeout: float):
+    """Wrap the series of the GetNext requests.
+
+    Args:
+        oid: Base oid.
+        timeout: Request timeout.
+    """
+
+    def __init__(
+        self: "GetNextIter", sock: SnmpClientSocket, oid: str, timeout: float
+    ) -> None:
         self._sock = sock
         self._ctx = _Iter(oid)
         self._fd = sock.get_fd()
         self._timeout = timeout
 
-    def __aiter__(self) -> "GetNextIter":
+    def __aiter__(self: "GetNextIter") -> "GetNextIter":
+        """Return asynchronous iterator."""
         return self
 
-    async def __anext__(self) -> Tuple[str, Any]:
+    async def __anext__(self: "GetNextIter") -> Tuple[str, ValueType]:
+        """Get next value."""
+
         async def get_response() -> Tuple[str, Any]:
             while True:
                 r_ev = asyncio.Event()

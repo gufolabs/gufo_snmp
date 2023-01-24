@@ -5,16 +5,15 @@
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
-import asyncio
-
 # Python modules
-from typing import Any, Dict
+import asyncio
+from typing import Any, Dict, Iterator, cast
 
 # Third-party modules
 import pytest
 
 # Gufo Labs modules
-from gufo.snmp import NoSuchInstance, SnmpSession
+from gufo.snmp import NoSuchInstance, SnmpSession, ValueType
 from gufo.snmp.snmpd import Snmpd
 
 SNMPD_ADDRESS = "127.0.0.1"
@@ -27,7 +26,7 @@ SNMP_USER = "rouser"
 
 
 @pytest.fixture(scope="module")
-def snmpd():
+def snmpd() -> Iterator[Snmpd]:
     with Snmpd(
         path=SNMPD_PATH,
         address=SNMPD_ADDRESS,
@@ -36,12 +35,12 @@ def snmpd():
         location=SNMP_LOCATION,
         contact=SNMP_CONTACT,
         user=SNMP_USER,
-    ):
-        yield None
+    ) as snmpd:
+        yield snmpd
 
 
-def test_timeout(snmpd):
-    async def inner():
+def test_timeout(snmpd: "Snmpd") -> None:
+    async def inner() -> ValueType:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT + 1,
@@ -54,7 +53,7 @@ def test_timeout(snmpd):
         asyncio.run(inner())
 
 
-async def snmp_get(oid: str) -> Any:
+async def snmp_get(oid: str) -> ValueType:
     async with SnmpSession(
         addr=SNMPD_ADDRESS,
         port=SNMPD_PORT,
@@ -65,41 +64,37 @@ async def snmp_get(oid: str) -> Any:
 
 
 @pytest.mark.parametrize(
-    "oid,expected",
+    ("oid", "expected"),
     [
         ("1.3.6.1.2.1.1.6.0", SNMP_LOCATION.encode()),
         ("1.3.6.1.2.1.1.4.0", SNMP_CONTACT.encode()),
     ],
 )
-def test_get(oid, expected, snmpd):
+def test_get(oid: str, expected: ValueType, snmpd: "Snmpd") -> None:
     r = asyncio.run(snmp_get(oid))
     assert r == expected
 
 
-def test_get_nosuchinstance(snmpd):
+def test_get_nosuchinstance(snmpd: "Snmpd") -> None:
     with pytest.raises(NoSuchInstance):
         asyncio.run(snmp_get("1.3.6.1.2.1.1.6"))
 
 
-def test_sys_uptime(snmpd):
-    """
-    sysUptime.0 returns TimeTicks type
-    """
+def test_sys_uptime(snmpd: "Snmpd") -> None:
+    """sysUptime.0 returns TimeTicks type."""
     r = asyncio.run(snmp_get("1.3.6.1.2.1.1.3.0"))
     assert isinstance(r, int)
 
 
-def test_sys_objectid(snmpd):
-    """
-    sysObjectId.0 returns OBJECT IDENTIFIER type
-    """
+def test_sys_objectid(snmpd: "Snmpd") -> None:
+    """sysObjectId.0 returns OBJECT IDENTIFIER type."""
     r = asyncio.run(snmp_get("1.3.6.1.2.1.1.2.0"))
     assert isinstance(r, str)
     assert r.startswith("1.3.6.1.4.1.8072.3.2.")
 
 
-def test_get_many(snmpd):
-    async def inner() -> Dict[str, Any]:
+def test_get_many(snmpd: "Snmpd") -> None:
+    async def inner() -> Dict[str, ValueType]:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT,
@@ -118,7 +113,9 @@ def test_get_many(snmpd):
     r = asyncio.run(inner())
     assert isinstance(r, dict)
     assert "1.3.6.1.2.1.1.2.0" in r
-    assert r["1.3.6.1.2.1.1.2.0"].startswith("1.3.6.1.4.1.8072.3.2.")
+    assert cast(str, r["1.3.6.1.2.1.1.2.0"]).startswith(
+        "1.3.6.1.4.1.8072.3.2."
+    )
     assert "1.3.6.1.2.1.1.3.0" in r
     assert isinstance(r["1.3.6.1.2.1.1.3.0"], int)
     assert "1.3.6.1.2.1.1.6.0" in r
@@ -127,7 +124,7 @@ def test_get_many(snmpd):
     assert r["1.3.6.1.2.1.1.4.0"] == SNMP_CONTACT.encode()
 
 
-def test_get_many_skip(snmpd):
+def test_get_many_skip(snmpd: "Snmpd") -> None:
     async def inner() -> Dict[str, Any]:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
@@ -154,7 +151,7 @@ def test_get_many_skip(snmpd):
     assert "1.3.6.1.2.1.1.4.0" in r
 
 
-def test_getmany_long_request(snmpd):
+def test_getmany_long_request(snmpd: "Snmpd") -> None:
     async def inner() -> Dict[str, Any]:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
@@ -179,12 +176,10 @@ def test_getmany_long_request(snmpd):
         assert oid in r
 
 
-def test_getnext(snmpd):
-    """
-    Iterate over whole MIB
-    """
+def test_getnext(snmpd: "Snmpd") -> None:
+    """Iterate over whole MIB."""
 
-    async def inner():
+    async def inner() -> None:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT,

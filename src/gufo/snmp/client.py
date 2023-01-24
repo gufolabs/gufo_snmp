@@ -5,28 +5,35 @@
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
+"""SnmpSession implementation."""
+
 # Python modules
-import enum
 import asyncio
-from typing import Any, Tuple, Iterable, Dict, AsyncIterator
+import enum
+from types import TracebackType
+from typing import AsyncIterator, Dict, Iterable, Optional, Tuple, Type
 
 # Gufo Labs modules
 from ._fast import SnmpClientSocket
 from .getnext import GetNextIter
+from .typing import ValueType
 
 
 class SnmpVersion(enum.IntEnum):
+    """SNMP protocol version."""
+
     v1 = 0
     v2c = 1
 
 
 class SnmpSession(object):
     """
-    Client SNMP session. Should be used either directly
-    or via asynchronous context manager.
+    SNMP client session.
+
+    Should be used either directly or via asynchronous context manager.
 
     Args:
-        addr: SNMP agent address, eigher IPv4 or IPv6.
+        addr: SNMP agent address, either IPv4 or IPv6.
         port: SNMP agent port.
         community: SNMP community.
         version: Protocol version.
@@ -51,7 +58,7 @@ class SnmpSession(object):
     """
 
     def __init__(
-        self,
+        self: "SnmpSession",
         addr: str,
         port: int = 161,
         community: str = "public",
@@ -60,8 +67,7 @@ class SnmpSession(object):
         tos: int = 0,
         send_buffer: int = 0,
         recv_buffer: int = 0,
-        # timeout
-    ):
+    ) -> None:
         self._sock = SnmpClientSocket(
             f"{addr}:{port}",
             community,
@@ -73,13 +79,19 @@ class SnmpSession(object):
         self._fd = self._sock.get_fd()
         self._timeout = timeout
 
-    async def __aenter__(self) -> "SnmpSession":
+    async def __aenter__(self: "SnmpSession") -> "SnmpSession":
+        """Asynchronous context manager entry."""
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        pass
+    async def __aexit__(
+        self: "SnmpSession",
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        """Asynchronous context manager exit."""
 
-    async def get(self, oid: str) -> Any:
+    async def get(self: "SnmpSession", oid: str) -> ValueType:
         """
         Send SNMP GET request and await for response.
 
@@ -97,7 +109,7 @@ class SnmpSession(object):
             SNMPError: On other SNMP-related errors.
         """
 
-        async def get_response() -> Any:
+        async def get_response() -> "SnmpSession":
             while True:
                 r_ev = asyncio.Event()
                 # Wait until data will be available
@@ -121,7 +133,9 @@ class SnmpSession(object):
         # Await response or timeout
         return await asyncio.wait_for(get_response(), self._timeout)
 
-    async def get_many(self, oids: Iterable[str]) -> Dict[str, Any]:
+    async def get_many(
+        self: "SnmpSession", oids: Iterable[str]
+    ) -> Dict[str, ValueType]:
         """
         Send SNMP GET request for multiple oids and await for response.
 
@@ -144,7 +158,7 @@ class SnmpSession(object):
             SNMPError: On other SNMP-related errors.
         """
 
-        async def get_response() -> Dict[str, Any]:
+        async def get_response() -> Dict[str, ValueType]:
             while True:
                 r_ev = asyncio.Event()
                 # Wait until data will be available
@@ -168,7 +182,9 @@ class SnmpSession(object):
         # Await response or timeout
         return await asyncio.wait_for(get_response(), self._timeout)
 
-    def getnext(self, oid: str) -> AsyncIterator[Tuple[str, Any]]:
+    def getnext(
+        self: "SnmpSession", oid: str
+    ) -> AsyncIterator[Tuple[str, ValueType]]:
         """
         Iterate over oids.
 

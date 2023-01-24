@@ -24,6 +24,11 @@
         "python.formatting.blackPath": "/usr/local/bin/black",
         "python.formatting.provider": "black",
         "python.pythonPath": "/usr/local/bin/python",
+        "[python]": {
+            "editor.codeActionsOnSave": {
+                "source.fixAll": true,
+            }
+        },
         "[rust]": {
             "editor.defaultFormatter": "rust-lang.rust-analyzer",
             "editor.formatOnSave": true,
@@ -38,5 +43,6 @@
         "be5invis.toml",
         "redhat.vscode-yaml",
         "rust-lang.rust-analyzer",
+        "charliermarsh.ruff",
     ]
 }

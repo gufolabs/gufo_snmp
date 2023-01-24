@@ -5,13 +5,16 @@
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
-"""
+"""Gufo SNMP: The accelerated Python asyncio SNMP client library.
+
 Attributes:
     __version__: Current version
 """
 
-from ._fast import SNMPError, SNMPEncodeError, SNMPDecodeError, NoSuchInstance
+# Gufo Labs modules
+from ._fast import NoSuchInstance, SNMPDecodeError, SNMPEncodeError, SNMPError
 from .client import SnmpSession
+from .typing import ValueType
 
 __version__: str = "0.1.0"
 __all__ = [
@@ -21,4 +24,5 @@ __all__ = [
     "SNMPEncodeError",
     "SNMPDecodeError",
     "NoSuchInstance",
+    "ValueType",
 ]

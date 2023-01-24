@@ -5,13 +5,19 @@
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
+"""snmpd context manager."""
+
 # Python modules
 import subprocess
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
+from types import TracebackType
+from typing import Optional, Type
 
 
 class Snmpd(object):
     """
+    snmpd context manager for testing.
+
     The context manager running snmpd instance
     for testing purposes. Requires Net-SNMP
     to be installed.
@@ -30,7 +36,6 @@ class Snmpd(object):
         the root priveleges.
 
     Example:
-
         ``` py
         with Snmpd():
             # Any Gufo SNMP code
@@ -44,7 +49,7 @@ class Snmpd(object):
     """
 
     def __init__(
-        self,
+        self: "Snmpd",
         path: str = "/usr/sbin/snmpd",
         address: str = "127.0.0.1",
         port: int = 10161,
@@ -52,7 +57,7 @@ class Snmpd(object):
         location: str = "Test",
         contact: str = "test <test@example.com>",
         user: str = "rouser",
-    ):
+    ) -> None:
         self._path = path
         self._address = address
         self._port = port
@@ -60,12 +65,15 @@ class Snmpd(object):
         self._location = location
         self._contact = contact
         self._user = user
-        self._cfg = None
-        self._proc = None
+        self._cfg: Optional[_TemporaryFileWrapper[str]] = None
+        self._proc: Optional[subprocess.Popen[bytes]] = None
 
-    def get_config(self) -> str:
+    def get_config(self: "Snmpd") -> str:
         """
         Generate snmpd config.
+
+        Returns:
+            snmpd configuration.
         """
         return f"""# Gufo SNMP Test Suite
 master agentx
@@ -81,10 +89,8 @@ syscontact  {self._contact}
 #
 sysServices 72"""
 
-    def _start(self):
-        """
-        Run snmpd instance.
-        """
+    def _start(self: "Snmpd") -> None:
+        """Run snmpd instance."""
         self._cfg = NamedTemporaryFile(
             prefix="snmpd-", suffix=".conf", mode="w"
         )
@@ -105,21 +111,37 @@ sysServices 72"""
             ]
         )
 
-    def _stop(self):
-        """
-        Terminate snmpd instance.
-        """
-        self._proc.kill()
-        self._cfg.close()
+    def _stop(self: "Snmpd") -> None:
+        """Terminate snmpd instance."""
+        if self._proc:
+            self._proc.kill()
+        if self._cfg:
+            self._cfg.close()
 
-    def __enter__(self):
+    def __enter__(self: "Snmpd") -> "Snmpd":
+        """Context manager entry."""
         self._start()
+        return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self: "Snmpd",
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        """Context manager exit."""
         self._stop()
 
-    async def __aenter__(self):
+    async def __aenter__(self: "Snmpd") -> "Snmpd":
+        """Asynchronous context manager entry."""
         self._start()
+        return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(
+        self: "Snmpd",
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        """Asynchronous context manager exit."""
         self._stop()
