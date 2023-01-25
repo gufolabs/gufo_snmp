@@ -133,8 +133,8 @@ class SnmpSession(object):
         # Await response or timeout
         try:
             return await asyncio.wait_for(get_response(), self._timeout)
-        except asyncio.TimeoutError:
-            raise TimeoutError  # Remap the error
+        except asyncio.TimeoutError as e:
+            raise TimeoutError from e  # Remap the error
 
     async def get_many(
         self: "SnmpSession", oids: Iterable[str]
@@ -185,8 +185,8 @@ class SnmpSession(object):
         # Await response or timeout
         try:
             return await asyncio.wait_for(get_response(), self._timeout)
-        except asyncio.TimeoutError:
-            raise TimeoutError  # Remap the error
+        except asyncio.TimeoutError as e:
+            raise TimeoutError from e  # Remap the error
 
     def getnext(
         self: "SnmpSession", oid: str
