@@ -1,0 +1,139 @@
+name: Run Tests
+env:
+  PIP_CACHE_DIR: .pip
+  PYTHONPATH: src
+on:
+  push:
+    paths:
+      - ".github/workflows/tests.yml"
+      - "examples/**"
+      - "tools/build/setup-rust.sh"
+      - "src/**"
+      - "tests/**"
+      - "setup.cfg"
+      - "setup.py"
+      - "pyproject.toml"
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  release:
+    types: ["published"]
+jobs:
+  py-lint:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set Up Python {{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      # Cache dependencies
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ./.pip
+          key: ${{ runner.os }}-tests-3.10-${{ hashFiles('./.requirements/lint.txt') }}
+
+      - name: Upgrade Pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install Dependencies
+        run: pip install -IU -r ./.requirements/lint.txt
+
+      - name: Check Formatting
+        run: black --check examples/ src/ tests/
+
+      - name: Check ruff
+        run: ruff -q examples/ src/ tests/
+
+      - name: Check Mypy
+        run: mypy --strict src/
+
+  rust-test:
+    runs-on: ubuntu-20.04
+    env:
+      RUST_ARCH: x86_64-unknown-linux-gnu
+    steps:
+      - name: Setup Environment
+        run: |
+          echo "CARGO_HOME=${HOME}/.cargo" >> $GITHUB_ENV
+          echo "RUSTUP_HOME=${HOME}/.rustup" >> $GITHUB_ENV
+          echo "${HOME}/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        run: ./tools/build/setup-rust.sh
+
+      - name: Install Rust Components
+        run: |
+          rustup component add rustfmt
+          rustup component add clippy
+
+      - name: Check Rust Format
+        run: cargo fmt --check
+
+      - name: Run Rust Tests
+        run: cargo test
+
+      - name: Run Clippy Tests
+        run: cargo clippy
+
+  py-test:
+    runs-on: ubuntu-20.04
+    needs: [py-lint, rust-test]
+    strategy:
+      fail-fast: true
+      matrix:
+        # Run on all supported versions
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+    env:
+      RUST_ARCH: x86_64-unknown-linux-gnu
+    steps:
+      - name: Setup Environment
+        run: |
+          echo "CARGO_HOME=${HOME}/.cargo" >> $GITHUB_ENV
+          echo "RUSTUP_HOME=${HOME}/.rustup" >> $GITHUB_ENV
+          echo "${HOME}/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set Up Python {{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Cache dependencies
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ./.pip
+          key: ${{ runner.os }}-tests-{{ matrix.python-version }}-${{ hashFiles('./.requirements/build.txt') }}-${{ hashFiles('./.requirements/test.txt') }}
+
+      - name: Upgrade Pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install Dependencies
+        run: pip install -IU -r ./.requirements/build.txt -r ./.requirements/test.txt
+
+      - name: Install Rust
+        run: ./tools/build/setup-rust.sh
+
+      - name: Build Rust module
+        run: python setup.py develop
+
+      - name: Install snmpd
+        run: ./tools/build/setup-snmpd.sh
+
+      - name: Run Tests
+        run: coverage run -m pytest -v
+
+      - name: Coverage Report
+        run: coverage report

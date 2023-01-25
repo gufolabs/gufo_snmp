@@ -1,0 +1,227 @@
+name: Package
+env:
+  PIP_CACHE_DIR: .pip
+  PYTHONPATH: src
+on:
+  release:
+    types: ["published"]
+  workflow_dispatch: {}
+jobs:
+  build-sdist:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set Up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Upgrade Pip
+        run: python -m pip install --upgrade pip
+
+      - name: Upgrade Build
+        run: pip install --upgrade build
+
+      - name: Install Python Dependencies
+        run: pip install -IU -r ./.requirements/build.txt
+
+      - name: Build sdist
+        run: ./tools/build/build-sdist.sh
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+
+  # glibc 2.17, x86_64 (RHEL7)
+  build-manylinux_2_17-x86_64:
+    runs-on: ubuntu-22.04
+    needs: build-sdist
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: x86_64
+            target: x86_64-unknown-linux-gnu
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      # Warning! No Python 3.11 in manylinux2014 image
+      - name: Build wheels
+        run: >
+          docker run --rm
+          -e RUST_ARCH=${{ matrix.target }}
+          -v $PWD:/workdir 
+          -w /workdir 
+          --user 0 
+          quay.io/pypa/manylinux2014_${{ matrix.arch }}:latest
+          ./tools/build/build-many.sh 3.8 3.9 3.10
+
+      - name: Save Artefacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheel_manylinux_2_17_${{ matrix.arch }}
+          path: wheelhouse/*.whl
+
+  # glibc 2.24, x86_64/aarch64 (Debian 9)
+  build-manylinux_2_24:
+    runs-on: ubuntu-22.04
+    needs: build-sdist
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: x86_64
+            target: x86_64-unknown-linux-gnu
+            platform: linux/amd64
+          # - arch: aarch64
+          #   target: aarch64-unknown-linux-gnu
+          #   platform: linux/arm64
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        if: matrix.arch != 'x86_64'
+        uses: docker/setup-qemu-action@v2
+        with:
+          image: tonistiigi/binfmt:qemu-v6.2.0
+          platforms: all
+
+      - name: Build wheels
+        run: >
+          docker run --rm
+          -e RUST_ARCH=${{ matrix.target }}
+          -v $PWD:/workdir 
+          -w /workdir 
+          --user 0 
+          --platform ${{ matrix.platform }}
+          quay.io/pypa/manylinux_2_24_${{ matrix.arch }}:latest
+          ./tools/build/build-many.sh 3.8 3.9 3.10 3.11
+
+      - name: Save Artefacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheel_manylinux_2_24_${{ matrix.arch }}
+          path: wheelhouse/*.whl
+
+  # Fails with:
+  # Cannot repair wheel, because required library "libpthread.so.0" could not be located
+  # build-musllinux-1_1:
+  #   runs-on: ubuntu-22.04
+  #   needs: build-sdist
+  #   strategy:
+  #     fail-fast: true
+  #     matrix:
+  #       include:
+  #         - arch: x86_64
+  #           target: x86_64-unknown-linux-musl
+  #           platform: linux/amd64
+  #         # - arch: aarch64
+  #         #   target: aarch64-unknown-linux-musl
+  #         #   platform: linux/arm64
+  #   steps:
+  #     - name: Checkout Repo
+  #       uses: actions/checkout@v3
+
+  #     - name: Set up QEMU
+  #       if: matrix.arch != 'x86_64'
+  #       uses: docker/setup-qemu-action@v2
+  #       with:
+  #         image: tonistiigi/binfmt:qemu-v6.2.0
+  #         platforms: all
+
+  #     # auditwheel crashes on 3.11
+  #     # ValueError: Cannot repair wheel, because required library
+  #     # "librt.so.1" could not be located
+  #     - name: Build wheels
+  #       run: >
+  #         docker run --rm
+  #         -e RUST_ARCH=${{ matrix.target }}
+  #         -v $PWD:/workdir
+  #         -w /workdir
+  #         --user 0
+  #         --platform ${{ matrix.platform }}
+  #         quay.io/pypa/musllinux_1_1_${{ matrix.arch }}:latest
+  #         ./tools/build/build-many.sh 3.8 3.9 3.10
+
+  #     - name: Save Artefacts
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: wheel_musllinux_1_1_${{ matrix.arch }}
+  #         path: wheelhouse/*.whl
+
+  build-wheel-macos:
+    runs-on: macos-11
+    needs: build-sdist
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: x86_64
+            platform: macosx
+          # - arch: arm64
+          #   platform: macosx
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Build Packages
+        uses: pypa/cibuildwheel@v2.11.2
+        env:
+          SETUP_RUST_PLATFORM: ${{matrix.platform}}-${{matrix.arch}}
+          CIBW_BUILD: cp{38,39,310,311}-${{matrix.platform}}_${{matrix.arch}}
+          CIBW_ARCHS: ${{matrix.arch}}
+          CIBW_ENVIRONMENT: >-
+            PATH=$HOME/.cargo/bin:$PATH
+            CARGO_HOME=$HOME/.cargo
+            RUSTUP_HOME=$HOME/.rustup
+            RUST_ARCH=x86_64-apple-darwin
+
+      - name: Save Artefacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheel_${{ matrix.platform }}_${{ matrix.arch }}
+          path: wheelhouse/*.whl
+
+  publish:
+    runs-on: ubuntu-20.04
+    needs:
+      - build-sdist
+      - build-manylinux_2_17-x86_64
+      - build-manylinux_2_24
+      - build-musllinux-1_1
+      - build-wheel-macos
+    steps:
+      - name: Download Artefacts
+        uses: actions/download-artifact@v3
+        with:
+          path: dist/
+
+      - name: Prepare dist/
+        run: |
+          mv dist/*/*.whl dist/
+          mv dist/*/*.tar.gz dist/
+          find dist/* -type d | xargs rm -r
+
+      - name: Show Artefacts
+        run: ls -lhR dist/
+
+      - name: Publish distribution 📦 to Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+          print_hash: true
+          skip_existing: true
+
+      - name: Publish distribution 📦 to PyPI
+        if: startsWith(github.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          print_hash: true
