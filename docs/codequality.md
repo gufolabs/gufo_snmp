@@ -26,4 +26,3 @@ The test suite must provide 100% code coverage whenever possible.
 [Black]: https://black.readthedocs.io/en/stable
 [ruff]: https://github.com/charliermarsh/ruff
 [Mypy]: https://mypy.readthedocs.io/en/stable/
-[PEP8]: https://peps.python.org/pep-0008/
