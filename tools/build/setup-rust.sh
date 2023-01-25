@@ -13,7 +13,7 @@ if [ -z "${RUST_ARCH}" ]; then
     exit 2
 fi
 
-RUST_VERSION=${RUST_VERSION:-1.66.0}
+RUST_VERSION=${RUST_VERSION:-1.66.1}
 
 # @todo: Allow override
 export RUSTUP_HOME=${RUSTUP_HOME:-/usr/local/rustup}
