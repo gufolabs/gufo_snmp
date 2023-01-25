@@ -109,7 +109,7 @@ class SnmpSession(object):
             SNMPError: On other SNMP-related errors.
         """
 
-        async def get_response() -> "SnmpSession":
+        async def get_response() -> ValueType:
             while True:
                 r_ev = asyncio.Event()
                 # Wait until data will be available
@@ -131,7 +131,10 @@ class SnmpSession(object):
         # Send request
         self._sock.send_get(oid)
         # Await response or timeout
-        return await asyncio.wait_for(get_response(), self._timeout)
+        try:
+            return await asyncio.wait_for(get_response(), self._timeout)
+        except asyncio.TimeoutError:
+            raise TimeoutError  # Remap the error
 
     async def get_many(
         self: "SnmpSession", oids: Iterable[str]
@@ -180,7 +183,10 @@ class SnmpSession(object):
         # Send request
         self._sock.send_get_many(list(oids))
         # Await response or timeout
-        return await asyncio.wait_for(get_response(), self._timeout)
+        try:
+            return await asyncio.wait_for(get_response(), self._timeout)
+        except asyncio.TimeoutError:
+            raise TimeoutError  # Remap the error
 
     def getnext(
         self: "SnmpSession", oid: str

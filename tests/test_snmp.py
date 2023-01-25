@@ -39,7 +39,7 @@ def snmpd() -> Iterator[Snmpd]:
         yield snmpd
 
 
-def test_timeout(snmpd: "Snmpd") -> None:
+def test_timeout1(snmpd: "Snmpd") -> None:
     async def inner() -> ValueType:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
@@ -48,6 +48,20 @@ def test_timeout(snmpd: "Snmpd") -> None:
             timeout=1.0,
         ) as session:
             return await session.get("1.3.6.1.2.1.1")
+
+    with pytest.raises(TimeoutError):
+        asyncio.run(inner())
+
+
+def test_timeout2(snmpd: "Snmpd") -> None:
+    async def inner() -> Dict[str, ValueType]:
+        async with SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT + 1,
+            community=SNMP_COMMUNITY,
+            timeout=1.0,
+        ) as session:
+            return await session.get_many(["1.3.6.1.2.1.1"])
 
     with pytest.raises(TimeoutError):
         asyncio.run(inner())
