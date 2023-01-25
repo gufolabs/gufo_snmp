@@ -6,7 +6,7 @@
 # ---------------------------------------------------------------------
 
 # Python modules
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 # Gufo Labs modules
 from .typing import ValueType
@@ -41,4 +41,4 @@ class SnmpClientSocket(object):
     ) -> Dict[str, ValueType]: ...
     def recv_getresponse_next(
         self: "SnmpClientSocket", iter_getnext: GetNextIter
-    ) -> ValueType: ...
+    ) -> Tuple[str, ValueType]: ...

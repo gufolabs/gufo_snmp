@@ -10,7 +10,7 @@
 
 # Python modules
 import asyncio
-from typing import Any, Tuple
+from typing import Tuple
 
 # Gufo Labs Modules
 from ._fast import GetNextIter as _Iter
@@ -41,7 +41,7 @@ class GetNextIter(object):
     async def __anext__(self: "GetNextIter") -> Tuple[str, ValueType]:
         """Get next value."""
 
-        async def get_response() -> Tuple[str, Any]:
+        async def get_response() -> Tuple[str, ValueType]:
             while True:
                 r_ev = asyncio.Event()
                 # Wait until data will be available
