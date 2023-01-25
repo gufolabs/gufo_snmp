@@ -23,19 +23,19 @@ Let's see the details.
 we should run the client from our synchronous script,
 so we need to import `asyncio` to use `asyncio.run()`.
 
-``` py title="debugging.py" linenums="1" hl_lines="2"
+``` py title="debugging.py" linenums="1" hl_lines="3"
 --8<-- "examples/debugging.py"
 ```
 
 `SnmpSession` object holds all necessary API, so import it from `gufo.snmp`.
 
-``` py title="debugging.py" linenums="1" hl_lines="3"
+``` py title="debugging.py" linenums="1" hl_lines="4"
 --8<-- "examples/debugging.py"
 ```
 
 `Snmpd` wrapper should be imported from `gufo.snmp.snmpd` directly.
 
-``` py title="debugging.py" linenums="1" hl_lines="6"
+``` py title="debugging.py" linenums="1" hl_lines="7"
 --8<-- "examples/debugging.py"
 ```
 
@@ -43,7 +43,7 @@ Asynchronous code must be executed in the asynchronous functions or coroutines.
 So we define our function as `async`. Unlike our [get](get.md), [getmany](getmany.md),
 and [getnext](getnext.md) examples we do not expect any external arguments.
 
-``` py title="debugging.py" linenums="1" hl_lines="7"
+``` py title="debugging.py" linenums="1" hl_lines="8"
 --8<-- "examples/debugging.py"
 ```
 
@@ -58,7 +58,7 @@ Both `Snmpd` and `SnmpSession` are highly configurable, so refer to the
 [SnmpSession](../../reference/gufo/snmp/client#gufo.snmp.client.SnmpSession)
 references.
 
-``` py title="debugging.py" linenums="1" hl_lines="8"
+``` py title="debugging.py" linenums="1" hl_lines="9"
 --8<-- "examples/debugging.py"
 ```
 
@@ -67,18 +67,18 @@ iterator returning pairs of `(OID, value)`, so we use `async for` construction t
 See [SnmpSession.getnext() reference](../../reference/gufo/snmp/client#gufo.snmp.client.SnmpSession.getnext)
 for further details. 
 
-``` py title="debugging.py" linenums="1" hl_lines="9"
+``` py title="debugging.py" linenums="1" hl_lines="10"
 --8<-- "examples/debugging.py"
 ```
 
 It is up to the application how to deal with the result.
 In our example we just print it.
 
-``` py title="debugging.py" linenums="1" hl_lines="12"
+``` py title="debugging.py" linenums="1" hl_lines="13"
 --8<-- "examples/debugging.py"
 ```
 
-Lets run our asyncronous `main()` function via `asyncio.run`
+Lets run our asynchronous `main()` function via `asyncio.run`
 and pass first command-line parameters as address, community, and oid.
 
 ## Running

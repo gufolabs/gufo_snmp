@@ -1,5 +1,6 @@
-import sys
 import asyncio
+import sys
+
 from gufo.snmp import SnmpSession
 
 

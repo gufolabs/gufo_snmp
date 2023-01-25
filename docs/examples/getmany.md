@@ -13,6 +13,13 @@ Let's see the details.
 ``` py title="getmany.py" linenums="1" hl_lines="1"
 --8<-- "examples/getmany.py"
 ```
+*Gufo SNMP* is an async library. In our case
+we should run the client from our synchronous script,
+so we need to import `asyncio` to use `asyncio.run()`.
+
+``` py title="getmany.py" linenums="1" hl_lines="2"
+--8<-- "examples/getmany.py"
+```
 
 Import `sys` module to parse the CLI argument.
 
@@ -21,13 +28,6 @@ Import `sys` module to parse the CLI argument.
     We use `sys.argv` only for demonstration purposes. Use `argsparse` or alternatives
     in real-world applications.
 
-``` py title="getmany.py" linenums="1" hl_lines="2"
---8<-- "examples/getmany.py"
-```
-*Gufo SNMP* is an async library. In our case
-we should run the client from our synchronous script,
-so we need to import `asyncio` to use `asyncio.run()`.
-
 ``` py title="getmany.py" linenums="1" hl_lines="3"
 --8<-- "examples/getmany.py"
 ```
@@ -35,13 +35,13 @@ so we need to import `asyncio` to use `asyncio.run()`.
 to place type hints in your code, so we import
 required type hints from Python's `typing` module.
 
-``` py title="getmany.py" linenums="1" hl_lines="4"
+``` py title="getmany.py" linenums="1" hl_lines="5"
 --8<-- "examples/getmany.py"
 ```
 
 `SnmpSession` object holds all necessary API, so import it from `gufo.snmp`.
 
-``` py title="getmany.py" linenums="1" hl_lines="7"
+``` py title="getmany.py" linenums="1" hl_lines="8"
 --8<-- "examples/getmany.py"
 ```
 
@@ -52,7 +52,7 @@ So we define our function as `async`. We expect the following arguments:
 * SNMP community to authorize.
 * List of OIDs to query.
 
-``` py title="getmany.py" linenums="1" hl_lines="8"
+``` py title="getmany.py" linenums="1" hl_lines="9"
 --8<-- "examples/getmany.py"
 ```
 
@@ -67,7 +67,7 @@ so its lifetime is defined explicitly.
 for further details. In our example, we set the agent's address and SNMP community
 to the given values.
 
-``` py title="getmany.py" linenums="1" hl_lines="9"
+``` py title="getmany.py" linenums="1" hl_lines="10"
 --8<-- "examples/getmany.py"
 ```
 
@@ -81,18 +81,18 @@ must be awaited. See [SnmpSession.get() reference](../../reference/gufo/snmp/cli
     `get_many()` ignores non-existent OIDs, so it is up to the application to check
     the resulting dict for missed keys.
 
-``` py title="getmany.py" linenums="1" hl_lines="10 11"
+``` py title="getmany.py" linenums="1" hl_lines="11 12"
 --8<-- "examples/getmany.py"
 ```
 
 It is up to the application how to deal with the result.
 In our example we just print all the items.
 
-``` py title="getmany.py" linenums="1" hl_lines="14"
+``` py title="getmany.py" linenums="1" hl_lines="15"
 --8<-- "examples/getmany.py"
 ```
 
-Lets run our asyncronous `main()` function via `asyncio.run`
+Lets run our asynchronous `main()` function via `asyncio.run`
 and pass first command-line parameters as address, community and OIDs.
 We use the rest of command line as the list of OIDs to query.
 

@@ -14,7 +14,13 @@ Let's see the details.
 ``` py title="getnext.py" linenums="1" hl_lines="1"
 --8<-- "examples/getnext.py"
 ```
+*Gufo SNMP* is an async library. In our case
+we should run the client from our synchronous script,
+so we need to import `asyncio` to use `asyncio.run()`.
 
+``` py title="getnext.py" linenums="1" hl_lines="2"
+--8<-- "examples/getnext.py"
+```
 Import `sys` module to parse the CLI argument.
 
 !!! warning
@@ -22,20 +28,13 @@ Import `sys` module to parse the CLI argument.
     We use `sys.argv` only for demonstration purposes. Use `argsparse` or alternatives
     in real-world applications.
 
-``` py title="getnext.py" linenums="1" hl_lines="2"
---8<-- "examples/getnext.py"
-```
-*Gufo SNMP* is an async library. In our case
-we should run the client from our synchronous script,
-so we need to import `asyncio` to use `asyncio.run()`.
-
-``` py title="getnext.py" linenums="1" hl_lines="3"
+``` py title="getnext.py" linenums="1" hl_lines="4"
 --8<-- "examples/getnext.py"
 ```
 
 `SnmpSession` object holds all necessary API, so import it from `gufo.snmp`.
 
-``` py title="getnext.py" linenums="1" hl_lines="6"
+``` py title="getnext.py" linenums="1" hl_lines="7"
 --8<-- "examples/getnext.py"
 ```
 
@@ -46,7 +45,7 @@ So we define our function as `async`. We expect the following arguments:
 * SNMP community to authorize.
 * Base OID to query.
 
-``` py title="getnext.py" linenums="1" hl_lines="7"
+``` py title="getnext.py" linenums="1" hl_lines="8"
 --8<-- "examples/getnext.py"
 ```
 
@@ -61,7 +60,7 @@ so its lifetime is defined explicitly.
 for further details. In our example, we set the agent's address and SNMP community
 to the given values.
 
-``` py title="getnext.py" linenums="1" hl_lines="8"
+``` py title="getnext.py" linenums="1" hl_lines="9"
 --8<-- "examples/getnext.py"
 ```
 
@@ -70,18 +69,18 @@ iterator returning pairs of `(OID, value)`, so we use `async for` construction t
 See [SnmpSession.getnext() reference](../../reference/gufo/snmp/client#gufo.snmp.client.SnmpSession.getnext)
 for further details. 
 
-``` py title="getnext.py" linenums="1" hl_lines="9"
+``` py title="getnext.py" linenums="1" hl_lines="10"
 --8<-- "examples/getnext.py"
 ```
 
 It is up to the application how to deal with the result.
 In our example we just print it.
 
-``` py title="getnext.py" linenums="1" hl_lines="12"
+``` py title="getnext.py" linenums="1" hl_lines="13"
 --8<-- "examples/getnext.py"
 ```
 
-Lets run our asyncronous `main()` function via `asyncio.run`
+Lets run our asynchronous `main()` function via `asyncio.run`
 and pass first command-line parameters as address, community, and oid.
 
 ## Running
