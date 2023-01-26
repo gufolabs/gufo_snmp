@@ -26,7 +26,7 @@ The currently supported types are:
 | Opaque            | Application |       P |    4 | :material-close:     | [RFC-1442][RFC-1442] pp 7.1.9  |
 | NsapAddress       | Application |       P |    5 | :material-close:     | [RFC-1442][RFC-1442] pp 7.1.10 |
 | Counter64         | Application |       P |    6 | :material-close:     | [RFC-1442][RFC-1442] pp 7.1.11 |
-| UInteger32        | Application |       P |    7 | :material-close:     | [RFC-1442][RFC-1442] pp 7.1.12 |
+| UInteger32        | Application |       P |    7 | int                  | [RFC-1442][RFC-1442] pp 7.1.12 |
 | noSuchObject      | Context     |       P |    0 | :material-check:[^3] | [RFC-1905][RFC-1905] pp 3      |
 | noSuchInstance    | Context     |       P |    1 | :material-check:[^3] | [RFC-1905][RFC-1905] pp 3      |
 | endOfMibView      | Context     |       P |    2 | :material-check:[^2] | [RFC-1905][RFC-1905] pp 3      |
