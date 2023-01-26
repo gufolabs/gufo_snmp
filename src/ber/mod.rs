@@ -59,6 +59,8 @@ use crate::buf::Buffer;
 pub(crate) use t_option::SnmpOption;
 pub(crate) mod t_ipaddress;
 pub(crate) use t_ipaddress::SnmpIpAddress;
+pub(crate) mod t_counter32;
+pub(crate) use t_counter32::SnmpCounter32;
 pub(crate) mod t_timeticks;
 pub(crate) use t_timeticks::SnmpTimeTicks;
 

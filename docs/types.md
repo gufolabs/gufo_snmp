@@ -20,7 +20,7 @@ The currently supported types are:
 | ENUMERATED        | Universal   |       P |   10 | :material-close:     |                                |
 | SEQUENCE          | Universal   |       C |   16 | :material-check:[^2] | [X.690][X-690] pp 8.9          |
 | IpAddress         | Application |       P |    0 | str                  | [RFC-1442][RFC-1442] pp 7.1.5  |
-| Counter32         | Application |       P |    1 | :material-close:     | [RFC-1442][RFC-1442] pp 7.1.6  |
+| Counter32         | Application |       P |    1 | int                  | [RFC-1442][RFC-1442] pp 7.1.6  |
 | Gauge32           | Application |       P |    2 | :material-close:     | [RFC-1442][RFC-1442] pp 7.1.7  |
 | TimeTicks         | Application |       P |    3 | int                  | [RFC-1442][RFC-1442] pp 7.1.8  |
 | Opaque            | Application |       P |    4 | :material-close:     | [RFC-1442][RFC-1442] pp 7.1.9  |
