@@ -122,7 +122,7 @@ impl<'a> SnmpValue<'a> {
 impl<'a> ToPython for &SnmpValue<'a> {
     fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError> {
         Ok(match self {
-            SnmpValue::Bool(x) => todo!(),
+            SnmpValue::Bool(x) => x.try_to_python(py)?,
             SnmpValue::Int(x) => x.try_to_python(py)?,
             SnmpValue::Null => todo!(),
             SnmpValue::OctetString(x) => x.try_to_python(py)?,

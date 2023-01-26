@@ -5,8 +5,9 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, TAG_BOOL};
+use super::{BerDecoder, BerHeader, ToPython, TAG_BOOL};
 use crate::error::SnmpError;
+use pyo3::{IntoPy, Py, PyAny, Python};
 
 pub(crate) struct SnmpBool(bool);
 
@@ -26,6 +27,12 @@ impl<'a> BerDecoder<'a> for SnmpBool {
 impl From<SnmpBool> for bool {
     fn from(value: SnmpBool) -> Self {
         value.0
+    }
+}
+
+impl ToPython for &SnmpBool {
+    fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError> {
+        Ok(self.0.into_py(py))
     }
 }
 

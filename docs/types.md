@@ -7,7 +7,7 @@ The currently supported types are:
 
 | Type              | Class       | P/C[^1] |  Tag | Python Type          | Reference                      |
 | ----------------- | ----------- | ------: | ---: | -------------------- | ------------------------------ |
-| BOOLEAN           | Universal   |       P |    1 |                      | [X.690][X-690] pp 8.1          |
+| BOOLEAN           | Universal   |       P |    1 | bool                 | [X.690][X-690] pp 8.1          |
 | INTEGER           | Universal   |       P |    2 | int                  | [X.690][X-690] pp 8.2          |
 | BITSTRING         | Universal   |     P/C |    3 | :material-close:     | [X.690][X-690] pp 8.6          |
 | OCTETSTRING       | Universal   |       P |    4 | bytes                | [X.690][X-690] pp 8.7          |
@@ -19,7 +19,7 @@ The currently supported types are:
 | REAL              | Universal   |       P |    9 | :material-close:     | [X.690][X-690] pp 8.5          |
 | ENUMERATED        | Universal   |       P |   10 | :material-close:     |                                |
 | SEQUENCE          | Universal   |       C |   16 | :material-check:[^2] | [X.690][X-690] pp 8.9          |
-| IpAddress         | Application |       P |    0 | :material-close:     | [RFC-1442][RFC-1442] pp 7.1.5  |
+| IpAddress         | Application |       P |    0 | str                  | [RFC-1442][RFC-1442] pp 7.1.5  |
 | Counter32         | Application |       P |    1 | :material-close:     | [RFC-1442][RFC-1442] pp 7.1.6  |
 | Gauge32           | Application |       P |    2 | :material-close:     | [RFC-1442][RFC-1442] pp 7.1.7  |
 | TimeTicks         | Application |       P |    3 | int                  | [RFC-1442][RFC-1442] pp 7.1.8  |
