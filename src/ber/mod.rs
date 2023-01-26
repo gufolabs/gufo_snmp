@@ -67,6 +67,8 @@ pub(crate) mod t_timeticks;
 pub(crate) use t_timeticks::SnmpTimeTicks;
 pub(crate) mod t_opaque;
 pub(crate) use t_opaque::SnmpOpaque;
+pub(crate) mod t_counter64;
+pub(crate) use t_counter64::SnmpCounter64;
 pub(crate) mod t_uinteger32;
 pub(crate) use t_uinteger32::SnmpUInteger32;
 
