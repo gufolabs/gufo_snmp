@@ -6,9 +6,9 @@
 // ------------------------------------------------------------------------
 
 use crate::ber::{
-    BerClass, BerDecoder, BerHeader, SnmpBool, SnmpCounter32, SnmpInt, SnmpIpAddress, SnmpNull,
-    SnmpOctetString, SnmpOid, SnmpSequence, SnmpTimeTicks, ToPython, TAG_APP_COUNTER32,
-    TAG_APP_IPADDRESS, TAG_APP_TIMETICKS, TAG_BOOL, TAG_CTX_END_OF_MIB_VIEW,
+    BerClass, BerDecoder, BerHeader, SnmpBool, SnmpCounter32, SnmpGauge32, SnmpInt, SnmpIpAddress,
+    SnmpNull, SnmpOctetString, SnmpOid, SnmpSequence, SnmpTimeTicks, ToPython, TAG_APP_COUNTER32,
+    TAG_APP_GAUGE32, TAG_APP_IPADDRESS, TAG_APP_TIMETICKS, TAG_BOOL, TAG_CTX_END_OF_MIB_VIEW,
     TAG_CTX_NO_SUCH_INSTANCE, TAG_CTX_NO_SUCH_OBJECT, TAG_INT, TAG_NULL, TAG_OBJECT_ID,
     TAG_OCTET_STRING,
 };
@@ -29,6 +29,7 @@ pub(crate) enum SnmpValue<'a> {
     Oid(SnmpOid),
     IpAddress(SnmpIpAddress),
     Counter32(SnmpCounter32),
+    Gauge32(SnmpGauge32),
     TimeTicks(SnmpTimeTicks),
     NoSuchObject,
     NoSuchInstance,
@@ -78,7 +79,7 @@ impl<'a> SnmpValue<'a> {
                 BerClass::Application => match hdr.tag {
                     TAG_APP_IPADDRESS => SnmpValue::IpAddress(SnmpIpAddress::decode(tail, &hdr)?),
                     TAG_APP_COUNTER32 => SnmpValue::Counter32(SnmpCounter32::decode(tail, &hdr)?),
-                    // TAG_APP_GAUGE32 =>{},
+                    TAG_APP_GAUGE32 => SnmpValue::Gauge32(SnmpGauge32::decode(tail, &hdr)?),
                     TAG_APP_TIMETICKS => SnmpValue::TimeTicks(SnmpTimeTicks::decode(tail, &hdr)?),
                     // TAG_APP_OPAQUE=> {},
                     // TAG_APP_NSAPADDRESS=>{},
@@ -131,6 +132,7 @@ impl<'a> ToPython for &SnmpValue<'a> {
             SnmpValue::Oid(x) => x.try_to_python(py)?,
             SnmpValue::IpAddress(x) => x.try_to_python(py)?,
             SnmpValue::Counter32(x) => x.try_to_python(py)?,
+            SnmpValue::Gauge32(x) => x.try_to_python(py)?,
             SnmpValue::TimeTicks(x) => x.try_to_python(py)?,
             SnmpValue::NoSuchObject | SnmpValue::NoSuchInstance => todo!("never should be passed"),
             SnmpValue::EndOfMibView => todo!("never should be passed"),
