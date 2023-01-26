@@ -65,6 +65,8 @@ pub(crate) mod t_gauge32;
 pub(crate) use t_gauge32::SnmpGauge32;
 pub(crate) mod t_timeticks;
 pub(crate) use t_timeticks::SnmpTimeTicks;
+pub(crate) mod t_opaque;
+pub(crate) use t_opaque::SnmpOpaque;
 pub(crate) mod t_uinteger32;
 pub(crate) use t_uinteger32::SnmpUInteger32;
 
