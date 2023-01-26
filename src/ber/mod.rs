@@ -57,6 +57,8 @@ pub(crate) use t_sequence::SnmpSequence;
 pub(crate) mod t_option;
 use crate::buf::Buffer;
 pub(crate) use t_option::SnmpOption;
+pub(crate) mod t_ipaddress;
+pub(crate) use t_ipaddress::SnmpIpAddress;
 pub(crate) mod t_timeticks;
 pub(crate) use t_timeticks::SnmpTimeTicks;
 
