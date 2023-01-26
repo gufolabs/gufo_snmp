@@ -18,6 +18,8 @@ pub(crate) struct Buffer {
 }
 
 impl Default for Buffer {
+    #[allow(invalid_value)]
+    #[allow(clippy::uninit_assumed_init)]
     fn default() -> Buffer {
         Buffer {
             len: 0,

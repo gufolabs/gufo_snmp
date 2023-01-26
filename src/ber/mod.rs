@@ -24,7 +24,7 @@ pub(crate) const TAG_INT: usize = 0x2;
 pub(crate) const TAG_OCTET_STRING: usize = 0x4;
 pub(crate) const TAG_NULL: usize = 0x5;
 pub(crate) const TAG_OBJECT_ID: usize = 0x6;
-pub(crate) const TAG_REAL: usize = 0x9;
+// pub(crate) const TAG_REAL: usize = 0x9;
 pub(crate) const TAG_SEQUENCE: usize = 0x10;
 // SNMP Application Tags
 pub(crate) const TAG_APP_IPADDRESS: usize = 0;
@@ -32,7 +32,7 @@ pub(crate) const TAG_APP_COUNTER32: usize = 1;
 pub(crate) const TAG_APP_GAUGE32: usize = 2;
 pub(crate) const TAG_APP_TIMETICKS: usize = 3;
 pub(crate) const TAG_APP_OPAQUE: usize = 4;
-pub(crate) const TAG_APP_NSAPADDRESS: usize = 5;
+// pub(crate) const TAG_APP_NSAPADDRESS: usize = 5;
 pub(crate) const TAG_APP_COUNTER64: usize = 6;
 pub(crate) const TAG_APP_UINTEGER32: usize = 7;
 // SNMP Context Tags

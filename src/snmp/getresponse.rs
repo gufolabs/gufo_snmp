@@ -9,6 +9,7 @@ use super::var::SnmpVar;
 use crate::ber::{BerDecoder, SnmpInt, SnmpSequence};
 use crate::error::SnmpError;
 
+#[allow(dead_code)]
 pub(crate) struct SnmpGetResponse<'a> {
     pub(crate) request_id: i64,
     pub(crate) error_status: i64,

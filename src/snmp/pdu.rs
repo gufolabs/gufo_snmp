@@ -12,6 +12,7 @@ use crate::ber::{BerDecoder, BerEncoder, SnmpOption};
 use crate::buf::Buffer;
 use crate::error::SnmpError;
 
+#[allow(clippy::enum_variant_names)]
 pub(crate) enum SnmpPdu<'a> {
     GetRequest(SnmpGet),
     GetNextRequest(SnmpGet),
