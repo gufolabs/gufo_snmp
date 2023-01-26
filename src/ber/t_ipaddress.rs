@@ -25,15 +25,16 @@ impl<'a> BerDecoder<'a> for SnmpIpAddress {
     }
 }
 
-impl Into<String> for &SnmpIpAddress {
-    fn into(self) -> String {
-        format!("{}.{}.{}.{}", self.0, self.1, self.2, self.3)
+impl From<&SnmpIpAddress> for String {
+    fn from(value: &SnmpIpAddress) -> Self {
+        format!("{}.{}.{}.{}", value.0, value.1, value.2, value.3)
     }
 }
 
 impl ToPython for &SnmpIpAddress {
     fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError> {
-        Ok(PyString::new(py, &<&SnmpIpAddress as Into<String>>::into(self)).into())
+        let s: String = self.into();
+        Ok(PyString::new(py, &s).into())
     }
 }
 
@@ -56,7 +57,8 @@ mod tests {
 
     #[test]
     fn test_into_str() {
-        let ip = SnmpIpAddress(127, 0, 0, 1);
-        assert_eq!(<&SnmpIpAddress as Into<String>>::into(&ip), "127.0.0.1");
+        let ip = &SnmpIpAddress(127, 0, 0, 1);
+        let s: String = ip.into();
+        assert_eq!(s, "127.0.0.1");
     }
 }

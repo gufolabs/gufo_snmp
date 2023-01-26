@@ -93,7 +93,7 @@ impl SnmpOid {
         if oid.0.len() < sl {
             return false;
         }
-        self.0 == &oid.0[..sl]
+        self.0 == oid.0[..sl]
     }
 }
 

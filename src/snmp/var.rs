@@ -40,7 +40,7 @@ impl<'a> SnmpVar<'a> {
         // Parse oid
         let (tail, oid) = SnmpOid::from_ber(vs.0)?;
         // Parse value
-        let (tail, value) = SnmpValue::from_ber(tail)?;
+        let (_, value) = SnmpValue::from_ber(tail)?;
         //
         Ok((rest, SnmpVar { oid, value }))
     }
