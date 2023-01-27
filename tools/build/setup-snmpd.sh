@@ -19,17 +19,23 @@ else
     exit 1
 fi
 
+if [ $(id -u) -eq 0 ]; then
+    SUDO=""
+else
+    SUDO="/sbin/sudo"
+fi
+
 echo "Installing snmpd for $OS"
 case $OS in
     rhel)
-        yum install -y net-snmp
+        $SUDO yum install -y net-snmp
         ;;
     debian)
-        apt-get update
-        apt-get install -y --no-install-recommends snmpd
+        $SUDO apt-get update
+        $SUDO apt-get install -y --no-install-recommends snmpd
         ;;
     alpine)
-        apk add net-snmp
+        $SUDO apk add net-snmp
         ;;
     *)
         echo "Unsupported OS: $OS"
