@@ -13,7 +13,8 @@ use pyo3::{Py, PyAny, Python};
 pub(crate) struct SnmpOpaque<'a>(pub(crate) &'a [u8]);
 
 impl<'a> BerDecoder<'a> for SnmpOpaque<'a> {
-    const IS_CONSTRUCTED: bool = false;
+    const ALLOW_PRIMITIVE: bool = true;
+    const ALLOW_CONSTRUCTED: bool = false;
     const TAG: usize = TAG_APP_OPAQUE;
 
     // Implement X.690 pp 8.7: Encoding of an Opaque value

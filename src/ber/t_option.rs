@@ -15,7 +15,8 @@ pub(crate) struct SnmpOption<'a> {
 }
 
 impl<'a> BerDecoder<'a> for SnmpOption<'a> {
-    const IS_CONSTRUCTED: bool = true;
+    const ALLOW_PRIMITIVE: bool = false;
+    const ALLOW_CONSTRUCTED: bool = true;
     const TAG: usize = TAG_SEQUENCE;
 
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {

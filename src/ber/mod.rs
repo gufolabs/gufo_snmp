@@ -78,7 +78,8 @@ pub(crate) trait BerDecoder<'a>
 where
     Self: Sized,
 {
-    const IS_CONSTRUCTED: bool;
+    const ALLOW_PRIMITIVE: bool;
+    const ALLOW_CONSTRUCTED: bool;
     const TAG: usize;
 
     fn decode(i: &'a [u8], hdr: &BerHeader) -> Result<Self, SnmpError>;
@@ -88,7 +89,10 @@ where
             return Err(Err::Failure(SnmpError::Incomplete));
         }
         let (tail, hdr) = BerHeader::from_ber(i)?;
-        if hdr.constructed != Self::IS_CONSTRUCTED || hdr.tag != Self::TAG {
+        if hdr.tag != Self::TAG
+            || (hdr.constructed && !Self::ALLOW_CONSTRUCTED)
+            || (!hdr.constructed && !Self::ALLOW_PRIMITIVE)
+        {
             return Err(Err::Failure(SnmpError::UnexpectedTag));
         }
         //

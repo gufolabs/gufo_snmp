@@ -20,7 +20,8 @@ use pyo3::{Py, PyAny, Python};
 pub(crate) struct SnmpOid(pub(crate) Vec<u32>);
 
 impl<'a> BerDecoder<'a> for SnmpOid {
-    const IS_CONSTRUCTED: bool = false;
+    const ALLOW_PRIMITIVE: bool = true;
+    const ALLOW_CONSTRUCTED: bool = false;
     const TAG: usize = TAG_OBJECT_ID;
 
     // Implement X.690 pp 8.19: Encoding of an object identifier value

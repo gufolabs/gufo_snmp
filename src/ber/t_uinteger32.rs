@@ -12,7 +12,8 @@ use pyo3::{IntoPy, Py, PyAny, Python};
 pub(crate) struct SnmpUInteger32(pub(crate) u32);
 
 impl<'a> BerDecoder<'a> for SnmpUInteger32 {
-    const IS_CONSTRUCTED: bool = false;
+    const ALLOW_PRIMITIVE: bool = true;
+    const ALLOW_CONSTRUCTED: bool = false;
     const TAG: usize = TAG_APP_UINTEGER32;
 
     // Implement RFC

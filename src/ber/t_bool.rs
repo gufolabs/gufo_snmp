@@ -12,7 +12,8 @@ use pyo3::{IntoPy, Py, PyAny, Python};
 pub(crate) struct SnmpBool(bool);
 
 impl<'a> BerDecoder<'a> for SnmpBool {
-    const IS_CONSTRUCTED: bool = false;
+    const ALLOW_PRIMITIVE: bool = true;
+    const ALLOW_CONSTRUCTED: bool = false;
     const TAG: usize = TAG_BOOL;
 
     // Implement X.690 pp 8.2: Encoding of a boolean value

@@ -12,7 +12,8 @@ use pyo3::{IntoPy, Py, PyAny, Python};
 pub(crate) struct SnmpCounter64(pub(crate) u64);
 
 impl<'a> BerDecoder<'a> for SnmpCounter64 {
-    const IS_CONSTRUCTED: bool = false;
+    const ALLOW_PRIMITIVE: bool = true;
+    const ALLOW_CONSTRUCTED: bool = false;
     const TAG: usize = TAG_APP_COUNTER64;
 
     // Implement RFC

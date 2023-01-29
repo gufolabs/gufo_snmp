@@ -12,7 +12,8 @@ use pyo3::{IntoPy, Py, PyAny, Python};
 pub(crate) struct SnmpTimeTicks(pub(crate) u32);
 
 impl<'a> BerDecoder<'a> for SnmpTimeTicks {
-    const IS_CONSTRUCTED: bool = false;
+    const ALLOW_PRIMITIVE: bool = true;
+    const ALLOW_CONSTRUCTED: bool = false;
     const TAG: usize = TAG_APP_TIMETICKS;
 
     // Implement RFC

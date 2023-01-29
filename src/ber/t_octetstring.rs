@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp
+// Gufo Snmp: OCTET STRING type
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details
@@ -13,7 +13,8 @@ use pyo3::{Py, PyAny, Python};
 pub(crate) struct SnmpOctetString<'a>(pub(crate) &'a [u8]);
 
 impl<'a> BerDecoder<'a> for SnmpOctetString<'a> {
-    const IS_CONSTRUCTED: bool = false;
+    const ALLOW_PRIMITIVE: bool = true;
+    const ALLOW_CONSTRUCTED: bool = false;
     const TAG: usize = TAG_OCTET_STRING;
 
     // Implement X.690 pp 8.7: Encoding of an octetstring value

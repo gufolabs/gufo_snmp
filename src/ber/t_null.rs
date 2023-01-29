@@ -12,7 +12,8 @@ use crate::error::SnmpError;
 pub(crate) struct SnmpNull;
 
 impl<'a> BerDecoder<'a> for SnmpNull {
-    const IS_CONSTRUCTED: bool = false;
+    const ALLOW_PRIMITIVE: bool = true;
+    const ALLOW_CONSTRUCTED: bool = false;
     const TAG: usize = TAG_NULL;
 
     // Implement X.690 pp 8.8: Encoding of a null value

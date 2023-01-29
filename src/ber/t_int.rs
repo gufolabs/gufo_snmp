@@ -14,7 +14,8 @@ use std::cmp::Ordering;
 pub(crate) struct SnmpInt(i64);
 
 impl<'a> BerDecoder<'a> for SnmpInt {
-    const IS_CONSTRUCTED: bool = false;
+    const ALLOW_PRIMITIVE: bool = true;
+    const ALLOW_CONSTRUCTED: bool = false;
     const TAG: usize = TAG_INT;
 
     // Implement X.690 pp 8.3: Encoding of an integer value
