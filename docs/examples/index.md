@@ -6,4 +6,5 @@ explanation of the samples from the `examples/` folder.
 * [get.py](get.md): Single Get Request
 * [getmany.py](getmany.md): Multi Items Get Request
 * [getnext.py](getnext.md): GetNext Request
+* [getbulk.py](getbulk.md): GetBulk Request
 * [debugging.py](debugging.md): Debugging

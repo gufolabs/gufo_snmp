@@ -19,11 +19,19 @@ async with SnmpSession(addr="127.0.0.1", community="public") as session:
     r = await session.get_many(["1.3.6.1.2.1.1.3.0", "1.3.6.1.2.1.1.2.0"])
 ```
 
-The querying of the MIB parts is also available:
+The querying of the MIB parts is also available with GetNext request:
 
 ``` py
 async with SnmpSession(addr="127.0.0.1", community="public") as session:
     async for oid, value in  session.getnext("1.3.6.1.2.1.1"):
+        ...
+```
+
+And with GetBulk request:
+
+``` py
+async with SnmpSession(addr="127.0.0.1", community="public") as session:
+    async for oid, value in  session.getbulk("1.3.6.1.2.1.1"):
         ...
 ```
 

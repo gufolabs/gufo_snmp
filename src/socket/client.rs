@@ -9,6 +9,7 @@ use crate::ber::{BerEncoder, SnmpOid, ToPython};
 use crate::buf::Buffer;
 use crate::error::SnmpError;
 use crate::snmp::get::SnmpGet;
+use crate::snmp::getbulk::SnmpGetBulk;
 use crate::snmp::msg::SnmpMessage;
 use crate::snmp::pdu::SnmpPdu;
 use crate::snmp::var::SnmpValue;
@@ -18,7 +19,7 @@ use pyo3::{
     exceptions::PyBlockingIOError,
     exceptions::{PyOSError, PyStopAsyncIteration, PyValueError},
     prelude::*,
-    types::PyDict,
+    types::{PyDict, PyList, PyTuple},
 };
 use rand::Rng;
 use socket2::{Domain, Protocol, SockAddr, Socket, Type};
@@ -40,6 +41,13 @@ pub(crate) struct SnmpClientSocket {
 pub(crate) struct GetNextIter {
     start_oid: SnmpOid,
     next_oid: SnmpOid,
+}
+
+#[pyclass]
+pub(crate) struct GetBulkIter {
+    start_oid: SnmpOid,
+    next_oid: SnmpOid,
+    max_repetitions: i64,
 }
 
 #[pymethods]
@@ -129,6 +137,31 @@ impl SnmpClientSocket {
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetNextRequest(SnmpGet {
                 request_id,
+                vars: vec![iter.get_next_oid()],
+            }),
+        };
+        msg.push_ber(&mut self.buf)
+            .map_err(|_| PyValueError::new_err("failed to encode message"))?;
+        // Send
+        self.io
+            .send_to(self.buf.data(), &self.addr)
+            .map_err(|_| PyOSError::new_err("failed to send"))?;
+        Ok(())
+    }
+    // Send GetBulk request according to iter
+    fn send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
+        // Start from clear buffer
+        self.buf.reset();
+        // Get new request id
+        let request_id = self.new_request_id();
+        // Encode message
+        let msg = SnmpMessage {
+            version: self.version.clone(),
+            community: self.community.as_ref(),
+            pdu: SnmpPdu::GetBulkRequest(SnmpGetBulk {
+                request_id,
+                non_repeaters: 0,
+                max_repetitions: iter.get_max_repetitions(),
                 vars: vec![iter.get_next_oid()],
             }),
         };
@@ -298,6 +331,68 @@ impl SnmpClientSocket {
             }
         }
     }
+    // Try to receive GETRESPONSE for GETBULK
+    fn recv_getresponse_bulk(&mut self, iter: &mut GetBulkIter, py: Python) -> PyResult<PyObject> {
+        loop {
+            // Receive response
+            let size = match self.io.recv_from(self.buf.as_mut()) {
+                Ok((s, _)) => s,
+                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                    return Err(PyBlockingIOError::new_err("blocked"))
+                }
+                Err(e) => return Err(PyOSError::new_err(e.to_string())),
+            };
+            // Parse response
+            let msg = SnmpMessage::try_from(self.buf.as_slice(size))?;
+            // Check version match
+            if msg.version != self.version {
+                continue; // Mismatched version, not our response.
+            }
+            // Check community match
+            if msg.community != self.community.as_bytes() {
+                continue; // Community mismatch, not our response.
+            }
+            match msg.pdu {
+                SnmpPdu::GetResponse(resp) => {
+                    // Check request id
+                    if resp.request_id != self.request_id {
+                        continue; // Not our request
+                    }
+                    // Check error_index
+                    // Check varbinds size
+                    if resp.vars.is_empty() {
+                        return Err(PyStopAsyncIteration::new_err("stop"));
+                    }
+                    let list = PyList::empty(py);
+                    for var in resp.vars.iter() {
+                        match &var.value {
+                            SnmpValue::Null
+                            | SnmpValue::NoSuchObject
+                            | SnmpValue::NoSuchInstance
+                            | SnmpValue::EndOfMibView => continue,
+                            _ => {
+                                // Check if we can continue
+                                if !iter.set_next_oid(&var.oid) {
+                                    break;
+                                }
+                                // Append to list
+                                list.append(PyTuple::new(
+                                    py,
+                                    vec![var.oid.try_to_python(py)?, var.value.try_to_python(py)?],
+                                ))
+                                .map_err(|e| PyRuntimeError::new_err(e.to_string()))?
+                            }
+                        }
+                    }
+                    if list.is_empty() {
+                        return Err(PyStopAsyncIteration::new_err("stop"));
+                    }
+                    return Ok(list.into());
+                }
+                _ => continue,
+            }
+        }
+    }
 }
 
 impl SnmpClientSocket {
@@ -380,5 +475,39 @@ impl GetNextIter {
         } else {
             false
         }
+    }
+}
+
+#[pymethods]
+impl GetBulkIter {
+    /// Python constructor
+    #[new]
+    fn new(oid: &str, max_repetitions: i64) -> PyResult<Self> {
+        let b_oid = SnmpOid::try_from(oid).map_err(|_| PyValueError::new_err("invalid oid"))?;
+        Ok(GetBulkIter {
+            start_oid: b_oid.clone(),
+            next_oid: b_oid,
+            max_repetitions,
+        })
+    }
+}
+
+impl GetBulkIter {
+    pub(crate) fn get_next_oid(&self) -> SnmpOid {
+        self.next_oid.clone()
+    }
+    // Save oid for next request.
+    // Return true if next request may be send or return false otherwise
+    pub(crate) fn set_next_oid(&mut self, oid: &SnmpOid) -> bool {
+        if self.start_oid.contains(oid) {
+            self.next_oid = oid.clone();
+            true
+        } else {
+            false
+        }
+    }
+    //
+    pub(crate) fn get_max_repetitions(&self) -> i64 {
+        self.max_repetitions
     }
 }

@@ -7,7 +7,7 @@
 
 # Python modules
 import asyncio
-from typing import Any, Dict, Iterator, cast
+from typing import Any, Dict, Iterator, cast, Set
 
 # Third-party modules
 import pytest
@@ -39,7 +39,7 @@ def snmpd() -> Iterator[Snmpd]:
         yield snmpd
 
 
-def test_timeout1(snmpd: "Snmpd") -> None:
+def test_timeout1(snmpd: Snmpd) -> None:
     async def inner() -> ValueType:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
@@ -53,7 +53,7 @@ def test_timeout1(snmpd: "Snmpd") -> None:
         asyncio.run(inner())
 
 
-def test_timeout2(snmpd: "Snmpd") -> None:
+def test_timeout2(snmpd: Snmpd) -> None:
     async def inner() -> Dict[str, ValueType]:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
@@ -84,30 +84,30 @@ async def snmp_get(oid: str) -> ValueType:
         ("1.3.6.1.2.1.1.4.0", SNMP_CONTACT.encode()),
     ],
 )
-def test_get(oid: str, expected: ValueType, snmpd: "Snmpd") -> None:
+def test_get(oid: str, expected: ValueType, snmpd: Snmpd) -> None:
     r = asyncio.run(snmp_get(oid))
     assert r == expected
 
 
-def test_get_nosuchinstance(snmpd: "Snmpd") -> None:
+def test_get_nosuchinstance(snmpd: Snmpd) -> None:
     with pytest.raises(NoSuchInstance):
         asyncio.run(snmp_get("1.3.6.1.2.1.1.6"))
 
 
-def test_sys_uptime(snmpd: "Snmpd") -> None:
+def test_sys_uptime(snmpd: Snmpd) -> None:
     """sysUptime.0 returns TimeTicks type."""
     r = asyncio.run(snmp_get("1.3.6.1.2.1.1.3.0"))
     assert isinstance(r, int)
 
 
-def test_sys_objectid(snmpd: "Snmpd") -> None:
+def test_sys_objectid(snmpd: Snmpd) -> None:
     """sysObjectId.0 returns OBJECT IDENTIFIER type."""
     r = asyncio.run(snmp_get("1.3.6.1.2.1.1.2.0"))
     assert isinstance(r, str)
     assert r.startswith("1.3.6.1.4.1.8072.3.2.")
 
 
-def test_get_many(snmpd: "Snmpd") -> None:
+def test_get_many(snmpd: Snmpd) -> None:
     async def inner() -> Dict[str, ValueType]:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
@@ -138,7 +138,7 @@ def test_get_many(snmpd: "Snmpd") -> None:
     assert r["1.3.6.1.2.1.1.4.0"] == SNMP_CONTACT.encode()
 
 
-def test_get_many_skip(snmpd: "Snmpd") -> None:
+def test_get_many_skip(snmpd: Snmpd) -> None:
     async def inner() -> Dict[str, Any]:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
@@ -165,7 +165,7 @@ def test_get_many_skip(snmpd: "Snmpd") -> None:
     assert "1.3.6.1.2.1.1.4.0" in r
 
 
-def test_getmany_long_request(snmpd: "Snmpd") -> None:
+def test_getmany_long_request(snmpd: Snmpd) -> None:
     async def inner() -> Dict[str, Any]:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
@@ -190,10 +190,11 @@ def test_getmany_long_request(snmpd: "Snmpd") -> None:
         assert oid in r
 
 
-def test_getnext(snmpd: "Snmpd") -> None:
+def test_getnext(snmpd: Snmpd) -> None:
     """Iterate over whole MIB."""
 
-    async def inner() -> None:
+    async def inner() -> int:
+        n = 0
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT,
@@ -201,6 +202,81 @@ def test_getnext(snmpd: "Snmpd") -> None:
             timeout=1.0,
         ) as session:
             async for _ in session.getnext("1.3.6"):
-                pass
+                n += 1
+        return n
 
-    asyncio.run(inner())
+    n = asyncio.run(inner())
+    assert n > 0
+
+
+def test_getbulk(snmpd: Snmpd) -> None:
+    """Iterate over whole MIB."""
+
+    async def inner() -> int:
+        n = 0
+        async with SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            community=SNMP_COMMUNITY,
+            timeout=1.0,
+        ) as session:
+            async for _ in session.getbulk("1.3.6"):
+                n += 1
+        return n
+
+    n = asyncio.run(inner())
+    assert n > 0
+
+
+def test_getbulk_single(snmpd: Snmpd) -> None:
+    """Test single value is returned with bulk"""
+
+    async def inner() -> int:
+        n = 0
+        async with SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            community=SNMP_COMMUNITY,
+            timeout=1.0,
+        ) as session:
+            async for oid, value in session.getbulk("1.3.6.1.2.1.1.2"):
+                assert oid == "1.3.6.1.2.1.1.2.0"
+                assert value.startswith("1.3.6.1.4.1.8072.3.2.")
+                n += 1
+        return n
+
+    n = asyncio.run(inner())
+    assert n == 1
+
+
+def test_getnext_getbulk(snmpd: Snmpd) -> None:
+    """Cross-test of getnext and getbulk"""
+
+    async def inner_getnext() -> Set[str]:
+        r: Set[str] = set()
+        async with SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            community=SNMP_COMMUNITY,
+            timeout=1.0,
+        ) as session:
+            async for oid, _ in session.getnext("1.3.6"):
+                r.add(oid)
+        return r
+
+    async def inner_getbulk() -> Set[str]:
+        r: Set[str] = set()
+        async with SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            community=SNMP_COMMUNITY,
+            timeout=1.0,
+        ) as session:
+            async for oid, _ in session.getbulk("1.3.6"):
+                r.add(oid)
+        return r
+
+    gn = asyncio.run(inner_getnext())
+    gb = asyncio.run(inner_getbulk())
+    assert len(gn) == len(gb)
+    assert gn == gb

@@ -19,6 +19,11 @@ class NoSuchInstance(SNMPError): ...
 class GetNextIter(object):
     def __init__(self: "GetNextIter", oid: str) -> None: ...
 
+class GetBulkIter(object):
+    def __init__(
+        self: "GetBulkIter", oid: str, max_repetitions: int
+    ) -> None: ...
+
 class SnmpClientSocket(object):
     def __init__(
         self: "SnmpClientSocket",
@@ -35,6 +40,9 @@ class SnmpClientSocket(object):
     def send_getnext(
         self: "SnmpClientSocket", iter_getnext: GetNextIter
     ) -> None: ...
+    def send_getbulk(
+        self: "SnmpClientSocket", iter_getbulk: GetBulkIter
+    ) -> None: ...
     def recv_getresponse(self: "SnmpClientSocket") -> ValueType: ...
     def recv_getresponse_many(
         self: "SnmpClientSocket",
@@ -42,3 +50,6 @@ class SnmpClientSocket(object):
     def recv_getresponse_next(
         self: "SnmpClientSocket", iter_getnext: GetNextIter
     ) -> Tuple[str, ValueType]: ...
+    def recv_getresponse_bulk(
+        self: "SnmpClientSocket", iter_getnext: GetBulkIter
+    ) -> List[Tuple[str, ValueType]]: ...

@@ -15,6 +15,7 @@ from typing import AsyncIterator, Dict, Iterable, Optional, Tuple, Type
 
 # Gufo Labs modules
 from ._fast import SnmpClientSocket
+from .getbulk import GetBulkIter
 from .getnext import GetNextIter
 from .typing import ValueType
 
@@ -43,6 +44,7 @@ class SnmpSession(object):
             0 - use default size.
         recv_buffer: Receive buffer size for UDP socket.
             0 - use default size.
+        max_repetitions: Default max_repetitions for getbulk.
 
     Example:
         ``` py
@@ -67,6 +69,7 @@ class SnmpSession(object):
         tos: int = 0,
         send_buffer: int = 0,
         recv_buffer: int = 0,
+        max_repetitions: int = 20,
     ) -> None:
         self._sock = SnmpClientSocket(
             f"{addr}:{port}",
@@ -78,6 +81,7 @@ class SnmpSession(object):
         )
         self._fd = self._sock.get_fd()
         self._timeout = timeout
+        self._max_repetitions = max_repetitions
 
     async def __aenter__(self: "SnmpSession") -> "SnmpSession":
         """Asynchronous context manager entry."""
@@ -207,3 +211,30 @@ class SnmpSession(object):
             ```
         """
         return GetNextIter(self._sock, oid, self._timeout)
+
+    def getbulk(
+        self: "SnmpSession", oid: str, max_repetitions: Optional[int] = None
+    ) -> AsyncIterator[Tuple[str, ValueType]]:
+        """
+        Iterate over oids.
+
+        Args:
+            oid: Starting oid
+            max_repetitions: Maximal amount of items per response.
+                Override the SnmpSession's defaults.
+
+        Returns:
+            Asynchronous iterator yielding pair of (oid, value)
+
+        Example:
+            ``` py
+            async for oid, value in session.getbulk("1.3.6"):
+                print(oid, value)
+            ```
+        """
+        return GetBulkIter(
+            self._sock,
+            oid,
+            self._timeout,
+            max_repetitions or self._max_repetitions,
+        )

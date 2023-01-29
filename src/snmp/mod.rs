@@ -13,8 +13,10 @@ const PDU_GETNEXT_REQUEST: usize = 1;
 const PDU_GET_RESPONSE: usize = 2;
 // const PDU_SET_REQUEST: usize = 3;
 // const PDU_TRAP: usize = 4;
+const PDU_GET_BULK_REQUEST: usize = 5;
 
 pub(crate) mod get;
+pub(crate) mod getbulk;
 pub(crate) mod getresponse;
 pub(crate) mod msg;
 pub(crate) mod pdu;

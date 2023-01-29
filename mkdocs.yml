@@ -13,7 +13,8 @@ nav:
       - Overview: examples/index.md
       - Single Item Get Request: examples/get.md
       - Multi Items Get Request: examples/getmany.md
-      - Get Next Request: examples/getnext.md
+      - GetNext Request: examples/getnext.md
+      - GetBulk Request: examples/getbulk.md
       - Debugging: examples/debugging.md
   - Reference: reference/
   - Developers' Guide:
