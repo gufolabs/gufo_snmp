@@ -48,8 +48,8 @@ impl BerEncoder for SnmpOid {
             return Err(SnmpError::InvalidData); // Too short oid
         }
         let start_len = buf.len();
-        for se in self.0[2..].iter().rev() {
-            SnmpOid::push_subelement(buf, *se)?;
+        for &se in self.0[2..].iter().rev() {
+            SnmpOid::push_subelement(buf, se)?;
         }
         // First two elements are pushed in one octet
         SnmpOid::push_subelement(buf, self.0[0] * 40 + self.0[1])?;
@@ -142,45 +142,45 @@ mod test {
     }
     #[test]
     fn test_encode() -> Result<(), Err<SnmpError>> {
+        let mut buf = Buffer::default();
         let oid = SnmpOid::from(vec![1, 3, 6, 999, 3]);
         let expected = [6u8, 5, 0x2b, 0x06, 0x87, 0x67, 0x3];
-        let expected = [6u8, 3, 0x88, 0x37, 0x3];
         oid.push_ber(&mut buf)?;
         assert_eq!(buf.data(), &expected);
         Ok(())
-    #[test]
     }
+    #[test]
     fn test_encode_decode() -> Result<(), Err<SnmpError>> {
+        let mut buf = Buffer::default();
         let oid = SnmpOid::from(vec![1, 3, 6, 999, 3]);
         oid.push_ber(&mut buf)?;
-        oid.push_ber(&mut buf);
         let (_, oid2) = SnmpOid::from_ber(&buf.data())?;
         assert_eq!(oid, oid2);
         Ok(())
-    #[test]
     }
+    #[test]
+    fn test_try_from_str() -> Result<(), Err<SnmpError>> {
         let data = ["1.3.6.999.3", "1.3.6.1.2.1.1.5.0"];
         let expected = vec![vec![1u32, 3, 6, 999, 3], vec![1u32, 3, 6, 1, 2, 1, 1, 5, 0]];
-        let expected = vec![vec![2u32, 999, 3], vec![1u32, 3, 6, 1, 2, 1, 1, 5, 0]];
         for i in 0..data.len() {
             let s = SnmpOid::try_from(data[i])?;
             assert_eq!(s.0, expected[i]);
         }
         Ok(())
-    #[test]
     }
+    #[test]
     fn test_contains1() {
         let oid1 = SnmpOid::from(vec![1, 3, 6]);
         let oid2 = SnmpOid::from(vec![1, 3]);
         assert_eq!(oid1.contains(&oid2), false);
-    #[test]
     }
+    #[test]
     fn test_contains2() {
         let oid1 = SnmpOid::from(vec![1, 3, 6]);
         let oid2 = SnmpOid::from(vec![1, 2, 5]);
         assert_eq!(oid1.contains(&oid2), false);
-    #[test]
     }
+    #[test]
     fn test_contains3() {
         let oid1 = SnmpOid::from(vec![1, 3, 6]);
         let oid2 = SnmpOid::from(vec![1, 3, 6, 1, 5]);
