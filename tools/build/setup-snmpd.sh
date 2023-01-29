@@ -22,7 +22,7 @@ fi
 if [ $(id -u) -eq 0 ]; then
     SUDO=""
 else
-    SUDO="/sbin/sudo"
+    SUDO="sudo"
 fi
 
 echo "Installing snmpd for $OS"
