@@ -7,11 +7,11 @@
 
 use crate::ber::{
     BerClass, BerDecoder, BerHeader, SnmpBool, SnmpCounter32, SnmpCounter64, SnmpGauge32, SnmpInt,
-    SnmpIpAddress, SnmpNull, SnmpOctetString, SnmpOid, SnmpOpaque, SnmpSequence, SnmpTimeTicks,
-    SnmpUInteger32, ToPython, TAG_APP_COUNTER32, TAG_APP_COUNTER64, TAG_APP_GAUGE32,
-    TAG_APP_IPADDRESS, TAG_APP_OPAQUE, TAG_APP_TIMETICKS, TAG_APP_UINTEGER32, TAG_BOOL,
-    TAG_CTX_END_OF_MIB_VIEW, TAG_CTX_NO_SUCH_INSTANCE, TAG_CTX_NO_SUCH_OBJECT, TAG_INT, TAG_NULL,
-    TAG_OBJECT_ID, TAG_OCTET_STRING,
+    SnmpIpAddress, SnmpNull, SnmpObjectDescriptor, SnmpOctetString, SnmpOid, SnmpOpaque,
+    SnmpSequence, SnmpTimeTicks, SnmpUInteger32, ToPython, TAG_APP_COUNTER32, TAG_APP_COUNTER64,
+    TAG_APP_GAUGE32, TAG_APP_IPADDRESS, TAG_APP_OPAQUE, TAG_APP_TIMETICKS, TAG_APP_UINTEGER32,
+    TAG_BOOL, TAG_CTX_END_OF_MIB_VIEW, TAG_CTX_NO_SUCH_INSTANCE, TAG_CTX_NO_SUCH_OBJECT, TAG_INT,
+    TAG_NULL, TAG_OBJECT_DESCRIPTOR, TAG_OBJECT_ID, TAG_OCTET_STRING,
 };
 use crate::error::SnmpError;
 use nom::{Err, IResult};
@@ -28,6 +28,7 @@ pub(crate) enum SnmpValue<'a> {
     Null,
     OctetString(SnmpOctetString<'a>),
     Oid(SnmpOid),
+    ObjectDescriptor(SnmpObjectDescriptor<'a>),
     IpAddress(SnmpIpAddress),
     Counter32(SnmpCounter32),
     Gauge32(SnmpGauge32),
@@ -72,6 +73,9 @@ impl<'a> SnmpValue<'a> {
                         SnmpValue::Null
                     }
                     TAG_OBJECT_ID => SnmpValue::Oid(SnmpOid::decode(tail, &hdr)?),
+                    TAG_OBJECT_DESCRIPTOR => {
+                        SnmpValue::ObjectDescriptor(SnmpObjectDescriptor::decode(tail, &hdr)?)
+                    }
                     //
                     _ => {
                         return Err(Err::Failure(SnmpError::UnsupportedTag(format!(
@@ -136,6 +140,7 @@ impl<'a> ToPython for &SnmpValue<'a> {
             SnmpValue::Null => todo!(),
             SnmpValue::OctetString(x) => x.try_to_python(py)?,
             SnmpValue::Oid(x) => x.try_to_python(py)?,
+            SnmpValue::ObjectDescriptor(x) => x.try_to_python(py)?,
             SnmpValue::IpAddress(x) => x.try_to_python(py)?,
             SnmpValue::Counter32(x) => x.try_to_python(py)?,
             SnmpValue::Gauge32(x) => x.try_to_python(py)?,

@@ -14,7 +14,7 @@ The currently supported types are:
 | NULL              | Universal   |       P |    5 | :material-close:     | [X.690][X-690] pp 8.8          |
 | OBJECT IDENTIFIER | Universal   |       P |    6 | str                  | [X.690][X-690] pp 8.19         |
 | - relative        |             |         |      | :material-close:     |                                |
-| OBJECT DESCRIPTOR | Universal   |     P/C |    7 | :material-close:     |                                |
+| OBJECT DESCRIPTOR | Universal   |     P/C |    7 | bytes                |                                |
 | EXTERNAL          | Universal   |       P |    8 | :material-close:     | [X.690][X-690] pp 8.18         |
 | REAL              | Universal   |       P |    9 | :material-close:     | [X.690][X-690] pp 8.5          |
 | ENUMERATED        | Universal   |       P |   10 | :material-close:     |                                |
