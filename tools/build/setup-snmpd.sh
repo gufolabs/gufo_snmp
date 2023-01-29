@@ -29,10 +29,14 @@ echo "Installing snmpd for $OS"
 case $OS in
     rhel)
         $SUDO yum install -y net-snmp
+        # Test
+        /usr/sbin/snmpd --version
         ;;
     debian)
         $SUDO apt-get update
         $SUDO apt-get install -y --no-install-recommends snmpd
+        # Test
+        /usr/sbin/snmpd --version
         ;;
     alpine)
         $SUDO apk add net-snmp
