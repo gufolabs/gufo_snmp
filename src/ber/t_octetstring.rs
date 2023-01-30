@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: OCTET STRING type
+// Gufo SNMP: OCTET STRING type
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

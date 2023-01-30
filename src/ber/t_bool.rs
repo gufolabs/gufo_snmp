@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: BER BOOLEAN class
+// Gufo SNMP: BER BOOLEAN class
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

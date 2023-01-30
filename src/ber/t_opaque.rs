@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: SNMP Application Class Opaque
+// Gufo SNMP: SNMP Application Class Opaque
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: BER OBJECT IDENTIFIER Class
+// Gufo SNMP: BER OBJECT IDENTIFIER Class
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

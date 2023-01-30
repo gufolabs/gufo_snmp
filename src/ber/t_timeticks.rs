@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: SNMP Application Class TimeTicks
+// Gufo SNMP: SNMP Application Class TimeTicks
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

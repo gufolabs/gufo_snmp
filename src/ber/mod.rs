@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: BER module definition
+// Gufo SNMP: BER module definition
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

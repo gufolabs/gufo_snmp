@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: Buffer implementation
+// Gufo SNMP: Buffer implementation
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

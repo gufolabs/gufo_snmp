@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: SNMP Application Class Gauge32
+// Gufo SNMP: SNMP Application Class Gauge32
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

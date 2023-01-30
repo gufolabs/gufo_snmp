@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: SNMP Message
+// Gufo SNMP: SNMP Message
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

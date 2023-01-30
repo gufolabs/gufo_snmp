@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: OBJECT DESCRIPTOR type
+// Gufo SNMP: OBJECT DESCRIPTOR type
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

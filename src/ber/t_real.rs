@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: BER REAL Class
+// Gufo SNMP: BER REAL Class
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

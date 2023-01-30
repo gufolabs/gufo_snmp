@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: Socket classes
+// Gufo SNMP: Socket classes
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

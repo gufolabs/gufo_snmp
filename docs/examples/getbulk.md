@@ -3,7 +3,7 @@
 We have mastered the iteration of the MIB view
 in our [getnext](getnext.md) example. SNMP v2
 also offers more effective approach - the GetBulk
-request. *Gufo Snmp* hides all implementation
+request. *Gufo SNMP* hides all implementation
 difference and the interface to the GetBulk
 requests is almost identical to the GetNext one.
 

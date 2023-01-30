@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: Module definition
+// Gufo SNMP: Module definition
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

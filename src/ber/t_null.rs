@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: BER NULL Class
+// Gufo SNMP: BER NULL Class
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

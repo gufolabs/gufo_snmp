@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo Snmp: GET PDU Parser
+// Gufo SNMP: GET PDU Parser
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details
