@@ -112,6 +112,9 @@ impl BerHeader {
             },
         ))
     }
+    pub(crate) fn is_empty(&self) -> bool {
+        self.length == 0
+    }
 }
 
 #[cfg(test)]

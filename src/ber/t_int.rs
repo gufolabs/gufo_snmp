@@ -20,7 +20,7 @@ impl<'a> BerDecoder<'a> for SnmpInt {
 
     // Implement X.690 pp 8.3: Encoding of an integer value
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
-        if h.length == 0 {
+        if h.is_empty() {
             return Ok(SnmpInt(0));
         }
         let mut v = 0i64;
