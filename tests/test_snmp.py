@@ -7,13 +7,13 @@
 
 # Python modules
 import asyncio
-from typing import Any, Dict, Iterator, cast, Set
+from typing import Any, Dict, Iterator, Set, cast
 
 # Third-party modules
 import pytest
 
 # Gufo Labs modules
-from gufo.snmp import NoSuchInstance, SnmpSession, ValueType
+from gufo.snmp import NoSuchInstance, SnmpSession, SnmpVersion, ValueType
 from gufo.snmp.snmpd import Snmpd
 
 SNMPD_ADDRESS = "127.0.0.1"
@@ -229,7 +229,7 @@ def test_getbulk(snmpd: Snmpd) -> None:
 
 
 def test_getbulk_single(snmpd: Snmpd) -> None:
-    """Test single value is returned with bulk"""
+    """Test single value is returned with bulk."""
 
     async def inner() -> int:
         n = 0
@@ -250,7 +250,7 @@ def test_getbulk_single(snmpd: Snmpd) -> None:
 
 
 def test_getnext_getbulk(snmpd: Snmpd) -> None:
-    """Cross-test of getnext and getbulk"""
+    """Cross-test of getnext and getbulk."""
 
     async def inner_getnext() -> Set[str]:
         r: Set[str] = set()
@@ -280,3 +280,30 @@ def test_getnext_getbulk(snmpd: Snmpd) -> None:
     gb = asyncio.run(inner_getbulk())
     assert len(gn) == len(gb)
     assert gn == gb
+
+
+@pytest.mark.parametrize(
+    ("version", "allow_bulk"),
+    [
+        (SnmpVersion.v1, False),
+        (SnmpVersion.v1, True),
+        (SnmpVersion.v2c, False),
+        (SnmpVersion.v2c, True),
+    ],
+)
+def test_fetch(version: SnmpVersion, allow_bulk: bool, snmpd: Snmpd) -> None:
+    async def inner() -> None:
+        async with SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            version=version,
+            community=SNMP_COMMUNITY,
+            timeout=1.0,
+            allow_bulk=allow_bulk,
+        ) as session:
+            n = 0
+            async for _, _ in session.fetch("1.3.6.1.2.1.1"):
+                n += 1
+            assert n > 0
+
+    asyncio.run(inner())

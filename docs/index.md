@@ -35,6 +35,13 @@ async with SnmpSession(addr="127.0.0.1", community="public") as session:
         ...
 ```
 
+The `.fetch()` method allows to choose between `.getnext()` and `.getbulk()` automatically:
+``` py
+async with SnmpSession(addr="127.0.0.1", community="public") as session:
+    async for oid, value in  session.fetch("1.3.6.1.2.1.1"):
+        ...
+```
+
 *Gufo SNMP* offers various tools for developers, including a wrapper to
 run a local instance of SNMP daemon:
 

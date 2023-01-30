@@ -15,11 +15,13 @@ Attributes:
 from ._fast import NoSuchInstance, SNMPDecodeError, SNMPEncodeError, SNMPError
 from .client import SnmpSession
 from .typing import ValueType
+from .version import SnmpVersion
 
 __version__: str = "0.1.0"
 __all__ = [
     "__version__",
     "SnmpSession",
+    "SnmpVersion",
     "SNMPError",
     "SNMPEncodeError",
     "SNMPDecodeError",

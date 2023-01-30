@@ -9,7 +9,6 @@
 
 # Python modules
 import asyncio
-import enum
 from types import TracebackType
 from typing import AsyncIterator, Dict, Iterable, Optional, Tuple, Type
 
@@ -18,13 +17,7 @@ from ._fast import SnmpClientSocket
 from .getbulk import GetBulkIter
 from .getnext import GetNextIter
 from .typing import ValueType
-
-
-class SnmpVersion(enum.IntEnum):
-    """SNMP protocol version."""
-
-    v1 = 0
-    v2c = 1
+from .version import SnmpVersion
 
 
 class SnmpSession(object):
@@ -45,6 +38,8 @@ class SnmpSession(object):
         recv_buffer: Receive buffer size for UDP socket.
             0 - use default size.
         max_repetitions: Default max_repetitions for getbulk.
+        allow_bulk: Allow using GETBULK in SnmpSession.fetch()
+            whenever possible.
 
     Example:
         ``` py
@@ -70,6 +65,7 @@ class SnmpSession(object):
         send_buffer: int = 0,
         recv_buffer: int = 0,
         max_repetitions: int = 20,
+        allow_bulk: bool = True,
     ) -> None:
         self._sock = SnmpClientSocket(
             f"{addr}:{port}",
@@ -82,6 +78,10 @@ class SnmpSession(object):
         self._fd = self._sock.get_fd()
         self._timeout = timeout
         self._max_repetitions = max_repetitions
+        if version == SnmpVersion.v1:
+            self._allow_bulk = False
+        else:
+            self._allow_bulk = True
 
     async def __aenter__(self: "SnmpSession") -> "SnmpSession":
         """Asynchronous context manager entry."""
@@ -238,3 +238,29 @@ class SnmpSession(object):
             self._timeout,
             max_repetitions or self._max_repetitions,
         )
+
+    def fetch(
+        self: "SnmpSession", oid: str
+    ) -> AsyncIterator[Tuple[str, ValueType]]:
+        """
+        Iterate over oids using fastest method available.
+
+        When SnmpSession's `allow_bulk` is set, use
+        `SnmpSession.getbulk()` on SNMPv2, otherwise
+        use `SnmpSession.getnext()`.
+
+        Args:
+            oid: Starting oid
+
+        Returns:
+            Asynchronous iterator yielding pair of (oid, value)
+
+        Example:
+            ``` py
+            async for oid, value in session.fetch("1.3.6"):
+                print(oid, value)
+            ```
+        """
+        if self._allow_bulk:
+            return self.getbulk(oid)
+        return self.getnext(oid)

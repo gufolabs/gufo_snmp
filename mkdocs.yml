@@ -15,6 +15,7 @@ nav:
       - Multi Items Get Request: examples/getmany.md
       - GetNext Request: examples/getnext.md
       - GetBulk Request: examples/getbulk.md
+      - Fetch: examples/fetch.md
       - Debugging: examples/debugging.md
   - Reference: reference/
   - Developers' Guide:
