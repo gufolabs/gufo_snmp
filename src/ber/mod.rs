@@ -25,7 +25,7 @@ pub(crate) const TAG_OCTET_STRING: usize = 0x4;
 pub(crate) const TAG_NULL: usize = 0x5;
 pub(crate) const TAG_OBJECT_ID: usize = 0x6;
 pub(crate) const TAG_OBJECT_DESCRIPTOR: usize = 0x7;
-// pub(crate) const TAG_REAL: usize = 0x9;
+pub(crate) const TAG_REAL: usize = 0x9;
 pub(crate) const TAG_SEQUENCE: usize = 0x10;
 // SNMP Application Tags
 pub(crate) const TAG_APP_IPADDRESS: usize = 0;
@@ -55,6 +55,8 @@ pub(crate) mod t_objectdescriptor;
 pub(crate) use t_objectdescriptor::SnmpObjectDescriptor;
 pub(crate) mod t_octetstring;
 pub(crate) use t_octetstring::SnmpOctetString;
+pub(crate) mod t_real;
+pub(crate) use t_real::SnmpReal;
 pub(crate) mod t_sequence;
 pub(crate) use t_sequence::SnmpSequence;
 pub(crate) mod t_option;

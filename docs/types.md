@@ -16,7 +16,7 @@ The currently supported types are:
 | - relative        |             |         |      | :material-close:     |                                |
 | OBJECT DESCRIPTOR | Universal   |     P/C |    7 | bytes                |                                |
 | EXTERNAL          | Universal   |       P |    8 | :material-close:     | [X.690][X-690] pp 8.18         |
-| REAL              | Universal   |       P |    9 | :material-close:     | [X.690][X-690] pp 8.5          |
+| REAL              | Universal   |       P |    9 | float                | [X.690][X-690] pp 8.5          |
 | ENUMERATED        | Universal   |       P |   10 | :material-close:     |                                |
 | SEQUENCE          | Universal   |       C |   16 | :material-check:[^2] | [X.690][X-690] pp 8.9          |
 | IpAddress         | Application |       P |    0 | str                  | [RFC-1442][RFC-1442] pp 7.1.5  |

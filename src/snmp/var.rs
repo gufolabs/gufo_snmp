@@ -7,11 +7,11 @@
 
 use crate::ber::{
     BerClass, BerDecoder, BerHeader, SnmpBool, SnmpCounter32, SnmpCounter64, SnmpGauge32, SnmpInt,
-    SnmpIpAddress, SnmpNull, SnmpObjectDescriptor, SnmpOctetString, SnmpOid, SnmpOpaque,
+    SnmpIpAddress, SnmpNull, SnmpObjectDescriptor, SnmpOctetString, SnmpOid, SnmpOpaque, SnmpReal,
     SnmpSequence, SnmpTimeTicks, SnmpUInteger32, ToPython, TAG_APP_COUNTER32, TAG_APP_COUNTER64,
     TAG_APP_GAUGE32, TAG_APP_IPADDRESS, TAG_APP_OPAQUE, TAG_APP_TIMETICKS, TAG_APP_UINTEGER32,
     TAG_BOOL, TAG_CTX_END_OF_MIB_VIEW, TAG_CTX_NO_SUCH_INSTANCE, TAG_CTX_NO_SUCH_OBJECT, TAG_INT,
-    TAG_NULL, TAG_OBJECT_DESCRIPTOR, TAG_OBJECT_ID, TAG_OCTET_STRING,
+    TAG_NULL, TAG_OBJECT_DESCRIPTOR, TAG_OBJECT_ID, TAG_OCTET_STRING, TAG_REAL,
 };
 use crate::error::SnmpError;
 use nom::{Err, IResult};
@@ -29,6 +29,7 @@ pub(crate) enum SnmpValue<'a> {
     OctetString(SnmpOctetString<'a>),
     Oid(SnmpOid),
     ObjectDescriptor(SnmpObjectDescriptor<'a>),
+    Real(SnmpReal),
     IpAddress(SnmpIpAddress),
     Counter32(SnmpCounter32),
     Gauge32(SnmpGauge32),
@@ -76,6 +77,7 @@ impl<'a> SnmpValue<'a> {
                     TAG_OBJECT_DESCRIPTOR => {
                         SnmpValue::ObjectDescriptor(SnmpObjectDescriptor::decode(tail, &hdr)?)
                     }
+                    TAG_REAL => SnmpValue::Real(SnmpReal::decode(i, &hdr)?),
                     //
                     _ => {
                         return Err(Err::Failure(SnmpError::UnsupportedTag(format!(
@@ -141,6 +143,7 @@ impl<'a> ToPython for &SnmpValue<'a> {
             SnmpValue::OctetString(x) => x.try_to_python(py)?,
             SnmpValue::Oid(x) => x.try_to_python(py)?,
             SnmpValue::ObjectDescriptor(x) => x.try_to_python(py)?,
+            SnmpValue::Real(x) => x.try_to_python(py)?,
             SnmpValue::IpAddress(x) => x.try_to_python(py)?,
             SnmpValue::Counter32(x) => x.try_to_python(py)?,
             SnmpValue::Gauge32(x) => x.try_to_python(py)?,
@@ -230,6 +233,19 @@ mod tests {
         assert_eq!(tail.len(), 0);
         if let SnmpValue::ObjectDescriptor(x) = value {
             assert_eq!(x.0, &data[2..]);
+            Ok(())
+        } else {
+            Err(SnmpError::UnexpectedTag)
+        }
+    }
+    #[test]
+    fn test_real() -> Result<(), SnmpError> {
+        let data = [9u8, 0];
+        let (tail, value) = SnmpValue::from_ber(&data)?;
+        assert_eq!(tail.len(), 0);
+        if let SnmpValue::Real(x) = value {
+            let v: f64 = x.into();
+            assert_eq!(v, 0.0);
             Ok(())
         } else {
             Err(SnmpError::UnexpectedTag)
