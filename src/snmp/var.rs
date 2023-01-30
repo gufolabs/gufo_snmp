@@ -223,4 +223,134 @@ mod tests {
             Err(SnmpError::UnexpectedTag)
         }
     }
+    #[test]
+    fn test_object_descriptor() -> Result<(), SnmpError> {
+        let data = [7u8, 5, 0, 1, 2, 3, 4];
+        let (tail, value) = SnmpValue::from_ber(&data)?;
+        assert_eq!(tail.len(), 0);
+        if let SnmpValue::ObjectDescriptor(x) = value {
+            assert_eq!(x.0, &data[2..]);
+            Ok(())
+        } else {
+            Err(SnmpError::UnexpectedTag)
+        }
+    }
+    #[test]
+    fn test_ipaddress() -> Result<(), SnmpError> {
+        let data = [0x40, 0x4, 127, 0, 0, 1];
+        let (tail, value) = SnmpValue::from_ber(&data)?;
+        assert_eq!(tail.len(), 0);
+        if let SnmpValue::IpAddress(x) = value {
+            let s: String = (&x).into();
+            assert_eq!(s, "127.0.0.1");
+            Ok(())
+        } else {
+            Err(SnmpError::UnexpectedTag)
+        }
+    }
+    #[test]
+    fn test_counter32() -> Result<(), SnmpError> {
+        let data = [0x41, 4, 1, 53, 16, 171];
+        let (tail, value) = SnmpValue::from_ber(&data)?;
+        assert_eq!(tail.len(), 0);
+        if let SnmpValue::Counter32(x) = value {
+            assert_eq!(x.0, 0x013510AB);
+            Ok(())
+        } else {
+            Err(SnmpError::UnexpectedTag)
+        }
+    }
+    #[test]
+    fn test_gauge32() -> Result<(), SnmpError> {
+        let data = [0x42, 4, 1, 53, 16, 171];
+        let (tail, value) = SnmpValue::from_ber(&data)?;
+        assert_eq!(tail.len(), 0);
+        if let SnmpValue::Gauge32(x) = value {
+            assert_eq!(x.0, 0x013510AB);
+            Ok(())
+        } else {
+            Err(SnmpError::UnexpectedTag)
+        }
+    }
+    #[test]
+    fn test_timeticks() -> Result<(), SnmpError> {
+        let data = [67, 4, 1, 53, 16, 171];
+        let (tail, value) = SnmpValue::from_ber(&data)?;
+        assert_eq!(tail.len(), 0);
+        if let SnmpValue::TimeTicks(x) = value {
+            assert_eq!(x.0, 0x013510AB);
+            Ok(())
+        } else {
+            Err(SnmpError::UnexpectedTag)
+        }
+    }
+    #[test]
+    fn test_opaque() -> Result<(), SnmpError> {
+        let data = [0x44, 5, 0, 1, 2, 3, 4];
+        let (tail, value) = SnmpValue::from_ber(&data)?;
+        assert_eq!(tail.len(), 0);
+        if let SnmpValue::Opaque(x) = value {
+            assert_eq!(x.0, &data[2..]);
+            Ok(())
+        } else {
+            Err(SnmpError::UnexpectedTag)
+        }
+    }
+    #[test]
+    fn test_counter64() -> Result<(), SnmpError> {
+        let data = [0x46, 4, 1, 53, 16, 171];
+        let (tail, value) = SnmpValue::from_ber(&data)?;
+        assert_eq!(tail.len(), 0);
+        if let SnmpValue::Counter64(x) = value {
+            assert_eq!(x.0, 0x013510AB);
+            Ok(())
+        } else {
+            Err(SnmpError::UnexpectedTag)
+        }
+    }
+    #[test]
+    fn test_uinteger32() -> Result<(), SnmpError> {
+        let data = [0x47, 4, 1, 53, 16, 171];
+        let (tail, value) = SnmpValue::from_ber(&data)?;
+        assert_eq!(tail.len(), 0);
+        if let SnmpValue::UInteger32(x) = value {
+            assert_eq!(x.0, 0x013510AB);
+            Ok(())
+        } else {
+            Err(SnmpError::UnexpectedTag)
+        }
+    }
+    #[test]
+    fn test_no_such_object() -> Result<(), SnmpError> {
+        let data = [0x80u8, 0];
+        let (tail, value) = SnmpValue::from_ber(&data)?;
+        assert_eq!(tail.len(), 0);
+        if let SnmpValue::NoSuchObject = value {
+            Ok(())
+        } else {
+            Err(SnmpError::UnexpectedTag)
+        }
+    }
+    #[test]
+    fn test_no_such_instance() -> Result<(), SnmpError> {
+        let data = [0x81u8, 0];
+        let (tail, value) = SnmpValue::from_ber(&data)?;
+        assert_eq!(tail.len(), 0);
+        if let SnmpValue::NoSuchInstance = value {
+            Ok(())
+        } else {
+            Err(SnmpError::UnexpectedTag)
+        }
+    }
+    #[test]
+    fn test_end_of_mib_view() -> Result<(), SnmpError> {
+        let data = [0x82u8, 0];
+        let (tail, value) = SnmpValue::from_ber(&data)?;
+        assert_eq!(tail.len(), 0);
+        if let SnmpValue::EndOfMibView = value {
+            Ok(())
+        } else {
+            Err(SnmpError::UnexpectedTag)
+        }
+    }
 }
