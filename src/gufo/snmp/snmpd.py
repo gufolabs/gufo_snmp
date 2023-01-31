@@ -147,8 +147,8 @@ sysServices 72"""
         if t.is_alive():
             raise TimeoutError
 
-    def _consume_stdout(self) -> None:
-        def inner():
+    def _consume_stdout(self: "Snmpd") -> None:
+        def inner() -> None:
             if self._proc and self._proc.stdout:
                 for _ in self._proc.stdout:
                     pass

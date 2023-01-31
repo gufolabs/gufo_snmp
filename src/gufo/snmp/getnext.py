@@ -63,4 +63,7 @@ class GetNextIter(object):
         # Send request
         self._sock.send_getnext(self._ctx)
         # Await response or timeout
-        return await asyncio.wait_for(get_response(), self._timeout)
+        try:
+            return await asyncio.wait_for(get_response(), self._timeout)
+        except asyncio.TimeoutError as e:
+            raise TimeoutError from e  # Remap the error

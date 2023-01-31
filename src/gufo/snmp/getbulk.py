@@ -63,11 +63,8 @@ class GetBulkIter(object):
                     continue
 
         # Return item from buffer, if present
-        try:
+        if self._buffer:
             return self._buffer.pop(0)
-        except IndexError:
-            pass
-
         if self._stop:
             raise StopAsyncIteration
         # Send request
@@ -80,7 +77,12 @@ class GetBulkIter(object):
         # Send request
         self._sock.send_getbulk(self._ctx)
         # Await response or timeout
-        self._buffer = await asyncio.wait_for(get_response(), self._timeout)
+        try:
+            self._buffer = await asyncio.wait_for(
+                get_response(), self._timeout
+            )
+        except asyncio.TimeoutError as e:
+            raise TimeoutError from e  # Remap the error
         if not self._buffer:
             raise StopAsyncIteration  # End of view
         self._stop = len(self._buffer) < self._max_repetitions

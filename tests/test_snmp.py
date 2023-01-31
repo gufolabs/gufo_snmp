@@ -209,6 +209,27 @@ def test_getnext(snmpd: Snmpd) -> None:
     assert n > 0
 
 
+def test_getnext_single(snmpd: Snmpd) -> None:
+    """Test single value is returned with bulk."""
+
+    async def inner() -> int:
+        n = 0
+        async with SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            community=SNMP_COMMUNITY,
+            timeout=1.0,
+        ) as session:
+            async for oid, value in session.getnext("1.3.6.1.2.1.1.2"):
+                assert oid == "1.3.6.1.2.1.1.2.0"
+                assert value.startswith("1.3.6.1.4.1.8072.3.2.")
+                n += 1
+        return n
+
+    n = asyncio.run(inner())
+    assert n == 1
+
+
 def test_getbulk(snmpd: Snmpd) -> None:
     """Iterate over whole MIB."""
 
