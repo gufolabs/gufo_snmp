@@ -123,6 +123,7 @@ sysServices 72"""
         )
         # Wait for snmpd is up
         self._wait()
+        self._consume_stdout()
 
     def _wait(self: "Snmpd") -> None:
         """Wait until snmpd is ready."""
@@ -145,6 +146,16 @@ sysServices 72"""
         t.join(self._start_timeout)
         if t.is_alive():
             raise TimeoutError
+
+    def _consume_stdout(self) -> None:
+        def inner():
+            if self._proc and self._proc.stdout:
+                for _ in self._proc.stdout:
+                    pass
+
+        t = threading.Thread(target=inner)
+        t.daemon = True
+        t.start()
 
     def _stop(self: "Snmpd") -> None:
         """Terminate snmpd instance."""
