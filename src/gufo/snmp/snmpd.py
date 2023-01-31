@@ -125,9 +125,9 @@ sysServices 72"""
         self._wait()
 
     def _wait(self: "Snmpd") -> None:
-        """Wait until snmpd is ready"""
+        """Wait until snmpd is ready."""
 
-        def inner():
+        def inner() -> None:
             for line in self._proc.stdout:
                 if line.startswith("NET-SNMP version"):
                     self.version = line.strip().split(" ", 2)[2].strip()
