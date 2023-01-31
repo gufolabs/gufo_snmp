@@ -135,9 +135,11 @@ sysServices 72"""
                         break
 
         if self._proc is None:
-            raise RuntimeError("_wait() must not be started directly")
+            msg = "_wait() must not be started directly"
+            raise RuntimeError(msg)
         if not self._proc.stdout:
-            raise RuntimeError("stdout is not piped")
+            msg = "stdout is not piped"
+            raise RuntimeError(msg)
         t = threading.Thread(target=inner)
         t.start()
         t.join(self._start_timeout)
