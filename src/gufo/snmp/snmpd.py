@@ -128,11 +128,16 @@ sysServices 72"""
         """Wait until snmpd is ready."""
 
         def inner() -> None:
-            for line in self._proc.stdout:
-                if line.startswith("NET-SNMP version"):
-                    self.version = line.strip().split(" ", 2)[2].strip()
-                    break
+            if self._proc and self._proc.stdout:
+                for line in self._proc.stdout:
+                    if line.startswith("NET-SNMP version"):
+                        self.version = line.strip().split(" ", 2)[2].strip()
+                        break
 
+        if self._proc is None:
+            raise RuntimeError("_wait() must not be started directly")
+        if not self._proc.stdout:
+            raise RuntimeError("stdout is not piped")
         t = threading.Thread(target=inner)
         t.start()
         t.join(self._start_timeout)
