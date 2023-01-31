@@ -9,6 +9,7 @@
 
 # Python modules
 import subprocess
+import threading
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from types import TracebackType
 from typing import Optional, Type
@@ -30,6 +31,10 @@ class Snmpd(object):
         location: sysLocation value.
         contact: sysContact value.
         user: SNMP v3 user.
+        start_timeout: Maximum time to wait for snmpd to start.
+
+    Attributes:
+        version: Net-SNMP version.
 
     Note:
         Using the ports below 1024 usually requires
@@ -57,6 +62,7 @@ class Snmpd(object):
         location: str = "Test",
         contact: str = "test <test@example.com>",
         user: str = "rouser",
+        start_timeout: float = 5.0,
     ) -> None:
         self._path = path
         self._address = address
@@ -65,8 +71,10 @@ class Snmpd(object):
         self._location = location
         self._contact = contact
         self._user = user
+        self._start_timeout = start_timeout
+        self.version: Optional[str] = None
         self._cfg: Optional[_TemporaryFileWrapper[str]] = None
-        self._proc: Optional[subprocess.Popen[bytes]] = None
+        self._proc: Optional[subprocess.Popen[str]] = None
 
     def get_config(self: "Snmpd") -> str:
         """
@@ -108,8 +116,28 @@ sysServices 72"""
                 "-Lo",  # Log to stdout
                 "-V",  # Verbose
                 "-d",  # Dump packets
-            ]
+            ],
+            stdout=subprocess.PIPE,
+            encoding="utf-8",
+            text=True,
         )
+        # Wait for snmpd is up
+        self._wait()
+
+    def _wait(self: "Snmpd") -> None:
+        """Wait until snmpd is ready"""
+
+        def inner():
+            for line in self._proc.stdout:
+                if line.startswith("NET-SNMP version"):
+                    self.version = line.strip().split(" ", 2)[2].strip()
+                    break
+
+        t = threading.Thread(target=inner)
+        t.start()
+        t.join(self._start_timeout)
+        if t.is_alive():
+            raise TimeoutError
 
     def _stop(self: "Snmpd") -> None:
         """Terminate snmpd instance."""
