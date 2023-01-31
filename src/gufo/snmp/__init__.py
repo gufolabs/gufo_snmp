@@ -12,7 +12,7 @@ Attributes:
 """
 
 # Gufo Labs modules
-from ._fast import NoSuchInstance, SNMPDecodeError, SNMPEncodeError, SNMPError
+from ._fast import NoSuchInstance, SnmpDecodeError, SnmpEncodeError, SnmpError
 from .client import SnmpSession
 from .typing import ValueType
 from .version import SnmpVersion
@@ -22,9 +22,9 @@ __all__ = [
     "__version__",
     "SnmpSession",
     "SnmpVersion",
-    "SNMPError",
-    "SNMPEncodeError",
-    "SNMPDecodeError",
+    "SnmpError",
+    "SnmpEncodeError",
+    "SnmpDecodeError",
     "NoSuchInstance",
     "ValueType",
 ]

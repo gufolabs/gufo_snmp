@@ -110,7 +110,7 @@ class SnmpSession(object):
             OSError: When unable to send request.
             TimeoutError: When timed out.
             NoSuchInstance: When requested key is not found.
-            SNMPError: On other SNMP-related errors.
+            SnmpError: On other SNMP-related errors.
         """
 
         async def get_response() -> ValueType:
@@ -162,7 +162,7 @@ class SnmpSession(object):
             OSError: When unable to send request.
             TimeoutError: When timed out.
             RuntimeError: On Python runtime failure.
-            SNMPError: On other SNMP-related errors.
+            SnmpError: On other SNMP-related errors.
         """
 
         async def get_response() -> Dict[str, ValueType]:

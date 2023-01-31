@@ -55,14 +55,30 @@ impl From<SnmpError> for nom::Err<SnmpError> {
     }
 }
 
-create_exception!(_fast, SNMPError, PyException);
-pub(crate) type PySnmpError = SNMPError;
-create_exception!(_fast, SNMPDecodeError, PySnmpError);
-pub(crate) type PySnmpDecodeError = SNMPDecodeError;
-create_exception!(_fast, SNMPEncodeError, PySnmpError);
-pub(crate) type PySnmpEncodeError = SNMPEncodeError;
-create_exception!(_fast, NoSuchInstance, PySnmpError);
-pub(crate) type PyNoSuchInstance = NoSuchInstance;
+create_exception!(
+    _fast,
+    PySnmpError,
+    PyException,
+    "Base class for Gufo SNMP errors"
+);
+create_exception!(
+    _fast,
+    PySnmpDecodeError,
+    PySnmpError,
+    "Message decoding error"
+);
+create_exception!(
+    _fast,
+    PySnmpEncodeError,
+    PySnmpError,
+    "Message encoding error"
+);
+create_exception!(
+    _fast,
+    PyNoSuchInstance,
+    PySnmpError,
+    "Requested OID is not found"
+);
 
 impl From<SnmpError> for PyErr {
     fn from(value: SnmpError) -> PyErr {
