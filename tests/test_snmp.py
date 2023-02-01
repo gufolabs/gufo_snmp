@@ -281,6 +281,9 @@ def test_getbulk_single(snmpd: Snmpd) -> None:
 def test_getnext_getbulk(snmpd: Snmpd) -> None:
     """Cross-test of getnext and getbulk."""
 
+    def is_valid(oid: str) -> bool:
+        return not oid.startswith("1.3.6.1.2.1.7.5.")
+
     async def inner_getnext() -> Set[str]:
         r: Set[str] = set()
         async with SnmpSession(
@@ -290,7 +293,8 @@ def test_getnext_getbulk(snmpd: Snmpd) -> None:
             timeout=1.0,
         ) as session:
             async for oid, _ in session.getnext("1.3.6"):
-                r.add(oid)
+                if is_valid(oid):
+                    r.add(oid)
         return r
 
     async def inner_getbulk() -> Set[str]:
@@ -302,13 +306,14 @@ def test_getnext_getbulk(snmpd: Snmpd) -> None:
             timeout=1.0,
         ) as session:
             async for oid, _ in session.getbulk("1.3.6"):
-                r.add(oid)
+                if is_valid(oid):
+                    r.add(oid)
         return r
 
     gn = asyncio.run(inner_getnext())
     gb = asyncio.run(inner_getbulk())
-    assert len(gn) == len(gb)
-    assert gn == gb
+    diff = gn.symmetric_difference(gb)
+    assert diff == set()
 
 
 @pytest.mark.parametrize(

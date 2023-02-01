@@ -76,6 +76,7 @@ class Snmpd(object):
         self._contact = contact
         self._user = user
         self._start_timeout = start_timeout
+        self._agentx_listen = f"/tmp/snmpd-agentx-{port}-{id(self)}"
         self.version: Optional[str] = None
         self._cfg: Optional[_TemporaryFileWrapper[str]] = None
         self._proc: Optional[subprocess.Popen[str]] = None
@@ -90,6 +91,7 @@ class Snmpd(object):
         return f"""# Gufo SNMP Test Suite
 master agentx
 agentaddress udp:{self._address}:{self._port}
+agentXsocket {self._agentx_listen}
 # Listen address
 # SNMPv1/SNMPv2c R/O community
 rocommunity {self._community} 127.0.0.1
