@@ -142,10 +142,12 @@ sysServices 72"""
             msg = "stdout is not piped"
             raise RuntimeError(msg)
         t = threading.Thread(target=inner)
+        t.daemon = True
         t.start()
         t.join(self._start_timeout)
         if t.is_alive():
-            raise TimeoutError
+            msg = "snmpd failed to start"
+            raise TimeoutError(msg)
 
     def _consume_stdout(self: "Snmpd") -> None:
         def inner() -> None:

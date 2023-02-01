@@ -7,6 +7,7 @@
 
 # Python modules
 import asyncio
+import random
 from typing import Any, Dict, Iterator, Set, cast
 
 # Third-party modules
@@ -17,7 +18,7 @@ from gufo.snmp import NoSuchInstance, SnmpSession, SnmpVersion, ValueType
 from gufo.snmp.snmpd import Snmpd
 
 SNMPD_ADDRESS = "127.0.0.1"
-SNMPD_PORT = 10161
+SNMPD_PORT = random.randint(52000, 53999)
 SNMPD_PATH = "/usr/sbin/snmpd"
 SNMP_COMMUNITY = "public"
 SNMP_LOCATION = "Gufo SNMP Test"
@@ -37,6 +38,10 @@ def snmpd() -> Iterator[Snmpd]:
         user=SNMP_USER,
     ) as snmpd:
         yield snmpd
+
+
+def test_snmpd_version(snmpd: Snmpd) -> None:
+    assert snmpd.version
 
 
 def test_timeout1(snmpd: Snmpd) -> None:
