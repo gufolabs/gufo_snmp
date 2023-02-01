@@ -12,7 +12,7 @@ import subprocess
 import threading
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from types import TracebackType
-from typing import Optional, Type
+from typing import List, Optional, Type
 
 
 class Snmpd(object):
@@ -32,6 +32,7 @@ class Snmpd(object):
         contact: sysContact value.
         user: SNMP v3 user.
         start_timeout: Maximum time to wait for snmpd to start.
+        dump_log: Dump snmpd log on premature exit.
 
     Attributes:
         version: Net-SNMP version.
@@ -63,6 +64,7 @@ class Snmpd(object):
         contact: str = "test <test@example.com>",
         user: str = "rouser",
         start_timeout: float = 5.0,
+        dump_log: bool = False,
     ) -> None:
         self._path = path
         self._address = address
@@ -72,6 +74,7 @@ class Snmpd(object):
         self._contact = contact
         self._user = user
         self._start_timeout = start_timeout
+        self._dump_log = dump_log
         self.version: Optional[str] = None
         self._cfg: Optional[_TemporaryFileWrapper[str]] = None
         self._proc: Optional[subprocess.Popen[str]] = None
@@ -130,10 +133,20 @@ sysServices 72"""
 
         def inner() -> None:
             if self._proc and self._proc.stdout:
+                log: List[str] = []
                 for line in self._proc.stdout:
+                    if self._dump_log:
+                        log.append(line)
                     if line.startswith("NET-SNMP version"):
                         self.version = line.strip().split(" ", 2)[2].strip()
-                        break
+                        return
+                # Premature termination of snmpd
+                if self._dump_log:
+                    print("".join(log))
+                msg = "snmpd is terminated prematurely"
+                raise RuntimeError(msg)
+            msg = "snmpd is not active"
+            raise RuntimeError(msg)
 
         if self._proc is None:
             msg = "_wait() must not be started directly"

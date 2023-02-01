@@ -36,6 +36,7 @@ def snmpd() -> Iterator[Snmpd]:
         location=SNMP_LOCATION,
         contact=SNMP_CONTACT,
         user=SNMP_USER,
+        dump_log=True,
     ) as snmpd:
         yield snmpd
 
