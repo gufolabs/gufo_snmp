@@ -9,6 +9,7 @@
 import asyncio
 import random
 from typing import Any, Dict, Iterator, Set, cast
+import logging
 
 # Third-party modules
 import pytest
@@ -28,6 +29,8 @@ SNMP_USER = "rouser"
 
 @pytest.fixture(scope="module")
 def snmpd() -> Iterator[Snmpd]:
+    logger = logging.getLogger("gufo.snmp.snmpd")
+    logger.setLevel(logging.DEBUG)
     with Snmpd(
         path=SNMPD_PATH,
         address=SNMPD_ADDRESS,
@@ -36,7 +39,6 @@ def snmpd() -> Iterator[Snmpd]:
         location=SNMP_LOCATION,
         contact=SNMP_CONTACT,
         user=SNMP_USER,
-        dump_log=True,
     ) as snmpd:
         yield snmpd
 

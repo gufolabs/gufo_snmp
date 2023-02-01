@@ -8,11 +8,15 @@
 """snmpd context manager."""
 
 # Python modules
+import logging
+import queue
 import subprocess
 import threading
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from types import TracebackType
-from typing import List, Optional, Type
+from typing import Optional, Type
+
+logger = logging.getLogger("gufo.snmp.snmpd")
 
 
 class Snmpd(object):
@@ -32,7 +36,6 @@ class Snmpd(object):
         contact: sysContact value.
         user: SNMP v3 user.
         start_timeout: Maximum time to wait for snmpd to start.
-        dump_log: Dump snmpd log on premature exit.
 
     Attributes:
         version: Net-SNMP version.
@@ -64,7 +67,6 @@ class Snmpd(object):
         contact: str = "test <test@example.com>",
         user: str = "rouser",
         start_timeout: float = 5.0,
-        dump_log: bool = False,
     ) -> None:
         self._path = path
         self._address = address
@@ -74,7 +76,6 @@ class Snmpd(object):
         self._contact = contact
         self._user = user
         self._start_timeout = start_timeout
-        self._dump_log = dump_log
         self.version: Optional[str] = None
         self._cfg: Optional[_TemporaryFileWrapper[str]] = None
         self._proc: Optional[subprocess.Popen[str]] = None
@@ -102,24 +103,29 @@ sysServices 72"""
 
     def _start(self: "Snmpd") -> None:
         """Run snmpd instance."""
+        logger.info("Starting snmpd instance")
         self._cfg = NamedTemporaryFile(
             prefix="snmpd-", suffix=".conf", mode="w"
         )
-        self._cfg.write(self.get_config())
+        cfg = self.get_config()
+        logger.debug("snmpd config:\n%s", cfg)
+        self._cfg.write(cfg)
         # Ensure the file is written
         self._cfg.flush()
         # Run snmpd
+        args = [
+            self._path,
+            "-C",  # Ignore default configs
+            "-c",  # Read our config
+            self._cfg.name,
+            "-f",  # No fork
+            "-Lo",  # Log to stdout
+            "-V",  # Verbose
+            "-d",  # Dump packets
+        ]
+        logger.debug("Running: %s", " ".join(args))
         self._proc = subprocess.Popen(
-            [
-                self._path,
-                "-C",  # Ignore default configs
-                "-c",  # Read our config
-                self._cfg.name,
-                "-f",  # No fork
-                "-Lo",  # Log to stdout
-                "-V",  # Verbose
-                "-d",  # Dump packets
-            ],
+            args,
             stdout=subprocess.PIPE,
             encoding="utf-8",
             text=True,
@@ -128,45 +134,58 @@ sysServices 72"""
         self._wait()
         self._consume_stdout()
 
+    def _wait_inner(self: "Snmpd", q: queue.Queue[Optional[str]]) -> None:
+        """
+        Inner implementation of snmpd waiter.
+
+        Launched from the separate thread.
+
+        Args:
+            q: Result queue.
+        """
+        if self._proc and self._proc.stdout:
+            logger.info("Waiting for snmpd")
+            for line in self._proc.stdout:
+                logger.debug("snmpd: %s", line[:-1])
+                if line.startswith("NET-SNMP version"):
+                    self.version = line.strip().split(" ", 2)[2].strip()
+                    logger.info("snmpd is up. Version %s", self.version)
+                    q.put(None)
+                    return
+            # Premature termination of snmpd
+            logging.error("snmpd is terminated prematurely")
+            q.put("snmpd is terminated prematurely")
+            return
+        q.put("snmpd is not active")
+
     def _wait(self: "Snmpd") -> None:
         """Wait until snmpd is ready."""
-
-        def inner() -> None:
-            if self._proc and self._proc.stdout:
-                log: List[str] = []
-                for line in self._proc.stdout:
-                    if self._dump_log:
-                        log.append(line)
-                    if line.startswith("NET-SNMP version"):
-                        self.version = line.strip().split(" ", 2)[2].strip()
-                        return
-                # Premature termination of snmpd
-                if self._dump_log:
-                    print("".join(log))
-                msg = "snmpd is terminated prematurely"
-                raise RuntimeError(msg)
-            msg = "snmpd is not active"
-            raise RuntimeError(msg)
-
         if self._proc is None:
             msg = "_wait() must not be started directly"
             raise RuntimeError(msg)
         if not self._proc.stdout:
             msg = "stdout is not piped"
             raise RuntimeError(msg)
-        t = threading.Thread(target=inner)
+        q: queue.Queue[Optional[str]] = queue.Queue()
+        t = threading.Thread(target=self._wait_inner, args=[q])
         t.daemon = True
         t.start()
-        t.join(self._start_timeout)
+        try:
+            err = q.get(block=True, timeout=self._start_timeout)
+        except queue.Empty:
+            raise TimeoutError from None
+        if err is not None:
+            raise RuntimeError(err)
         if t.is_alive():
+            logger.error("snmpd is failed to start")
             msg = "snmpd failed to start"
             raise TimeoutError(msg)
 
     def _consume_stdout(self: "Snmpd") -> None:
         def inner() -> None:
             if self._proc and self._proc.stdout:
-                for _ in self._proc.stdout:
-                    pass
+                for line in self._proc.stdout:
+                    logger.debug("snmpd: %s", line[:-1])
 
         t = threading.Thread(target=inner)
         t.daemon = True
@@ -175,6 +194,7 @@ sysServices 72"""
     def _stop(self: "Snmpd") -> None:
         """Terminate snmpd instance."""
         if self._proc:
+            logger.info("Stopping snmpd")
             self._proc.kill()
         if self._cfg:
             self._cfg.close()
