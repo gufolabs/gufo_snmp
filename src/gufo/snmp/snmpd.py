@@ -36,6 +36,7 @@ class Snmpd(object):
         contact: sysContact value.
         user: SNMP v3 user.
         start_timeout: Maximum time to wait for snmpd to start.
+        log_packets: Log SNMP requests and responses.
 
     Attributes:
         version: Net-SNMP version.
@@ -67,6 +68,7 @@ class Snmpd(object):
         contact: str = "test <test@example.com>",
         user: str = "rouser",
         start_timeout: float = 5.0,
+        log_packets: bool = False,
     ) -> None:
         self._path = path
         self._address = address
@@ -76,6 +78,7 @@ class Snmpd(object):
         self._contact = contact
         self._user = user
         self._start_timeout = start_timeout
+        self._log_packets = log_packets
         self.version: Optional[str] = None
         self._cfg: Optional[_TemporaryFileWrapper[str]] = None
         self._proc: Optional[subprocess.Popen[str]] = None
@@ -122,8 +125,11 @@ sysServices 72"""
             "-f",  # No fork
             "-Lo",  # Log to stdout
             "-V",  # Verbose
-            "-d",  # Dump packets
         ]
+        if self._log_packets:
+            args += [
+                "-d",  # Dump packets
+            ]
         logger.debug("Running: %s", " ".join(args))
         self._proc = subprocess.Popen(
             args,
