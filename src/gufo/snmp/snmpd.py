@@ -135,7 +135,7 @@ sysServices 72"""
         self._wait()
         self._consume_stdout()
 
-    def _wait_inner(self: "Snmpd", q: queue.Queue[Optional[str]]) -> None:
+    def _wait_inner(self: "Snmpd", q: "queue.Queue[Optional[str]]") -> None:
         """
         Inner implementation of snmpd waiter.
 
