@@ -307,7 +307,7 @@ impl SnmpClientSocket {
                     // Check error_index
                     // Check varbinds size
                     match resp.vars.len() {
-                        // Empty response, stop iteratio
+                        // Empty response, stop iteration
                         0 => return Err(PyStopAsyncIteration::new_err("stop")),
                         // Return value
                         1 => {
