@@ -8,19 +8,14 @@
 use crate::ber::{
     BerClass, BerDecoder, BerHeader, SnmpBool, SnmpCounter32, SnmpCounter64, SnmpGauge32, SnmpInt,
     SnmpIpAddress, SnmpNull, SnmpObjectDescriptor, SnmpOctetString, SnmpOid, SnmpOpaque, SnmpReal,
-    SnmpSequence, SnmpTimeTicks, SnmpUInteger32, ToPython, TAG_APP_COUNTER32, TAG_APP_COUNTER64,
-    TAG_APP_GAUGE32, TAG_APP_IPADDRESS, TAG_APP_OPAQUE, TAG_APP_TIMETICKS, TAG_APP_UINTEGER32,
-    TAG_BOOL, TAG_CTX_END_OF_MIB_VIEW, TAG_CTX_NO_SUCH_INSTANCE, TAG_CTX_NO_SUCH_OBJECT, TAG_INT,
-    TAG_NULL, TAG_OBJECT_DESCRIPTOR, TAG_OBJECT_ID, TAG_OCTET_STRING, TAG_REAL,
+    SnmpTimeTicks, SnmpUInteger32, ToPython, TAG_APP_COUNTER32, TAG_APP_COUNTER64, TAG_APP_GAUGE32,
+    TAG_APP_IPADDRESS, TAG_APP_OPAQUE, TAG_APP_TIMETICKS, TAG_APP_UINTEGER32, TAG_BOOL,
+    TAG_CTX_END_OF_MIB_VIEW, TAG_CTX_NO_SUCH_INSTANCE, TAG_CTX_NO_SUCH_OBJECT, TAG_INT, TAG_NULL,
+    TAG_OBJECT_DESCRIPTOR, TAG_OBJECT_ID, TAG_OCTET_STRING, TAG_REAL,
 };
 use crate::error::SnmpError;
 use nom::{Err, IResult};
 use pyo3::{Py, PyAny, Python};
-
-pub(crate) struct SnmpVar<'a> {
-    pub(crate) oid: SnmpOid,
-    pub(crate) value: SnmpValue<'a>,
-}
 
 pub(crate) enum SnmpValue<'a> {
     Bool(SnmpBool),
@@ -40,19 +35,6 @@ pub(crate) enum SnmpValue<'a> {
     NoSuchObject,
     NoSuchInstance,
     EndOfMibView,
-}
-
-impl<'a> SnmpVar<'a> {
-    pub(crate) fn from_ber(i: &[u8]) -> IResult<&[u8], SnmpVar, SnmpError> {
-        // Parse enclosing sequence
-        let (rest, vs) = SnmpSequence::from_ber(i)?;
-        // Parse oid
-        let (tail, oid) = SnmpOid::from_ber(vs.0)?;
-        // Parse value
-        let (_, value) = SnmpValue::from_ber(tail)?;
-        //
-        Ok((rest, SnmpVar { oid, value }))
-    }
 }
 
 impl<'a> SnmpValue<'a> {

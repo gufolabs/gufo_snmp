@@ -20,6 +20,6 @@ pub(crate) mod getbulk;
 pub(crate) mod getresponse;
 pub(crate) mod msg;
 pub(crate) mod pdu;
-pub(crate) mod var;
+pub(crate) mod value;
 pub(crate) mod version;
 pub(crate) use version::SnmpVersion;

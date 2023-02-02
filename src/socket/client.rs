@@ -12,7 +12,7 @@ use crate::snmp::get::SnmpGet;
 use crate::snmp::getbulk::SnmpGetBulk;
 use crate::snmp::msg::SnmpMessage;
 use crate::snmp::pdu::SnmpPdu;
-use crate::snmp::var::SnmpValue;
+use crate::snmp::value::SnmpValue;
 use crate::snmp::SnmpVersion;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::{

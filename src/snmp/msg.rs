@@ -66,7 +66,7 @@ mod tests {
     use super::*;
     use crate::ber::SnmpOid;
     use crate::snmp::get::SnmpGet;
-    use crate::snmp::var::SnmpValue;
+    use crate::snmp::value::SnmpValue;
 
     #[test]
     fn test_parse_snmp_v1_get() -> Result<(), SnmpError> {
