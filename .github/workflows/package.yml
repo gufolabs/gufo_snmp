@@ -193,7 +193,7 @@ jobs:
       - build-sdist
       - build-manylinux_2_17-x86_64
       - build-manylinux_2_24
-      - build-musllinux-1_1
+      # - build-musllinux-1_1
       - build-wheel-macos
     steps:
       - name: Download Artefacts
