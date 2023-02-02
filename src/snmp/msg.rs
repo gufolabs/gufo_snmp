@@ -270,6 +270,76 @@ mod tests {
         Ok(())
     }
     #[test]
+    fn test_parse_snmpv2_getresponse_many_rel() -> Result<(), SnmpError> {
+        let data = [
+            48u8, 116, // Sequence, 116 bytes
+            2, 1, 1, // ITEGER, v2c
+            4, 6, 112, 117, 98, 108, 105, 99, // OCTET STRING, "public"
+            162, 103, // PDU, Get-Response, 103 byte
+            2, 4, 91, 63, 155, 39, // Request ID, 0x5B3F9B27
+            2, 1, 0, // error-status, 0
+            2, 1, 0, // error-index, 0
+            48, 89, // Varbinds, sequence, 107 bytes
+            48, 22, // Var, sequence, 22 bytes
+            6, 8, 43, 6, 1, 2, 1, 1, 2, 0, // OBJECT IDENTIFIER, 1.3.6.1.2.1.1.2.0
+            6, 10, 43, 6, 1, 4, 1, 191, 8, 3, 2,
+            10, // OBJECT IDENTIFIER, 1.3.6.1.4.1.1.8072.3.2.10
+            48, 10, // Var, sequence, 10  bytes
+            13, 2, 3, 0, // OBJECT IDENTIFIER, 1.3.6.1.2.1.1.[3.0]
+            67, 4, 1, 53, 16, 171, // TimeTicks, 0x013510AB
+            48, 20, // Var, sequennce, 20 bytes
+            13, 2, 6, 0, // OBJECT IDENTIFIER, 1.3.6.1.2.1.1.[6.0]
+            4, 14, 71, 117, 102, 111, 32, 83, 78, 77, 80, 32, 84, 101, 115,
+            116, // OCTET STRING
+            48, 29, // Var, sequence, 29 bytes
+            13, 2, 4, 0, // OBJECT IDENTIFIER, 1.3.6.1.2.1.1.[4.0]
+            4, 23, 116, 101, 115, 116, 32, 60, 116, 101, 115, 116, 64, 101, 120, 97, 109, 112, 108,
+            101, 46, 99, 111, 109, 62, // OCTET STRING
+        ];
+        let msg = SnmpMessage::try_from(data.as_ref())?;
+        // Check version
+        assert_eq!(msg.version, SnmpVersion::V2C);
+        // community == public
+        assert_eq!(msg.community, [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63]);
+        //
+        match msg.pdu {
+            SnmpPdu::GetResponse(pdu) => {
+                assert_eq!(pdu.request_id, 0x5B3F9B27);
+                assert_eq!(pdu.error_status, 0);
+                assert_eq!(pdu.error_index, 0);
+                assert_eq!(pdu.vars.len(), 4);
+                // Var 0
+                assert_eq!(pdu.vars[0].oid, SnmpOid::try_from("1.3.6.1.2.1.1.2.0")?);
+                match &pdu.vars[0].value {
+                    SnmpValue::Oid(s) => {
+                        assert_eq!(*s, SnmpOid::try_from("1.3.6.1.4.1.8072.3.2.10")?)
+                    }
+                    _ => return Err(SnmpError::InvalidData),
+                }
+                // Var 1
+                assert_eq!(pdu.vars[1].oid, SnmpOid::try_from("1.3.6.1.2.1.1.3.0")?);
+                match &pdu.vars[1].value {
+                    SnmpValue::TimeTicks(s) => assert_eq!(s.0, 0x013510AB),
+                    _ => return Err(SnmpError::InvalidData),
+                }
+                // Var 2
+                assert_eq!(pdu.vars[2].oid, SnmpOid::try_from("1.3.6.1.2.1.1.6.0")?);
+                match &pdu.vars[2].value {
+                    SnmpValue::OctetString(s) => assert_eq!(s.0, b"Gufo SNMP Test"),
+                    _ => return Err(SnmpError::InvalidData),
+                }
+                // Var 3
+                assert_eq!(pdu.vars[3].oid, SnmpOid::try_from("1.3.6.1.2.1.1.4.0")?);
+                match &pdu.vars[3].value {
+                    SnmpValue::OctetString(s) => assert_eq!(s.0, b"test <test@example.com>"),
+                    _ => return Err(SnmpError::InvalidData),
+                }
+            }
+            _ => return Err(SnmpError::InvalidPdu),
+        }
+        Ok(())
+    }
+    #[test]
     fn test_encode_snmp_v1_get() -> Result<(), SnmpError> {
         let expected = [
             0x30u8, 0x35, 0x02, 0x01, 0x00, 0x04, 0x06, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0xa0,

@@ -13,11 +13,11 @@ The currently supported types are:
 | OCTETSTRING       | Universal   |       P |    4 | bytes                | [X.690][X-690] pp 8.7          |
 | NULL              | Universal   |       P |    5 | :material-close:     | [X.690][X-690] pp 8.8          |
 | OBJECT IDENTIFIER | Universal   |       P |    6 | str                  | [X.690][X-690] pp 8.19         |
-| - relative        |             |         |      | :material-close:     |                                |
 | OBJECT DESCRIPTOR | Universal   |     P/C |    7 | bytes                |                                |
 | EXTERNAL          | Universal   |       P |    8 | :material-close:     | [X.690][X-690] pp 8.18         |
 | REAL              | Universal   |       P |    9 | float                | [X.690][X-690] pp 8.5          |
 | ENUMERATED        | Universal   |       P |   10 | :material-close:     |                                |
+| RELATIVE OID      | Universal   |       P |   13 | str                  | [X.690][X-690] pp 8.20         |
 | SEQUENCE          | Universal   |       C |   16 | :material-check:[^2] | [X.690][X-690] pp 8.9          |
 | IpAddress         | Application |       P |    0 | str                  | [RFC-1442][RFC-1442] pp 7.1.5  |
 | Counter32         | Application |       P |    1 | int                  | [RFC-1442][RFC-1442] pp 7.1.6  |

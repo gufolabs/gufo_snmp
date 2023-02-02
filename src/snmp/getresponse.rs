@@ -6,7 +6,9 @@
 // ------------------------------------------------------------------------
 
 use super::value::SnmpValue;
-use crate::ber::{BerDecoder, SnmpInt, SnmpOid, SnmpSequence};
+use crate::ber::{
+    BerDecoder, SnmpInt, SnmpOid, SnmpRelativeOid, SnmpSequence, TAG_OBJECT_ID, TAG_RELATIVE_OID,
+};
 use crate::error::SnmpError;
 
 #[allow(dead_code)]
@@ -38,17 +40,30 @@ impl<'a> TryFrom<&'a [u8]> for SnmpGetResponse<'a> {
             return Err(SnmpError::TrailingData);
         }
         let mut v_tail = vb.0;
-        let mut vars = Vec::new();
+        let mut vars: Vec<SnmpVar> = Vec::new();
         while !v_tail.is_empty() {
             // Parse enclosing sequence
             let (rest, vs) = SnmpSequence::from_ber(v_tail)?;
-            // Parse oid
-            let (tail, oid) = SnmpOid::from_ber(vs.0)?;
+            // Parse oid. May be either absolute or relative
+            let (tail, oid) = match vs.0[0] as usize {
+                TAG_OBJECT_ID => SnmpOid::from_ber(vs.0)?,
+                TAG_RELATIVE_OID => {
+                    if vars.is_empty() {
+                        // Relative oid must follow absolute one
+                        return Err(SnmpError::UnexpectedTag);
+                    }
+                    // Parse relative oid
+                    let (t, r_oid) = SnmpRelativeOid::from_ber(vs.0)?;
+                    // Apply relative oid
+                    (t, r_oid.normalize(&vars[vars.len() - 1].oid))
+                }
+                _ => return Err(SnmpError::UnexpectedTag),
+            };
             // Parse value
             let (_, value) = SnmpValue::from_ber(tail)?;
-            //<
+            // Append an item
             vars.push(SnmpVar { oid, value });
-            // Shift to the next
+            // Shift to the next var
             v_tail = rest;
         }
         Ok(SnmpGetResponse {
