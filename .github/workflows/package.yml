@@ -50,7 +50,6 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      # Warning! No Python 3.11 in manylinux2014 image
       - name: Build wheels
         run: >
           docker run --rm
@@ -59,7 +58,7 @@ jobs:
           -w /workdir 
           --user 0 
           quay.io/pypa/manylinux2014_${{ matrix.arch }}:latest
-          ./tools/build/build-many.sh 3.8 3.9 3.10
+          ./tools/build/build-many.sh 3.8 3.9 3.10 3.11
 
       - name: Save Artefacts
         uses: actions/upload-artifact@v3
