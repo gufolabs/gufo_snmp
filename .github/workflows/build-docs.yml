@@ -9,6 +9,8 @@ on:
       - ".requirements/docs.txt"
       - "docs/**"
       - "examples/**"
+      - "**.md"
+      - "**.py"
     branches:
       - master
 jobs:
