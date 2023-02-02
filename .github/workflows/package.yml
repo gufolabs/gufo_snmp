@@ -154,38 +154,38 @@ jobs:
   #         name: wheel_musllinux_1_1_${{ matrix.arch }}
   #         path: wheelhouse/*.whl
 
-  build-wheel-macos:
-    runs-on: macos-11
-    needs: build-sdist
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - arch: x86_64
-            platform: macosx
-          # - arch: arm64
-          #   platform: macosx
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
+  # build-wheel-macos:
+  #   runs-on: macos-11
+  #   needs: build-sdist
+  #   strategy:
+  #     fail-fast: true
+  #     matrix:
+  #       include:
+  #         - arch: x86_64
+  #           platform: macosx
+  #         # - arch: arm64
+  #         #   platform: macosx
+  #   steps:
+  #     - name: Checkout Repo
+  #       uses: actions/checkout@v3
 
-      - name: Build Packages
-        uses: pypa/cibuildwheel@v2.11.2
-        env:
-          SETUP_RUST_PLATFORM: ${{matrix.platform}}-${{matrix.arch}}
-          CIBW_BUILD: cp{38,39,310,311}-${{matrix.platform}}_${{matrix.arch}}
-          CIBW_ARCHS: ${{matrix.arch}}
-          CIBW_ENVIRONMENT: >-
-            PATH=$HOME/.cargo/bin:$PATH
-            CARGO_HOME=$HOME/.cargo
-            RUSTUP_HOME=$HOME/.rustup
-            RUST_ARCH=x86_64-apple-darwin
+  #     - name: Build Packages
+  #       uses: pypa/cibuildwheel@v2.11.2
+  #       env:
+  #         SETUP_RUST_PLATFORM: ${{matrix.platform}}-${{matrix.arch}}
+  #         CIBW_BUILD: cp{38,39,310,311}-${{matrix.platform}}_${{matrix.arch}}
+  #         CIBW_ARCHS: ${{matrix.arch}}
+  #         CIBW_ENVIRONMENT: >-
+  #           PATH=$HOME/.cargo/bin:$PATH
+  #           CARGO_HOME=$HOME/.cargo
+  #           RUSTUP_HOME=$HOME/.rustup
+  #           RUST_ARCH=x86_64-apple-darwin
 
-      - name: Save Artefacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: wheel_${{ matrix.platform }}_${{ matrix.arch }}
-          path: wheelhouse/*.whl
+  #     - name: Save Artefacts
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: wheel_${{ matrix.platform }}_${{ matrix.arch }}
+  #         path: wheelhouse/*.whl
 
   publish:
     runs-on: ubuntu-20.04
@@ -194,7 +194,7 @@ jobs:
       - build-manylinux_2_17-x86_64
       - build-manylinux_2_24
       # - build-musllinux-1_1
-      - build-wheel-macos
+      # - build-wheel-macos
     steps:
       - name: Download Artefacts
         uses: actions/download-artifact@v3
