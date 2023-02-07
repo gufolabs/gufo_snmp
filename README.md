@@ -7,6 +7,7 @@
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 ![Build](https://img.shields.io/github/actions/workflow/status/gufolabs/gufo_snmp/tests.yml?branch=master)
 ![Sponsors](https://img.shields.io/github/sponsors/gufolabs)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v0.json)](https://github.com/charliermarsh/ruff)
 
 ---
 
