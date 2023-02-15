@@ -7,9 +7,9 @@
 
 # Python modules
 import asyncio
+import logging
 import random
 from typing import Any, Dict, Iterator, Set, cast
-import logging
 
 # Third-party modules
 import pytest
@@ -282,10 +282,7 @@ def test_getnext_getbulk(snmpd: Snmpd) -> None:
     """Cross-test of getnext and getbulk."""
 
     def is_valid(oid: str) -> bool:
-        return not (
-            oid.startswith("1.3.6.1.2.1.7.5.")
-            or oid.startswith("1.3.6.1.2.1.6.13")
-        )
+        return not oid.startswith(("1.3.6.1.2.1.7.5.", "1.3.6.1.2.1.6.13"))
 
     async def inner_getnext() -> Set[str]:
         r: Set[str] = set()
