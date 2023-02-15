@@ -72,9 +72,8 @@ REQUIRED_FILES = [
 
 
 def test_required_is_sorted() -> None:
-    assert sorted(
-        REQUIRED_FILES
-    ) == REQUIRED_FILES, "REQUIRED_FILES must be sorted"
+    S_REQ = sorted(REQUIRED_FILES)
+    assert S_REQ == REQUIRED_FILES, "REQUIRED_FILES must be sorted"
 
 
 @pytest.mark.parametrize("name", REQUIRED_FILES)
