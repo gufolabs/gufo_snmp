@@ -12,6 +12,10 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 * Benchmarks
 
+### Infrastructure
+
+* Rust 1.67.1
+
 ## 0.1.0 - 2023-02-02
 
 ### Added
