@@ -10,7 +10,7 @@ use crate::error::SnmpError;
 use pyo3::types::PyString;
 use pyo3::{Py, PyAny, Python};
 
-pub(crate) struct SnmpIpAddress(u8, u8, u8, u8);
+pub struct SnmpIpAddress(u8, u8, u8, u8);
 
 impl<'a> BerDecoder<'a> for SnmpIpAddress {
     const ALLOW_PRIMITIVE: bool = true;

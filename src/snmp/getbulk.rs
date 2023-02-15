@@ -10,7 +10,7 @@ use crate::buf::Buffer;
 use crate::error::SnmpError;
 use nom::IResult;
 
-pub(crate) struct SnmpGetBulk {
+pub struct SnmpGetBulk {
     pub(crate) request_id: i64,
     pub(crate) non_repeaters: i64,
     pub(crate) max_repetitions: i64,

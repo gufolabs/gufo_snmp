@@ -28,7 +28,7 @@ use std::os::fd::AsRawFd;
 
 /// Python class wrapping socket implementation
 #[pyclass]
-pub(crate) struct SnmpClientSocket {
+pub struct SnmpClientSocket {
     io: Socket,
     addr: SockAddr,
     community: String,
@@ -38,13 +38,13 @@ pub(crate) struct SnmpClientSocket {
 }
 
 #[pyclass]
-pub(crate) struct GetNextIter {
+pub struct GetNextIter {
     start_oid: SnmpOid,
     next_oid: SnmpOid,
 }
 
 #[pyclass]
-pub(crate) struct GetBulkIter {
+pub struct GetBulkIter {
     start_oid: SnmpOid,
     next_oid: SnmpOid,
     max_repetitions: i64,
@@ -463,12 +463,12 @@ impl GetNextIter {
 }
 
 impl GetNextIter {
-    pub(crate) fn get_next_oid(&self) -> SnmpOid {
+    pub fn get_next_oid(&self) -> SnmpOid {
         self.next_oid.clone()
     }
     // Save oid for next request.
     // Return true if next request may be send or return false otherwise
-    pub(crate) fn set_next_oid(&mut self, oid: &SnmpOid) -> bool {
+    pub fn set_next_oid(&mut self, oid: &SnmpOid) -> bool {
         if self.start_oid.contains(oid) {
             self.next_oid = oid.clone();
             true
@@ -493,12 +493,12 @@ impl GetBulkIter {
 }
 
 impl GetBulkIter {
-    pub(crate) fn get_next_oid(&self) -> SnmpOid {
+    pub fn get_next_oid(&self) -> SnmpOid {
         self.next_oid.clone()
     }
     // Save oid for next request.
     // Return true if next request may be send or return false otherwise
-    pub(crate) fn set_next_oid(&mut self, oid: &SnmpOid) -> bool {
+    pub fn set_next_oid(&mut self, oid: &SnmpOid) -> bool {
         if self.start_oid.contains(oid) {
             self.next_oid = oid.clone();
             true
@@ -507,7 +507,7 @@ impl GetBulkIter {
         }
     }
     //
-    pub(crate) fn get_max_repetitions(&self) -> i64 {
+    pub fn get_max_repetitions(&self) -> i64 {
         self.max_repetitions
     }
 }

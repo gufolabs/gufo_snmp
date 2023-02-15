@@ -9,7 +9,7 @@ use super::{BerDecoder, BerHeader, ToPython, TAG_APP_TIMETICKS};
 use crate::error::SnmpError;
 use pyo3::{IntoPy, Py, PyAny, Python};
 
-pub(crate) struct SnmpTimeTicks(pub(crate) u32);
+pub struct SnmpTimeTicks(pub(crate) u32);
 
 impl<'a> BerDecoder<'a> for SnmpTimeTicks {
     const ALLOW_PRIMITIVE: bool = true;

@@ -5,5 +5,5 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-pub(crate) mod client;
-pub(crate) use client::{GetBulkIter, GetNextIter, SnmpClientSocket};
+pub mod client;
+pub use client::{GetBulkIter, GetNextIter, SnmpClientSocket};

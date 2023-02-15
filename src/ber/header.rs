@@ -10,7 +10,7 @@ use super::BerClass;
 use nom::{Err, IResult, Needed};
 
 #[derive(Debug)]
-pub(crate) struct BerHeader {
+pub struct BerHeader {
     // Object class: universal, application, context-specific, or private
     pub class: BerClass,
     // True if costructed
@@ -46,7 +46,7 @@ pub(crate) struct BerHeader {
 //
 impl BerHeader {
     // Implement X.690 pp 8.1.1: Structure of an encoding
-    pub(crate) fn from_ber(i: &[u8]) -> IResult<&[u8], BerHeader, SnmpError> {
+    pub fn from_ber(i: &[u8]) -> IResult<&[u8], BerHeader, SnmpError> {
         if i.len() < 2 {
             return Err(Err::Incomplete(Needed::new(2)));
         }
@@ -112,7 +112,7 @@ impl BerHeader {
             },
         ))
     }
-    pub(crate) fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.length == 0
     }
 }

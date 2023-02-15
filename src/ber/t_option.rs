@@ -9,7 +9,7 @@ use super::{BerClass, BerDecoder, BerHeader, TAG_SEQUENCE};
 use crate::error::SnmpError;
 use nom::{Err, IResult};
 
-pub(crate) struct SnmpOption<'a> {
+pub struct SnmpOption<'a> {
     pub tag: usize,
     pub value: &'a [u8],
 }

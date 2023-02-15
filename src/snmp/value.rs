@@ -17,7 +17,7 @@ use crate::error::SnmpError;
 use nom::{Err, IResult};
 use pyo3::{Py, PyAny, Python};
 
-pub(crate) enum SnmpValue<'a> {
+pub enum SnmpValue<'a> {
     Bool(SnmpBool),
     Int(SnmpInt),
     Null,
@@ -38,7 +38,7 @@ pub(crate) enum SnmpValue<'a> {
 }
 
 impl<'a> SnmpValue<'a> {
-    pub(crate) fn from_ber(i: &[u8]) -> IResult<&[u8], SnmpValue, SnmpError> {
+    pub fn from_ber(i: &[u8]) -> IResult<&[u8], SnmpValue, SnmpError> {
         let (tail, hdr) = BerHeader::from_ber(i)?;
         let value = match hdr.constructed {
             // Primitive types

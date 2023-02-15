@@ -9,7 +9,7 @@ use super::{BerDecoder, BerHeader, SnmpOid, TAG_RELATIVE_OID};
 use crate::error::SnmpError;
 
 #[derive(Debug, PartialEq, Clone)]
-pub(crate) struct SnmpRelativeOid(pub(crate) Vec<u32>);
+pub struct SnmpRelativeOid(pub(crate) Vec<u32>);
 
 impl<'a> BerDecoder<'a> for SnmpRelativeOid {
     const ALLOW_PRIMITIVE: bool = true;
@@ -18,13 +18,11 @@ impl<'a> BerDecoder<'a> for SnmpRelativeOid {
 
     // Implement X.690 pp 8.20: Encoding of a relative object identifier value
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
-        println!("decode: {:?}", i);
         let mut v = Vec::<u32>::new();
         let mut b = 0;
         for &x in i[..h.length].iter() {
             b = (b << 7) + ((x & 0x7f) as u32);
             if x & 0x80 == 0 {
-                println!("push {}", b);
                 v.push(b);
                 b = 0;
             }
@@ -42,7 +40,7 @@ impl From<Vec<u32>> for SnmpRelativeOid {
 impl SnmpRelativeOid {
     /// Apply relative oid to absolute one
     /// and return normalized absolute oid
-    pub(crate) fn normalize(&self, oid: &SnmpOid) -> SnmpOid {
+    pub fn normalize(&self, oid: &SnmpOid) -> SnmpOid {
         let la = oid.0.len();
         let lr = self.0.len();
         if lr >= la {

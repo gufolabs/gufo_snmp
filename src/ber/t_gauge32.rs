@@ -9,7 +9,7 @@ use super::{BerDecoder, BerHeader, ToPython, TAG_APP_GAUGE32};
 use crate::error::SnmpError;
 use pyo3::{IntoPy, Py, PyAny, Python};
 
-pub(crate) struct SnmpGauge32(pub(crate) u32);
+pub struct SnmpGauge32(pub(crate) u32);
 
 impl<'a> BerDecoder<'a> for SnmpGauge32 {
     const ALLOW_PRIMITIVE: bool = true;

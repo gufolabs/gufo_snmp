@@ -12,7 +12,7 @@ use pyo3::{
 };
 
 #[derive(Debug)]
-pub(crate) enum SnmpError {
+pub enum SnmpError {
     /// Too short
     Incomplete,
     /// Other tag is expected

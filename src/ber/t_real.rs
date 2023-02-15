@@ -10,7 +10,7 @@ use crate::error::SnmpError;
 use core::str::from_utf8;
 use pyo3::{IntoPy, Py, PyAny, Python};
 
-pub(crate) struct SnmpReal(f64);
+pub struct SnmpReal(f64);
 
 impl<'a> BerDecoder<'a> for SnmpReal {
     const ALLOW_PRIMITIVE: bool = true;

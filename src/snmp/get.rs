@@ -12,7 +12,7 @@ use nom::IResult;
 
 const DOUBLE_ZEROES: [u8; 6] = [2u8, 1, 0, 2, 1, 0];
 
-pub(crate) struct SnmpGet {
+pub struct SnmpGet {
     pub(crate) request_id: i64,
     pub(crate) vars: Vec<SnmpOid>,
 }

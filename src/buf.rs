@@ -12,7 +12,7 @@ const MAX_SIZE: usize = 65536;
 
 // SNMP message is build starting from the end,
 // So we use stack-like buffer.
-pub(crate) struct Buffer {
+pub struct Buffer {
     len: usize,
     data: [u8; MAX_SIZE], // @todo: MaybeUninit<u8>
 }
@@ -30,18 +30,18 @@ impl Default for Buffer {
 
 impl Buffer {
     #[inline]
-    pub(crate) fn free(&self) -> usize {
+    pub fn free(&self) -> usize {
         MAX_SIZE - self.len
     }
     #[inline]
-    pub(crate) fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.len
     }
     #[inline]
-    pub(crate) fn data(&self) -> &[u8] {
+    pub fn data(&self) -> &[u8] {
         &self.data[MAX_SIZE - self.len..]
     }
-    pub(crate) fn push_u8(&mut self, v: u8) -> Result<(), SnmpError> {
+    pub fn push_u8(&mut self, v: u8) -> Result<(), SnmpError> {
         if self.free() < 1 {
             return Err(SnmpError::OutOfBuffer);
         }
@@ -49,7 +49,7 @@ impl Buffer {
         self.len += 1;
         Ok(())
     }
-    pub(crate) fn push(&mut self, chunk: &[u8]) -> Result<(), SnmpError> {
+    pub fn push(&mut self, chunk: &[u8]) -> Result<(), SnmpError> {
         let cs = chunk.len();
         if self.free() < cs {
             return Err(SnmpError::OutOfBuffer);
@@ -59,7 +59,7 @@ impl Buffer {
         self.len += cs;
         Ok(())
     }
-    pub(crate) fn push_ber_len(&mut self, v: usize) -> Result<(), SnmpError> {
+    pub fn push_ber_len(&mut self, v: usize) -> Result<(), SnmpError> {
         if v < 128 {
             // Short form, X.690 pp 8.3.1.4
             self.push_u8(v as u8)?;
@@ -77,10 +77,10 @@ impl Buffer {
         }
         Ok(())
     }
-    pub(crate) fn reset(&mut self) {
+    pub fn reset(&mut self) {
         self.len = 0;
     }
-    pub(crate) fn as_slice(&self, len: usize) -> &[u8] {
+    pub fn as_slice(&self, len: usize) -> &[u8] {
         &self.data[..len]
     }
 }

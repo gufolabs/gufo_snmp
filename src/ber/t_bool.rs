@@ -9,7 +9,7 @@ use super::{BerDecoder, BerHeader, ToPython, TAG_BOOL};
 use crate::error::SnmpError;
 use pyo3::{IntoPy, Py, PyAny, Python};
 
-pub(crate) struct SnmpBool(bool);
+pub struct SnmpBool(bool);
 
 impl<'a> BerDecoder<'a> for SnmpBool {
     const ALLOW_PRIMITIVE: bool = true;

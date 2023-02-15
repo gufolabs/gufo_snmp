@@ -12,7 +12,7 @@ use crate::ber::{
 use crate::buf::Buffer;
 use crate::error::SnmpError;
 
-pub(crate) struct SnmpMessage<'a> {
+pub struct SnmpMessage<'a> {
     pub(crate) version: SnmpVersion,
     pub(crate) community: &'a [u8],
     pub(crate) pdu: SnmpPdu<'a>,

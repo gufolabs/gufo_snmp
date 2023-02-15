@@ -114,4 +114,26 @@ $ mkdocs serve
 We recommend using [Grammarly][Grammarly] service to check
 documentation for common errors.
 
+## Benchmarks
+
+First, edit `Cargo.toml`, comment line in the section `[lib]`:
+
+```
+crate-type = ["cdylib"] # Comment for bench
+```
+
+and uncomment
+
+```
+# crate-type = ["cdylib", "rlib"] # Uncomment for bench
+```
+
+Then run bencmarks:
+
+```
+$ cargo bench
+```
+
+Revert `Cargo.toml` when you completed.
+
 [Grammarly]: https://grammarly.com/

@@ -9,7 +9,7 @@ use super::{BerDecoder, BerEncoder, BerHeader, TAG_NULL};
 use crate::buf::Buffer;
 use crate::error::SnmpError;
 
-pub(crate) struct SnmpNull;
+pub struct SnmpNull;
 
 impl<'a> BerDecoder<'a> for SnmpNull {
     const ALLOW_PRIMITIVE: bool = true;

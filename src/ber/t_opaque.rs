@@ -10,7 +10,7 @@ use crate::error::SnmpError;
 use pyo3::types::PyBytes;
 use pyo3::{Py, PyAny, Python};
 
-pub(crate) struct SnmpOpaque<'a>(pub(crate) &'a [u8]);
+pub struct SnmpOpaque<'a>(pub(crate) &'a [u8]);
 
 impl<'a> BerDecoder<'a> for SnmpOpaque<'a> {
     const ALLOW_PRIMITIVE: bool = true;

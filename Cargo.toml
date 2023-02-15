@@ -3,10 +3,9 @@ edition = "2021"
 name = "gufo_snmp"
 version = "0.1.0"
 
-# See more keys and their definitions 
-# at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib"] # Comment for bench
+# crate-type = ["cdylib", "rlib"] # Uncomment for bench
 name = "gufo_snmp"
 
 [profile.release]
@@ -23,4 +22,4 @@ criterion = "0.4"
 
 [[bench]]
 harness = false
-name = "msg"
+name = "decode"

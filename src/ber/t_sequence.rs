@@ -8,7 +8,7 @@
 use super::{BerDecoder, BerHeader, TAG_SEQUENCE};
 use crate::error::SnmpError;
 
-pub(crate) struct SnmpSequence<'a>(pub(crate) &'a [u8]);
+pub struct SnmpSequence<'a>(pub(crate) &'a [u8]);
 
 impl<'a> BerDecoder<'a> for SnmpSequence<'a> {
     const ALLOW_PRIMITIVE: bool = false;

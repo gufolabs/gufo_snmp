@@ -11,7 +11,7 @@ use crate::buf::Buffer;
 use crate::error::SnmpError;
 
 #[derive(Debug, PartialEq, Clone)]
-pub(crate) enum SnmpVersion {
+pub enum SnmpVersion {
     V1,
     V2C,
 }

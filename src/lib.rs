@@ -6,10 +6,10 @@
 // ------------------------------------------------------------------------
 
 use pyo3::prelude::*;
-pub(crate) mod ber;
-pub(crate) mod buf;
-pub(crate) mod error;
-pub(crate) mod snmp;
+pub mod ber;
+pub mod buf;
+pub mod error;
+pub mod snmp;
 mod socket;
 
 /// Module index

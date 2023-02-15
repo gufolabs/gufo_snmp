@@ -9,7 +9,7 @@ use super::{BerDecoder, BerHeader, ToPython, TAG_APP_COUNTER64};
 use crate::error::SnmpError;
 use pyo3::{IntoPy, Py, PyAny, Python};
 
-pub(crate) struct SnmpCounter64(pub(crate) u64);
+pub struct SnmpCounter64(pub(crate) u64);
 
 impl<'a> BerDecoder<'a> for SnmpCounter64 {
     const ALLOW_PRIMITIVE: bool = true;

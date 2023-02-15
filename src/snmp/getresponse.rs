@@ -12,16 +12,16 @@ use crate::ber::{
 use crate::error::SnmpError;
 
 #[allow(dead_code)]
-pub(crate) struct SnmpGetResponse<'a> {
+pub struct SnmpGetResponse<'a> {
     pub(crate) request_id: i64,
     pub(crate) error_status: i64,
     pub(crate) error_index: i64,
     pub(crate) vars: Vec<SnmpVar<'a>>,
 }
 
-pub(crate) struct SnmpVar<'a> {
-    pub(crate) oid: SnmpOid,
-    pub(crate) value: SnmpValue<'a>,
+pub struct SnmpVar<'a> {
+    pub oid: SnmpOid,
+    pub value: SnmpValue<'a>,
 }
 
 impl<'a> TryFrom<&'a [u8]> for SnmpGetResponse<'a> {

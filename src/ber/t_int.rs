@@ -11,7 +11,7 @@ use crate::error::SnmpError;
 use pyo3::{IntoPy, Py, PyAny, Python};
 use std::cmp::Ordering;
 
-pub(crate) struct SnmpInt(i64);
+pub struct SnmpInt(i64);
 
 impl<'a> BerDecoder<'a> for SnmpInt {
     const ALLOW_PRIMITIVE: bool = true;
@@ -126,7 +126,7 @@ impl From<SnmpInt> for i64 {
 }
 
 impl SnmpInt {
-    pub(crate) fn is_zero(&self) -> bool {
+    pub fn is_zero(&self) -> bool {
         self.0 == 0
     }
 }

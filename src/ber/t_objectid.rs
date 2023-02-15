@@ -17,7 +17,7 @@ use pyo3::{Py, PyAny, Python};
 // 128 sub-identifiers.  Further, each sub-identifier must not
 // exceed the value 2^32-1 (4294967295 decimal).
 #[derive(Debug, PartialEq, Clone)]
-pub(crate) struct SnmpOid(pub(crate) Vec<u32>);
+pub struct SnmpOid(pub(crate) Vec<u32>);
 
 impl<'a> BerDecoder<'a> for SnmpOid {
     const ALLOW_PRIMITIVE: bool = true;
@@ -89,7 +89,7 @@ impl SnmpOid {
         Ok(())
     }
     // Check oid is contained within
-    pub(crate) fn contains(&self, oid: &SnmpOid) -> bool {
+    pub fn contains(&self, oid: &SnmpOid) -> bool {
         let sl = self.0.len();
         if oid.0.len() < sl {
             return false;
