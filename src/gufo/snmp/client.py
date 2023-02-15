@@ -81,7 +81,7 @@ class SnmpSession(object):
         if version == SnmpVersion.v1:
             self._allow_bulk = False
         else:
-            self._allow_bulk = True
+            self._allow_bulk = allow_bulk
 
     async def __aenter__(self: "SnmpSession") -> "SnmpSession":
         """Asynchronous context manager entry."""

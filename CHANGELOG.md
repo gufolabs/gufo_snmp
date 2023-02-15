@@ -12,6 +12,10 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 * Benchmarks
 
+### Fixed
+
+* Fix SnmpSession allow_bulk handling.
+
 ### Infrastructure
 
 * Rust 1.67.1
