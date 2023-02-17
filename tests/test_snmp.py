@@ -341,3 +341,21 @@ def test_fetch(version: SnmpVersion, allow_bulk: bool, snmpd: Snmpd) -> None:
             assert n > 0
 
     asyncio.run(inner())
+
+
+@pytest.mark.parametrize("allow_bulk", [False, True])
+def test_fetch_file_not_found(allow_bulk: bool, snmpd: Snmpd) -> None:
+    """Test issue #1 condition."""
+
+    async def inner() -> None:
+        for _ in range(10):
+            async with SnmpSession(
+                addr=SNMPD_ADDRESS,
+                port=SNMPD_PORT,
+                community=SNMP_COMMUNITY,
+                allow_bulk=allow_bulk,
+            ) as session:
+                async for _ in session.fetch("1.3.6.1.2.1.1.3"):
+                    pass
+
+    asyncio.run(inner())

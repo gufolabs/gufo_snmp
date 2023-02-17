@@ -51,10 +51,13 @@ class GetBulkIter(object):
 
         async def get_response() -> List[Tuple[str, ValueType]]:
             while True:
-                r_ev = asyncio.Event()
                 # Wait until data will be available
+                r_ev = asyncio.Event()
                 loop.add_reader(self._fd, r_ev.set)
-                await r_ev.wait()
+                try:
+                    await r_ev.wait()
+                finally:
+                    loop.remove_reader(self._fd)
                 # Read data or get BlockingIOError
                 # if no valid data available.
                 try:
@@ -69,11 +72,12 @@ class GetBulkIter(object):
             raise StopAsyncIteration
         # Send request
         loop = asyncio.get_running_loop()
-        # Wait for socket became writable
-        w_ev = asyncio.Event()
-        loop.add_writer(self._fd, w_ev.set)
-        await w_ev.wait()
-        loop.remove_writer(self._fd)
+        r_ev = asyncio.Event()
+        loop.add_writer(self._fd, r_ev.set)
+        try:
+            await r_ev.wait()
+        finally:
+            loop.remove_writer(self._fd)
         # Send request
         self._sock.send_getbulk(self._ctx)
         # Await response or timeout

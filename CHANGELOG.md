@@ -15,6 +15,8 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 ### Fixed
 
 * Fix SnmpSession allow_bulk handling.
+* Fix [#1][#1]: Getting FileNotFoundError exception if multiple instances
+  of SnmpSession were previously used.
 
 ### Infrastructure
 
@@ -26,3 +28,5 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 ### Added
 
 * Initial implementation
+
+[#1]: https://github.com/gufolabs/gufo_snmp/issues/1
