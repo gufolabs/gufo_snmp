@@ -1,0 +1,44 @@
+// ------------------------------------------------------------------------
+// Gufo SNMP: Benchmarks for encode functions
+// ------------------------------------------------------------------------
+// Copyright (C) 2023, Gufo Labs
+// See LICENSE.md for details
+// ------------------------------------------------------------------------
+
+use criterion::{criterion_group, criterion_main, Criterion};
+use gufo_snmp::{
+    ber::{BerEncoder, SnmpOid},
+    buf::Buffer,
+    snmp::get::SnmpGet,
+    snmp::msg::SnmpMessage,
+    snmp::pdu::SnmpPdu,
+    snmp::SnmpVersion,
+};
+
+pub fn bench_get(c: &mut Criterion) {
+    let community = [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63];
+    let msg = SnmpMessage {
+        version: SnmpVersion::V2C,
+        community: &community,
+        pdu: SnmpPdu::GetRequest(SnmpGet {
+            request_id: 0x63ccac7d,
+            vars: vec![
+                SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 3]),
+                SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 2]),
+                SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 6]),
+                SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 4]),
+            ],
+        }),
+    };
+    let mut buf = Buffer::default();
+
+    c.bench_function("encode GET", |b| {
+        b.iter(|| {
+            buf.reset();
+            msg.push_ber(&mut buf);
+        })
+    });
+}
+
+criterion_group!(benches, bench_get);
+criterion_main!(benches);

@@ -13,9 +13,9 @@ use crate::buf::Buffer;
 use crate::error::SnmpError;
 
 pub struct SnmpMessage<'a> {
-    pub(crate) version: SnmpVersion,
-    pub(crate) community: &'a [u8],
-    pub(crate) pdu: SnmpPdu<'a>,
+    pub version: SnmpVersion,
+    pub community: &'a [u8],
+    pub pdu: SnmpPdu<'a>,
 }
 
 impl<'a> TryFrom<&'a [u8]> for SnmpMessage<'a> {

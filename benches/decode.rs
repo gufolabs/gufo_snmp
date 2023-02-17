@@ -13,10 +13,40 @@ use gufo_snmp::ber::{
     SnmpNull, SnmpObjectDescriptor, SnmpOctetString, SnmpOid, SnmpOpaque, SnmpReal,
     SnmpRelativeOid, SnmpTimeTicks, SnmpUInteger32,
 };
+use gufo_snmp::snmp::msg::SnmpMessage;
 
 pub fn bench_header(c: &mut Criterion) {
     let data = [1u8, 1, 0];
     c.bench_function("decode header", |b| b.iter(|| BerHeader::from_ber(&data)));
+}
+
+pub fn bench_getresponse(c:&mut Criterion) {
+    let data = [
+        48u8, 129, 134, // Sequence, 134 bytes
+        2, 1, 1, // ITEGER, v2c
+        4, 6, 112, 117, 98, 108, 105, 99, // OCTET STRING, "public"
+        162, 121, // PDU, Get-Response, 121 byte
+        2, 4, 91, 63, 155, 39, // Request ID, 0x5B3F9B27
+        2, 1, 0, // error-status, 0
+        2, 1, 0, // error-index, 0
+        48, 107, // Varbinds, sequence, 107 bytes
+        48, 22, // Var, sequence, 22 bytes
+        6, 8, 43, 6, 1, 2, 1, 1, 2, 0, // OBJECT IDENTIFIER, 1.3.6.1.2.1.1.2.0
+        6, 10, 43, 6, 1, 4, 1, 191, 8, 3, 2,
+        10, // OBJECT IDENTIFIER, 1.3.6.1.4.1.1.8072.3.2.10
+        48, 16, // Var, sequence, 16  bytes
+        6, 8, 43, 6, 1, 2, 1, 1, 3, 0, // OBJECT IDENTIFIER, 1.3.6.1.2.1.1.3.0
+        67, 4, 1, 53, 16, 171, // TimeTicks, 0x013510AB
+        48, 26, // Var, sequennce, 26 bytes
+        6, 8, 43, 6, 1, 2, 1, 1, 6, 0, // OBJECT IDENTIFIER, 1.3.6.1.2.1.1.6.0
+        4, 14, 71, 117, 102, 111, 32, 83, 78, 77, 80, 32, 84, 101, 115,
+        116, // OCTET STRING
+        48, 35, // Var, sequence, 35 bytes
+        6, 8, 43, 6, 1, 2, 1, 1, 4, 0, // OBJECT IDENTIFIER, 1.3.6.1.2.1.1.4.0
+        4, 23, 116, 101, 115, 116, 32, 60, 116, 101, 115, 116, 64, 101, 120, 97, 109, 112, 108,
+        101, 46, 99, 111, 109, 62, // OCTET STRING
+    ];
+    c.bench_function("decode GETRESPONSE", |b| b.iter(|| SnmpMessage::try_from(data.as_ref())));
 }
 
 pub fn bench_bool(c: &mut Criterion) {
@@ -127,6 +157,7 @@ pub fn bench_uinteger32(c: &mut Criterion) {
 criterion_group!(
     benches,
     bench_header,
+    bench_getresponse,
     bench_bool,
     bench_counter32,
     bench_counter64,

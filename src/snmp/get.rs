@@ -13,8 +13,8 @@ use nom::IResult;
 const DOUBLE_ZEROES: [u8; 6] = [2u8, 1, 0, 2, 1, 0];
 
 pub struct SnmpGet {
-    pub(crate) request_id: i64,
-    pub(crate) vars: Vec<SnmpOid>,
+    pub request_id: i64,
+    pub vars: Vec<SnmpOid>,
 }
 
 impl<'a> TryFrom<&'a [u8]> for SnmpGet {
