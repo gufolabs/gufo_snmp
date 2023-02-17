@@ -20,7 +20,7 @@ pub fn bench_header(c: &mut Criterion) {
     c.bench_function("decode header", |b| b.iter(|| BerHeader::from_ber(&data)));
 }
 
-pub fn bench_getresponse(c:&mut Criterion) {
+pub fn bench_getresponse(c: &mut Criterion) {
     let data = [
         48u8, 129, 134, // Sequence, 134 bytes
         2, 1, 1, // ITEGER, v2c
@@ -39,14 +39,15 @@ pub fn bench_getresponse(c:&mut Criterion) {
         67, 4, 1, 53, 16, 171, // TimeTicks, 0x013510AB
         48, 26, // Var, sequennce, 26 bytes
         6, 8, 43, 6, 1, 2, 1, 1, 6, 0, // OBJECT IDENTIFIER, 1.3.6.1.2.1.1.6.0
-        4, 14, 71, 117, 102, 111, 32, 83, 78, 77, 80, 32, 84, 101, 115,
-        116, // OCTET STRING
+        4, 14, 71, 117, 102, 111, 32, 83, 78, 77, 80, 32, 84, 101, 115, 116, // OCTET STRING
         48, 35, // Var, sequence, 35 bytes
         6, 8, 43, 6, 1, 2, 1, 1, 4, 0, // OBJECT IDENTIFIER, 1.3.6.1.2.1.1.4.0
         4, 23, 116, 101, 115, 116, 32, 60, 116, 101, 115, 116, 64, 101, 120, 97, 109, 112, 108,
         101, 46, 99, 111, 109, 62, // OCTET STRING
     ];
-    c.bench_function("decode GETRESPONSE", |b| b.iter(|| SnmpMessage::try_from(data.as_ref())));
+    c.bench_function("decode GETRESPONSE", |b| {
+        b.iter(|| SnmpMessage::try_from(data.as_ref()))
+    });
 }
 
 pub fn bench_bool(c: &mut Criterion) {
