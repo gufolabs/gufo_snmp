@@ -6,11 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 To see unreleased changes, please see the [CHANGELOG on the main branch guide](https://github.com/gufolabs/gufo_snmp/blob/main/CHANGELOG.md).
 
-## 0.1.1 - 2023-02-17
+## Unreleased
 
 ### Added
 
-* Benchmarks
+* docs: Benchmarks
+
+### Infrastructure
+
+* Iai benchmarks
+* `fmt-iai.py` tool
+
+## 0.1.1 - 2023-02-17
 
 ### Fixed
 
@@ -22,6 +29,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 * Rust 1.67.1
 * Ruff 0.0.246
+* Criterion Benchmarks
 
 ## 0.1.0 - 2023-02-02
 

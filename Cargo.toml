@@ -19,11 +19,20 @@ socket2 = {version = "0.4", features = ["all"]}
 
 [dev-dependencies]
 criterion = "0.4"
+iai = "0.1"
 
 [[bench]]
 harness = false
-name = "decode"
+name = "cri_decode"
 
 [[bench]]
 harness = false
-name = "encode"
+name = "cri_encode"
+
+[[bench]]
+harness = false
+name = "iai_decode"
+
+[[bench]]
+harness = false
+name = "iai_encode"

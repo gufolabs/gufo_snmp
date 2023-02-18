@@ -28,6 +28,7 @@ nav:
       - Code of Conduct: CODE_OF_CONDUCT.md
   - Supported Standards: standards.md
   - Supported BER Types: types.md
+  - Benchmarks: benchmarks.md
   - FAQ: faq.md
   - Changelog: CHANGELOG.md
   - License: LICENSE.md

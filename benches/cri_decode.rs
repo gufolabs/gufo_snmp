@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo SNMP: Benchmarks for decode functions
+// Gufo SNMP: Benchmarks for decode functions (Criterion)
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details

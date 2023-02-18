@@ -1,11 +1,10 @@
 // ------------------------------------------------------------------------
-// Gufo SNMP: Benchmarks for encode functions
+// Gufo SNMP: Benchmarks for encode functions (Iai)
 // ------------------------------------------------------------------------
 // Copyright (C) 2023, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use criterion::{criterion_group, criterion_main, Criterion};
 use gufo_snmp::{
     ber::{BerEncoder, SnmpOid},
     buf::Buffer,
@@ -14,8 +13,9 @@ use gufo_snmp::{
     snmp::pdu::SnmpPdu,
     snmp::SnmpVersion,
 };
+use iai::black_box;
 
-pub fn bench_get(c: &mut Criterion) {
+pub fn encode_get() {
     let community = [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63];
     let msg = SnmpMessage {
         version: SnmpVersion::V2C,
@@ -31,14 +31,7 @@ pub fn bench_get(c: &mut Criterion) {
         }),
     };
     let mut buf = Buffer::default();
-
-    c.bench_function("encode GET", |b| {
-        b.iter(|| {
-            buf.reset();
-            msg.push_ber(&mut buf);
-        })
-    });
+    msg.push_ber(black_box(&mut buf));
 }
 
-criterion_group!(benches, bench_get);
-criterion_main!(benches);
+iai::main!(encode_get);
