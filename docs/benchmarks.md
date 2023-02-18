@@ -8,7 +8,7 @@ bencmark framework to estimate performance of the critical code paths.
 | Name                    | Inst.[^1] | L1 Acc.[^2] | L2 Acc.[^3] | RAM Acc.[^4] | Est. Cycles [^5] |
 | ----------------------- | --------: | ----------: | ----------: | -----------: | ---------------: |
 | decode_header           |        56 |          72 |           2 |            8 |              362 |
-| decode_getresponse      |      7505 |       10417 |          15 |          106 |            14202 |
+| decode_getresponse      |      5045 |        7038 |          12 |          103 |            10703 |
 | decode_bool             |       123 |         169 |           3 |           14 |              674 |
 | decode_counter32        |       154 |         203 |           2 |           15 |              738 |
 | decode_counter64        |       154 |         201 |           3 |           16 |              776 |
@@ -17,13 +17,13 @@ bencmark framework to estimate performance of the critical code paths.
 | decode_ipaddress        |       132 |         181 |           3 |           15 |              721 |
 | decode_null             |       113 |         153 |           3 |           13 |              623 |
 | decode_objectdescriptor |       118 |         165 |           2 |           14 |              665 |
-| decode_oid              |       970 |        1316 |           5 |           35 |             2566 |
+| decode_oid              |       478 |         655 |           3 |           21 |             1405 |
 | decode_octetstring      |       136 |         186 |           4 |           14 |              696 |
 | decode_opaque           |       136 |         187 |           3 |           14 |              692 |
 | decode_real_nr1         |       305 |         380 |           6 |           24 |             1250 |
 | decode_real_nr2         |       484 |         600 |           6 |           41 |             2065 |
 | decode_real_nr3         |       460 |         573 |           7 |           41 |             2043 |
-| decode_relative_oid     |       431 |         594 |           3 |           26 |             1519 |
+| decode_relative_oid     |       388 |         534 |           3 |           20 |             1249 |
 | decode_timeticks        |       170 |         224 |           3 |           13 |              694 |
 | decode_uinteger32       |       170 |         224 |           2 |           14 |              724 |
 | encode_get              |      2968 |        3936 |          10 |           79 |             6751 |

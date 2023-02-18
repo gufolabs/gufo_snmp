@@ -27,11 +27,14 @@ impl<'a> BerDecoder<'a> for SnmpOid {
     // Implement X.690 pp 8.19: Encoding of an object identifier value
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
         // First two elements
-        let mut v = Vec::<u32>::new();
-        v.extend_from_slice(&[(i[0] / 40) as u32, (i[0] % 40) as u32]);
+        let mut v = Vec::<u32>::with_capacity(h.length + 1);
+        let first = i[0] as u32;
+        let (si1, si2) = (first / 40, first % 40);
+        v.push(si1);
+        v.push(si2);
         // Rest of them
         let mut b = 0;
-        for x in i[1..h.length].iter() {
+        for &x in i[1..h.length].iter() {
             b = (b << 7) + ((x & 0x7f) as u32);
             if x & 0x80 == 0 {
                 v.push(b);

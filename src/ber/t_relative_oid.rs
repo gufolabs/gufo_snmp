@@ -18,7 +18,7 @@ impl<'a> BerDecoder<'a> for SnmpRelativeOid {
 
     // Implement X.690 pp 8.20: Encoding of a relative object identifier value
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
-        let mut v = Vec::<u32>::new();
+        let mut v = Vec::<u32>::with_capacity(h.length + 1);
         let mut b = 0;
         for &x in i[..h.length].iter() {
             b = (b << 7) + ((x & 0x7f) as u32);

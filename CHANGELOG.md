@@ -12,6 +12,13 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 * docs: Benchmarks
 
+### Changed
+
+* Improve BER decoder performance:
+
+  * Typical Get Response: ~25%
+  * Object Identifier: ~46%
+
 ### Infrastructure
 
 * Iai benchmarks
