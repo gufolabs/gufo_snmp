@@ -5,7 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerEncoder, BerHeader, ToPython, TAG_INT};
+use super::{BerDecoder, BerEncoder, BerHeader, Tag, ToPython, TAG_INT};
 use crate::buf::Buffer;
 use crate::error::SnmpError;
 use pyo3::{IntoPy, Py, PyAny, Python};
@@ -16,7 +16,7 @@ pub struct SnmpInt(i64);
 impl<'a> BerDecoder<'a> for SnmpInt {
     const ALLOW_PRIMITIVE: bool = true;
     const ALLOW_CONSTRUCTED: bool = false;
-    const TAG: usize = TAG_INT;
+    const TAG: Tag = TAG_INT;
 
     // Implement X.690 pp 8.3: Encoding of an integer value
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {

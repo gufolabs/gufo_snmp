@@ -16,31 +16,33 @@ pub enum BerClass {
     Private,
 }
 
+pub type Tag = u8;
+
 // BER Tags
-// pub const TAG_END_OF_CONTENTS: usize = 0x0;
-pub const TAG_BOOL: usize = 0x1;
-pub const TAG_INT: usize = 0x2;
-// pub const TAG_BIT_STRING: usize = 0x3;
-pub const TAG_OCTET_STRING: usize = 0x4;
-pub const TAG_NULL: usize = 0x5;
-pub const TAG_OBJECT_ID: usize = 0x6;
-pub const TAG_OBJECT_DESCRIPTOR: usize = 0x7;
-pub const TAG_REAL: usize = 0x9;
-pub const TAG_SEQUENCE: usize = 0x10;
-pub const TAG_RELATIVE_OID: usize = 0xd;
+// pub const TAG_END_OF_CONTENTS: Tag = 0x0;
+pub const TAG_BOOL: Tag = 0x1;
+pub const TAG_INT: Tag = 0x2;
+// pub const TAG_BIT_STRING: Tag = 0x3;
+pub const TAG_OCTET_STRING: Tag = 0x4;
+pub const TAG_NULL: Tag = 0x5;
+pub const TAG_OBJECT_ID: Tag = 0x6;
+pub const TAG_OBJECT_DESCRIPTOR: Tag = 0x7;
+pub const TAG_REAL: Tag = 0x9;
+pub const TAG_SEQUENCE: Tag = 0x10;
+pub const TAG_RELATIVE_OID: Tag = 0xd;
 // SNMP Application Tags
-pub const TAG_APP_IPADDRESS: usize = 0;
-pub const TAG_APP_COUNTER32: usize = 1;
-pub const TAG_APP_GAUGE32: usize = 2;
-pub const TAG_APP_TIMETICKS: usize = 3;
-pub const TAG_APP_OPAQUE: usize = 4;
-// pub const TAG_APP_NSAPADDRESS: usize = 5;
-pub const TAG_APP_COUNTER64: usize = 6;
-pub const TAG_APP_UINTEGER32: usize = 7;
+pub const TAG_APP_IPADDRESS: Tag = 0;
+pub const TAG_APP_COUNTER32: Tag = 1;
+pub const TAG_APP_GAUGE32: Tag = 2;
+pub const TAG_APP_TIMETICKS: Tag = 3;
+pub const TAG_APP_OPAQUE: Tag = 4;
+// pub const TAG_APP_NSAPADDRESS: Tag = 5;
+pub const TAG_APP_COUNTER64: Tag = 6;
+pub const TAG_APP_UINTEGER32: Tag = 7;
 // SNMP Context Tags
-pub const TAG_CTX_NO_SUCH_OBJECT: usize = 0;
-pub const TAG_CTX_NO_SUCH_INSTANCE: usize = 1;
-pub const TAG_CTX_END_OF_MIB_VIEW: usize = 2;
+pub const TAG_CTX_NO_SUCH_OBJECT: Tag = 0;
+pub const TAG_CTX_NO_SUCH_INSTANCE: Tag = 1;
+pub const TAG_CTX_END_OF_MIB_VIEW: Tag = 2;
 
 pub mod header;
 pub use header::BerHeader;
@@ -88,7 +90,7 @@ where
 {
     const ALLOW_PRIMITIVE: bool;
     const ALLOW_CONSTRUCTED: bool;
-    const TAG: usize;
+    const TAG: Tag;
 
     fn decode(i: &'a [u8], hdr: &BerHeader) -> Result<Self, SnmpError>;
 

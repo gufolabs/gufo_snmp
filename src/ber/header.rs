@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::super::error::SnmpError;
-use super::BerClass;
+use super::{BerClass, Tag};
 use nom::{Err, IResult, Needed};
 
 #[derive(Debug)]
@@ -16,7 +16,7 @@ pub struct BerHeader {
     // True if costructed
     pub constructed: bool,
     // Tag
-    pub tag: usize,
+    pub tag: Tag,
     // Object length
     pub length: usize,
 }
@@ -67,19 +67,19 @@ impl BerHeader {
         let tag = match id_octets & 0x1f {
             0x1f => {
                 // > 30
-                let mut n = 0usize;
+                let mut n = 0 as Tag;
                 loop {
                     // @todo: check size
                     let t = i[current];
                     current += 1;
-                    n = (n << 7) | ((t & 0x7f) as usize);
+                    n = (n << 7) | ((t & 0x7f) as Tag);
                     if t & 0x80 == 0 {
                         break;
                     }
                 }
                 n
             }
-            n => n as usize,
+            n => n as Tag,
         };
         // Parse length offset
         // X.690 8.3.1.4-8.3.1.5

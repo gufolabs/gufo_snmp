@@ -7,26 +7,25 @@ bencmark framework to estimate performance of the critical code paths.
 
 | Name                    | Inst.[^1] | L1 Acc.[^2] | L2 Acc.[^3] | RAM Acc.[^4] | Est. Cycles [^5] |
 | ----------------------- | --------: | ----------: | ----------: | -----------: | ---------------: |
-| decode_header           |        56 |          72 |           2 |            8 |              362 |
-| decode_getresponse      |      5045 |        7038 |          12 |          103 |            10703 |
-| decode_bool             |       123 |         169 |           3 |           14 |              674 |
-| decode_counter32        |       154 |         203 |           2 |           15 |              738 |
-| decode_counter64        |       154 |         201 |           3 |           16 |              776 |
-| decode_gauge32          |       154 |         201 |           3 |           16 |              776 |
-| decode_int              |       164 |         212 |           2 |           17 |              817 |
-| decode_ipaddress        |       132 |         181 |           3 |           15 |              721 |
-| decode_null             |       113 |         153 |           3 |           13 |              623 |
-| decode_objectdescriptor |       118 |         165 |           2 |           14 |              665 |
-| decode_oid              |       478 |         655 |           3 |           21 |             1405 |
-| decode_octetstring      |       136 |         186 |           4 |           14 |              696 |
-| decode_opaque           |       136 |         187 |           3 |           14 |              692 |
-| decode_real_nr1         |       305 |         380 |           6 |           24 |             1250 |
-| decode_real_nr2         |       484 |         600 |           6 |           41 |             2065 |
-| decode_real_nr3         |       460 |         573 |           7 |           41 |             2043 |
-| decode_relative_oid     |       388 |         534 |           3 |           20 |             1249 |
-| decode_timeticks        |       170 |         224 |           3 |           13 |              694 |
-| decode_uinteger32       |       170 |         224 |           2 |           14 |              724 |
-| encode_get              |      2968 |        3936 |          10 |           79 |             6751 |
+| decode_header           |        59 |          77 |           2 |            6 |              297 |
+| decode_getresponse      |      5013 |        7006 |          15 |           94 |            10371 |
+| decode_bool             |       119 |         163 |           3 |           13 |              633 |
+| decode_counter32        |       150 |         197 |           2 |           14 |              697 |
+| decode_counter64        |       150 |         196 |           3 |           14 |              701 |
+| decode_gauge32          |       150 |         197 |           3 |           13 |              667 |
+| decode_int              |       160 |         208 |           2 |           14 |              708 |
+| decode_ipaddress        |       127 |         176 |           3 |           12 |              611 |
+| decode_null             |       109 |         148 |           3 |           11 |              548 |
+| decode_objectdescriptor |       114 |         161 |           2 |           11 |              556 |
+| decode_oid              |       474 |         649 |           3 |           20 |             1364 |
+| decode_octetstring      |       132 |         183 |           4 |           10 |              553 |
+| decode_opaque           |       132 |         184 |           3 |           10 |              549 |
+| decode_real_nr1         |       301 |         378 |           5 |           20 |             1103 |
+| decode_real_nr2         |       480 |         593 |           5 |           42 |             2088 |
+| decode_real_nr3         |       456 |         567 |           6 |           41 |             2032 |
+| decode_relative_oid     |       384 |         529 |           3 |           18 |             1174 |
+| decode_timeticks        |       166 |         218 |           4 |           11 |              623 |
+| decode_uinteger32       |       166 |         217 |           2 |           14 |              717 |
 
 [^1]: CPU instructions performed.
 [^2]: L1 cache accesses.

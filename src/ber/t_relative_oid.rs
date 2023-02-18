@@ -5,7 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, SnmpOid, TAG_RELATIVE_OID};
+use super::{BerDecoder, BerHeader, SnmpOid, Tag, TAG_RELATIVE_OID};
 use crate::error::SnmpError;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -14,7 +14,7 @@ pub struct SnmpRelativeOid(pub(crate) Vec<u32>);
 impl<'a> BerDecoder<'a> for SnmpRelativeOid {
     const ALLOW_PRIMITIVE: bool = true;
     const ALLOW_CONSTRUCTED: bool = false;
-    const TAG: usize = TAG_RELATIVE_OID;
+    const TAG: Tag = TAG_RELATIVE_OID;
 
     // Implement X.690 pp 8.20: Encoding of a relative object identifier value
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {

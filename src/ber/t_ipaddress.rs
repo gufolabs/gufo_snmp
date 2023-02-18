@@ -5,7 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, ToPython, TAG_APP_IPADDRESS};
+use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_APP_IPADDRESS};
 use crate::error::SnmpError;
 use pyo3::types::PyString;
 use pyo3::{Py, PyAny, Python};
@@ -15,7 +15,7 @@ pub struct SnmpIpAddress(u8, u8, u8, u8);
 impl<'a> BerDecoder<'a> for SnmpIpAddress {
     const ALLOW_PRIMITIVE: bool = true;
     const ALLOW_CONSTRUCTED: bool = false;
-    const TAG: usize = TAG_APP_IPADDRESS;
+    const TAG: Tag = TAG_APP_IPADDRESS;
 
     // Implement RFC
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {

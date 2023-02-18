@@ -5,7 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, ToPython, TAG_BOOL};
+use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_BOOL};
 use crate::error::SnmpError;
 use pyo3::{IntoPy, Py, PyAny, Python};
 
@@ -14,7 +14,7 @@ pub struct SnmpBool(bool);
 impl<'a> BerDecoder<'a> for SnmpBool {
     const ALLOW_PRIMITIVE: bool = true;
     const ALLOW_CONSTRUCTED: bool = false;
-    const TAG: usize = TAG_BOOL;
+    const TAG: Tag = TAG_BOOL;
 
     // Implement X.690 pp 8.2: Encoding of a boolean value
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {

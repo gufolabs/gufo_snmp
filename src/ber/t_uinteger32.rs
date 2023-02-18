@@ -5,7 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, ToPython, TAG_APP_UINTEGER32};
+use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_APP_UINTEGER32};
 use crate::error::SnmpError;
 use pyo3::{IntoPy, Py, PyAny, Python};
 
@@ -14,7 +14,7 @@ pub struct SnmpUInteger32(pub(crate) u32);
 impl<'a> BerDecoder<'a> for SnmpUInteger32 {
     const ALLOW_PRIMITIVE: bool = true;
     const ALLOW_CONSTRUCTED: bool = false;
-    const TAG: usize = TAG_APP_UINTEGER32;
+    const TAG: Tag = TAG_APP_UINTEGER32;
 
     // Implement RFC
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {

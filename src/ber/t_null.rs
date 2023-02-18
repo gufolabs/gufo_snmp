@@ -5,7 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerEncoder, BerHeader, TAG_NULL};
+use super::{BerDecoder, BerEncoder, BerHeader, Tag, TAG_NULL};
 use crate::buf::Buffer;
 use crate::error::SnmpError;
 
@@ -14,7 +14,7 @@ pub struct SnmpNull;
 impl<'a> BerDecoder<'a> for SnmpNull {
     const ALLOW_PRIMITIVE: bool = true;
     const ALLOW_CONSTRUCTED: bool = false;
-    const TAG: usize = TAG_NULL;
+    const TAG: Tag = TAG_NULL;
 
     // Implement X.690 pp 8.8: Encoding of a null value
     fn decode(_: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {

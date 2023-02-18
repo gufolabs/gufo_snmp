@@ -16,6 +16,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 * Improve BER decoder performance:
 
+  * BER Header: ~18%
   * Typical Get Response: ~25%
   * Object Identifier: ~46%
 

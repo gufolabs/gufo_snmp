@@ -5,7 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, ToPython, TAG_APP_TIMETICKS};
+use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_APP_TIMETICKS};
 use crate::error::SnmpError;
 use pyo3::{IntoPy, Py, PyAny, Python};
 
@@ -14,7 +14,7 @@ pub struct SnmpTimeTicks(pub(crate) u32);
 impl<'a> BerDecoder<'a> for SnmpTimeTicks {
     const ALLOW_PRIMITIVE: bool = true;
     const ALLOW_CONSTRUCTED: bool = false;
-    const TAG: usize = TAG_APP_TIMETICKS;
+    const TAG: Tag = TAG_APP_TIMETICKS;
 
     // Implement RFC
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {

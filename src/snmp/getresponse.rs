@@ -7,7 +7,8 @@
 
 use super::value::SnmpValue;
 use crate::ber::{
-    BerDecoder, SnmpInt, SnmpOid, SnmpRelativeOid, SnmpSequence, TAG_OBJECT_ID, TAG_RELATIVE_OID,
+    BerDecoder, SnmpInt, SnmpOid, SnmpRelativeOid, SnmpSequence, Tag, TAG_OBJECT_ID,
+    TAG_RELATIVE_OID,
 };
 use crate::error::SnmpError;
 
@@ -45,7 +46,7 @@ impl<'a> TryFrom<&'a [u8]> for SnmpGetResponse<'a> {
             // Parse enclosing sequence
             let (rest, vs) = SnmpSequence::from_ber(v_tail)?;
             // Parse oid. May be either absolute or relative
-            let (tail, oid) = match vs.0[0] as usize {
+            let (tail, oid) = match vs.0[0] as Tag {
                 TAG_OBJECT_ID => SnmpOid::from_ber(vs.0)?,
                 TAG_RELATIVE_OID => {
                     if vars.is_empty() {

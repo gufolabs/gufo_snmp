@@ -5,7 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerEncoder, BerHeader, ToPython, TAG_OBJECT_ID};
+use super::{BerDecoder, BerEncoder, BerHeader, Tag, ToPython, TAG_OBJECT_ID};
 use crate::buf::Buffer;
 use crate::error::SnmpError;
 use pyo3::types::PyString;
@@ -22,7 +22,7 @@ pub struct SnmpOid(pub(crate) Vec<u32>);
 impl<'a> BerDecoder<'a> for SnmpOid {
     const ALLOW_PRIMITIVE: bool = true;
     const ALLOW_CONSTRUCTED: bool = false;
-    const TAG: usize = TAG_OBJECT_ID;
+    const TAG: Tag = TAG_OBJECT_ID;
 
     // Implement X.690 pp 8.19: Encoding of an object identifier value
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {

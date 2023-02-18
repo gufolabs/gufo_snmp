@@ -5,7 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, ToPython, TAG_REAL};
+use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_REAL};
 use crate::error::SnmpError;
 use core::str::from_utf8;
 use pyo3::{IntoPy, Py, PyAny, Python};
@@ -15,7 +15,7 @@ pub struct SnmpReal(f64);
 impl<'a> BerDecoder<'a> for SnmpReal {
     const ALLOW_PRIMITIVE: bool = true;
     const ALLOW_CONSTRUCTED: bool = false;
-    const TAG: usize = TAG_REAL;
+    const TAG: Tag = TAG_REAL;
 
     // Implement X.690 pp 8.5: Encoding of a real value
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {

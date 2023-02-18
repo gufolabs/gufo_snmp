@@ -5,19 +5,19 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerClass, BerDecoder, BerHeader, TAG_SEQUENCE};
+use super::{BerClass, BerDecoder, BerHeader, Tag, TAG_SEQUENCE};
 use crate::error::SnmpError;
 use nom::{Err, IResult};
 
 pub struct SnmpOption<'a> {
-    pub tag: usize,
+    pub tag: Tag,
     pub value: &'a [u8],
 }
 
 impl<'a> BerDecoder<'a> for SnmpOption<'a> {
     const ALLOW_PRIMITIVE: bool = false;
     const ALLOW_CONSTRUCTED: bool = true;
-    const TAG: usize = TAG_SEQUENCE;
+    const TAG: Tag = TAG_SEQUENCE;
 
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
         Ok(SnmpOption {
