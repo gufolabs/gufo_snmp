@@ -45,8 +45,9 @@ impl Buffer {
     pub fn data(&self) -> &[u8] {
         &self.data[MAX_SIZE - self.len..]
     }
+    #[inline]
     pub fn push_u8(&mut self, v: u8) -> Result<(), SnmpError> {
-        if self.free() < 1 {
+        if self.is_empty() {
             return Err(SnmpError::OutOfBuffer);
         }
         self.data[MAX_SIZE - self.len - 1] = v;

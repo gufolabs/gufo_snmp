@@ -7,6 +7,12 @@ bencmark framework to estimate performance of the critical code paths.
 
 | Name                    | Inst.[^1] | L1 Acc.[^2] | L2 Acc.[^3] | RAM Acc.[^4] | Est. Cycles [^5] |
 | ----------------------- | --------: | ----------: | ----------: | -----------: | ---------------: |
+| buf_default             |       135 |         142 |           3 |            4 |              297 |
+| buf_push_u8             |         5 |           6 |           1 |            1 |               46 |
+| buf_push                |        58 |          79 |           2 |            4 |              229 |
+| buf_push_ber_len_short  |        20 |          25 |           1 |            4 |              170 |
+| buf_push_ber_len_long   |        22 |          30 |           0 |            3 |              130 |
+| encode_get              |      2945 |        3917 |           8 |           76 |             6617 |
 | decode_header           |        59 |          77 |           2 |            6 |              297 |
 | decode_getresponse      |      5013 |        7006 |          15 |           94 |            10371 |
 | decode_bool             |       119 |         163 |           3 |           13 |              633 |
@@ -26,11 +32,6 @@ bencmark framework to estimate performance of the critical code paths.
 | decode_relative_oid     |       384 |         529 |           3 |           18 |             1174 |
 | decode_timeticks        |       166 |         218 |           4 |           11 |              623 |
 | decode_uinteger32       |       166 |         217 |           2 |           14 |              717 |
-| buf_default             |       135 |         143 |           2 |            4 |              293 |
-| buf_push_u8             |        26 |          37 |           1 |            2 |              112 |
-| buf_push                |        58 |          77 |           3 |            5 |              267 |
-| buf_push_ber_len_short  |        27 |          32 |           2 |            5 |              217 |
-| buf_push_ber_len_long   |        47 |          58 |           0 |            4 |              198 |
 
 [^1]: CPU instructions performed.
 [^2]: L1 cache accesses.
