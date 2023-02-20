@@ -3,7 +3,7 @@
 # Python modules
 from dataclasses import dataclass
 import sys
-from typing import Iterable, Optional, List
+from typing import Iterable, List, Optional
 
 
 @dataclass
@@ -14,6 +14,18 @@ class Bench(object):
     l2: int
     ram: int
     cycles: int
+
+    def adjust(self, base: "Bench") -> "Bench":
+        """Adjust benchmark related to base."""
+
+        return Bench(
+            name=self.name,
+            inst=self.inst - base.inst,
+            l1=self.l1 - base.l1,
+            l2=self.l2 - base.l2,
+            ram=self.ram - base.ram,
+            cycles=self.cycles - base.cycles,
+        )
 
 
 def iter_blocks() -> Iterable[List[str]]:
@@ -56,12 +68,17 @@ def iter_benches() -> Iterable[Bench]:
 
 def main() -> None:
     benches = list(iter_benches())
+    buf_default: Optional[Bench] = None
     print(
         "| Name | Inst.[^1] | L1 Acc.[^2] | L2 Acc.[^3] | "
         "RAM Acc.[^4] | Est. Cycles [^5] |"
     )
     print("| --- | --: | --: | --: | --: | --: |")
     for b in benches:
+        if b.name == "buf_default":
+            buf_default = b
+        elif b.name.startswith("buf_") and buf_default:
+            b = b.adjust(buf_default)
         print(
             f"| {b.name} | {b.inst} | {b.l1} | {b.l2} | {b.ram} | {b.cycles} |"
         )

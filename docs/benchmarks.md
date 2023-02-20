@@ -26,6 +26,11 @@ bencmark framework to estimate performance of the critical code paths.
 | decode_relative_oid     |       384 |         529 |           3 |           18 |             1174 |
 | decode_timeticks        |       166 |         218 |           4 |           11 |              623 |
 | decode_uinteger32       |       166 |         217 |           2 |           14 |              717 |
+| buf_default             |       135 |         143 |           2 |            4 |              293 |
+| buf_push_u8             |        26 |          37 |           1 |            2 |              112 |
+| buf_push                |        58 |          77 |           3 |            5 |              267 |
+| buf_push_ber_len_short  |        27 |          32 |           2 |            5 |              217 |
+| buf_push_ber_len_long   |        47 |          58 |           0 |            4 |              198 |
 
 [^1]: CPU instructions performed.
 [^2]: L1 cache accesses.
