@@ -36,3 +36,7 @@ name = "iai_decode"
 [[bench]]
 harness = false
 name = "iai_encode"
+
+[[bench]]
+harness = false
+name = "iai_buf"

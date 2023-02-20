@@ -38,6 +38,10 @@ impl Buffer {
         self.len
     }
     #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+    #[inline]
     pub fn data(&self) -> &[u8] {
         &self.data[MAX_SIZE - self.len..]
     }
