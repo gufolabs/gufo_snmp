@@ -23,16 +23,19 @@ impl<'a> BerDecoder<'a> for SnmpInt {
         if h.is_empty() {
             return Ok(SnmpInt(0));
         }
-        let mut v = 0i64;
-        for &n in i[..h.length].iter() {
-            v = (v << 8) | (n as i64);
-        }
-        if i[0] & 0x80 == 0x80 {
+        let v = i
+            .iter()
+            .take(h.length)
+            .map(|x| *x as i64)
+            .reduce(|acc, x| (acc << 8) | x)
+            .unwrap_or(0);
+        Ok(SnmpInt(if i[0] & 0x80 == 0 {
+            v
+        } else {
             // Negative number
             let m = 1 << (8 * h.length);
-            v -= m;
-        }
-        Ok(SnmpInt(v))
+            v - m
+        }))
     }
 }
 

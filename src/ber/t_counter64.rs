@@ -18,10 +18,12 @@ impl<'a> BerDecoder<'a> for SnmpCounter64 {
 
     // Implement RFC
     fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
-        let mut v = 0u64;
-        for &n in i[..h.length].iter() {
-            v = (v << 8) | (n as u64);
-        }
+        let v = i
+            .iter()
+            .take(h.length)
+            .map(|x| *x as u64)
+            .reduce(|acc, x| (acc << 8) | x)
+            .unwrap_or(0);
         Ok(SnmpCounter64(v))
     }
 }
