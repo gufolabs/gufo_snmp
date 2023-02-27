@@ -6,8 +6,8 @@
 # ---------------------------------------------------------------------
 
 # Python modules
-from time import perf_counter_ns
 import asyncio
+from time import perf_counter_ns
 
 # Third-party modules
 import pytest
