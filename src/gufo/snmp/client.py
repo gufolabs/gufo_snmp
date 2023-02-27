@@ -10,12 +10,13 @@
 # Python modules
 import asyncio
 from types import TracebackType
-from typing import AsyncIterator, Dict, Iterable, Optional, Tuple, Type
+from typing import AsyncIterator, Dict, Iterable, Optional, Tuple, Type, Union
 
 # Gufo Labs modules
 from ._fast import SnmpClientSocket
 from .getbulk import GetBulkIter
 from .getnext import GetNextIter
+from .policer import BasePolicer, RPSPolicer
 from .typing import ValueType
 from .version import SnmpVersion
 
@@ -40,6 +41,10 @@ class SnmpSession(object):
         max_repetitions: Default max_repetitions for getbulk.
         allow_bulk: Allow using GETBULK in SnmpSession.fetch()
             whenever possible.
+        policer: Optional `BasePolicer` instance to limit
+            outgoing requests. Overrides `limit_rps` parameter.
+        limit_rps: Limit outgouing requests to `limit_rps`
+            requests per second.
 
     Example:
         ``` py
@@ -66,6 +71,8 @@ class SnmpSession(object):
         recv_buffer: int = 0,
         max_repetitions: int = 20,
         allow_bulk: bool = True,
+        policer: Optional[BasePolicer] = None,
+        limit_rps: Optional[Union[int, float]] = None,
     ) -> None:
         self._sock = SnmpClientSocket(
             f"{addr}:{port}",
@@ -82,6 +89,11 @@ class SnmpSession(object):
             self._allow_bulk = False
         else:
             self._allow_bulk = allow_bulk
+        self._policer: Optional[BasePolicer] = None
+        if policer:
+            self._policer = policer
+        elif limit_rps:
+            self._policer = RPSPolicer(float(limit_rps))
 
     async def __aenter__(self: "SnmpSession") -> "SnmpSession":
         """Asynchronous context manager entry."""
@@ -130,6 +142,9 @@ class SnmpSession(object):
                     continue
 
         loop = asyncio.get_running_loop()
+        # Process limits
+        if self._policer:
+            await self._policer.wait()
         # Wait for socket became writable
         w_ev = asyncio.Event()
         loop.add_writer(self._fd, w_ev.set)
@@ -187,6 +202,9 @@ class SnmpSession(object):
                     continue
 
         loop = asyncio.get_running_loop()
+        # Process limits
+        if self._policer:
+            await self._policer.wait()
         # Wait for socket became writable
         w_ev = asyncio.Event()
         loop.add_writer(self._fd, w_ev.set)
@@ -220,7 +238,7 @@ class SnmpSession(object):
                 print(oid, value)
             ```
         """
-        return GetNextIter(self._sock, oid, self._timeout)
+        return GetNextIter(self._sock, oid, self._timeout, self._policer)
 
     def getbulk(
         self: "SnmpSession", oid: str, max_repetitions: Optional[int] = None
@@ -247,6 +265,7 @@ class SnmpSession(object):
             oid,
             self._timeout,
             max_repetitions or self._max_repetitions,
+            self._policer,
         )
 
     def fetch(

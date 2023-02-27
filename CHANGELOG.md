@@ -11,6 +11,8 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 ### Added
 
 * docs: Benchmarks
+* SnmpSession `policer` and `limit_rps` parameters
+  for query rate limiting.
 
 ### Changed
 

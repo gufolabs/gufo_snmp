@@ -10,11 +10,12 @@
 
 # Python modules
 import asyncio
-from typing import Tuple
+from typing import Optional, Tuple
 
 # Gufo Labs Modules
 from ._fast import GetNextIter as _Iter
 from ._fast import SnmpClientSocket
+from .policer import BasePolicer
 from .typing import ValueType
 
 
@@ -22,17 +23,25 @@ class GetNextIter(object):
     """Wrap the series of the GetNext requests.
 
     Args:
+        sock: Requsting SnmpClientSocket instance.
         oid: Base oid.
         timeout: Request timeout.
+        policer: Optional BasePolicer instance to limit
+            outgoing requests.
     """
 
     def __init__(
-        self: "GetNextIter", sock: SnmpClientSocket, oid: str, timeout: float
+        self: "GetNextIter",
+        sock: SnmpClientSocket,
+        oid: str,
+        timeout: float,
+        policer: Optional[BasePolicer] = None,
     ) -> None:
         self._sock = sock
         self._ctx = _Iter(oid)
         self._fd = sock.get_fd()
         self._timeout = timeout
+        self._policer = policer
 
     def __aiter__(self: "GetNextIter") -> "GetNextIter":
         """Return asynchronous iterator."""
@@ -58,6 +67,9 @@ class GetNextIter(object):
                     continue
 
         loop = asyncio.get_running_loop()
+        # Process limits
+        if self._policer:
+            await self._policer.wait()
         # Wait for socket became writable
         w_ev = asyncio.Event()
         loop.add_writer(self._fd, w_ev.set)

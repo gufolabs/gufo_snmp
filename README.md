@@ -59,6 +59,16 @@ async with SnmpSession(addr="127.0.0.1", community="public") as session:
         ...
 ```
 
+*Gufo SNMP* also allows to limit rate of outgoing requests to protect equipment
+from overloadig:
+
+``` py
+async with SnmpSession(addr="127.0.0.1", community="public", limit_rps=10) as session:
+    async for oid, value in  session.fetch("1.3.6.1.2.1.1"):
+        ...
+```
+
+
 *Gufo SNMP* offers various tools for developers, including a wrapper to
 run a local instance of SNMP daemon:
 
@@ -74,6 +84,7 @@ async with Snmpd(), SnmpSession(addr="127.0.0.1", port=10161) as session:
 * High-performance.
 * Zero-copy BER parsing.
 * Full Python typing support.
+* Query rate limiting.
 * Editor completion.
 * Well-tested, battle-proven code.
 
@@ -81,7 +92,6 @@ async with Snmpd(), SnmpSession(addr="127.0.0.1", port=10161) as session:
 
 * SNMPv3 support.
 * SNMP Trap and Inform collector.
-* Query rate-limiting.
 * Incorporation of the [NOC's][NOC] *Compiled MIB* infrastructure.
 
 ## On Gufo Stack

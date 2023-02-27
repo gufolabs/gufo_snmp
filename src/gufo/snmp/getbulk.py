@@ -10,11 +10,12 @@
 
 # Python modules
 import asyncio
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 # Gufo Labs Modules
 from ._fast import GetBulkIter as _Iter
 from ._fast import SnmpClientSocket
+from .policer import BasePolicer
 from .typing import ValueType
 
 
@@ -22,9 +23,11 @@ class GetBulkIter(object):
     """Wrap the series of the GetBulk requests.
 
     Args:
+        sock: Parent SnmpClientSocket.
         oid: Base oid.
         timeout: Request timeout.
         max_repetitions: Max amount of iterms per response.
+        policer: Optional BasePolicer instance to limit requests.
     """
 
     def __init__(
@@ -33,6 +36,7 @@ class GetBulkIter(object):
         oid: str,
         timeout: float,
         max_repetitions: int,
+        policer: Optional[BasePolicer] = None,
     ) -> None:
         self._sock = sock
         self._ctx = _Iter(oid, max_repetitions)
@@ -41,6 +45,7 @@ class GetBulkIter(object):
         self._max_repetitions = max_repetitions
         self._buffer: List[Tuple[str, ValueType]] = []
         self._stop = False
+        self._policer = policer
 
     def __aiter__(self: "GetBulkIter") -> "GetBulkIter":
         """Return asynchronous iterator."""
@@ -72,6 +77,9 @@ class GetBulkIter(object):
             raise StopAsyncIteration
         # Send request
         loop = asyncio.get_running_loop()
+        # Process limits
+        if self._policer:
+            await self._policer.wait()
         r_ev = asyncio.Event()
         loop.add_writer(self._fd, r_ev.set)
         try:
