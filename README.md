@@ -60,7 +60,7 @@ async with SnmpSession(addr="127.0.0.1", community="public") as session:
 ```
 
 *Gufo SNMP* also allows to limit rate of outgoing requests to protect equipment
-from overloadig:
+from overloading:
 
 ``` py
 async with SnmpSession(addr="127.0.0.1", community="public", limit_rps=10) as session:
