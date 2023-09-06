@@ -69,7 +69,7 @@ per second while iterating over the MIB. If you need to send every request in se
 seconds, use the fractions. i.e. `0.25` means *one request per each 4 seconds*.
 
 `SnmpSession` constructor offers lots of configuration variables for fine-tuning. Refer to the 
-[SnmpSession reference](../../reference/gufo/snmp/client#gufo.snmp.client.SnmpSession)
+[SnmpSession reference][gufo.snmp.client.SnmpSession]
 for further details. In our example, we set the agent's address and SNMP community
 to the given values.
 
@@ -82,7 +82,7 @@ We use `SnmpSession.fetch()` function to iterate within base OID just like the
 
 The function is an asynchronous
 iterator returning pairs of `(OID, value)`, so we use `async for` construction to iterate over the values.
-See [SnmpSession.getbulk() reference](../../reference/gufo/snmp/client#gufo.snmp.client.SnmpSession.getbulk)
+See [SnmpSession.getbulk() reference][gufo.snmp.client.SnmpSession.getbulk]
 for further details. 
 
 ``` py title="ratelimit.py" linenums="1" hl_lines="12"

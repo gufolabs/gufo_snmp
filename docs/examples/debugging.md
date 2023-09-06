@@ -54,8 +54,8 @@ clause. Refer to the [get](get.md), [getmany](getmany.md),
 and [getnext](getnext.md) examples for additional details.
 
 Both `Snmpd` and `SnmpSession` are highly configurable, so refer to the
-[Snmpd](../../reference/gufo/snmp/client#gufo.snmp.snmpd.Snmpd) and
-[SnmpSession](../../reference/gufo/snmp/client#gufo.snmp.client.SnmpSession)
+[Snmpd][gufo.snmp.snmpd.Snmpd] and
+[SnmpSession][gufo.snmp.client.SnmpSession]
 references.
 
 ``` py title="debugging.py" linenums="1" hl_lines="9"
@@ -64,7 +64,7 @@ references.
 
 We use `SnmpSession.getnext()` function to iterate within base OID. The function is an asynchronous
 iterator returning pairs of `(OID, value)`, so we use `async for` construction to iterate over the values.
-See [SnmpSession.getnext() reference](../../reference/gufo/snmp/client#gufo.snmp.client.SnmpSession.getnext)
+See [SnmpSession.getnext() reference][gufo.snmp.client.SnmpSession.getnext]
 for further details. 
 
 ``` py title="debugging.py" linenums="1" hl_lines="10"

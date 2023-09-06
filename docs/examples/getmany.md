@@ -63,7 +63,7 @@ the client automatically closes all connections on the exit of context,
 so its lifetime is defined explicitly.
 
 `SnmpSession` constructor offers lots of configuration variables for fine-tuning. Refer to the 
-[SnmpSession reference](../../reference/gufo/snmp/client#gufo.snmp.client.SnmpSession)
+[SnmpSession reference][gufo.snmp.client.SnmpSession]
 for further details. In our example, we set the agent's address and SNMP community
 to the given values.
 
@@ -72,7 +72,7 @@ to the given values.
 ```
 
 We use `SnmpSession.get_many()` function to query multiple OIDs. The function is asynchronous and
-must be awaited. See [SnmpSession.get() reference](../../reference/gufo/snmp/client#gufo.snmp.client.SnmpSession.get_many) for further details.
+must be awaited. See [SnmpSession.get() reference][gufo.snmp.client.SnmpSession.get_many] for further details.
 
 `get_many()` returns a `dict`, where keys are the requested OIDs, and values are the query results.
 
