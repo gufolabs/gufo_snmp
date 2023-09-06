@@ -1,3 +1,7 @@
+---
+hide:
+    - navigation
+---
 # Installation
 
 Install with the pip

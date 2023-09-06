@@ -1,3 +1,7 @@
+---
+hide:
+    - navigation
+---
 # FAQ
 
     What is "Gufo"?

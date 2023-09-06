@@ -1,3 +1,7 @@
+---
+hide:
+    - navigation
+---
 Copyright &copy; 2023, Gufo Labs.
 All rights reserved.
 

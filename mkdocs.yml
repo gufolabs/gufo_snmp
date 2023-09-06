@@ -5,7 +5,7 @@ site_url: "https://docs.gufolabs.com/gufo_snmp/"
 copyright: "&copy; 2023, Gufo Labs"
 site_dir: dist/docs/
 repo_url: https://github.com/gufolabs/gufo_snmp/
-repo_name: GitHub
+repo_name: gufolabs/gufo_snmp
 nav:
   - Home: index.md
   - Installation: installation.md
@@ -27,8 +27,8 @@ nav:
       - Code Base: codebase.md
       - Contributing Guide: CONTRIBUTING.md
       - Code of Conduct: CODE_OF_CONDUCT.md
-  - Supported Standards: standards.md
-  - Supported BER Types: types.md
+      - Supported Standards: standards.md
+      - Supported BER Types: types.md
   - Benchmarks: benchmarks.md
   - FAQ: faq.md
   - Changelog: CHANGELOG.md
@@ -38,6 +38,27 @@ theme:
   name: material
   logo: assets/logo.png
   favicon: assets/logo.png
+  custom_dir: docs/overrides
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      primary: deep purple
+      scheme: default
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
 watch:
   - docs/
   - src/gufo/
@@ -72,3 +93,7 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
+extra:
+  analytics:
+    provider: google
+    property: G-GW3X378HNJ

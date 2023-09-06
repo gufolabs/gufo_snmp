@@ -1,3 +1,7 @@
+---
+hide:
+    - navigation
+---
 # Benchmarks
 
 ## Rust Core Benchmarks
