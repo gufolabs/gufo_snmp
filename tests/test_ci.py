@@ -9,7 +9,8 @@
 import inspect
 import os
 import sys
-from typing import Iterable, Tuple
+from dataclasses import dataclass
+from typing import Iterable
 
 # Third-party modules
 import pytest
@@ -30,13 +31,27 @@ VERSIONS = [
 ]
 
 
-def _iter_actions() -> Iterable[Tuple[str, str, str, str, str]]:
+@dataclass
+class Action(object):
+    path: str
+    job: str
+    step: str
+    action: str
+    version: str
+    expected: str
+
+
+def action_label(action: Action) -> str:
+    return f"{action.path}: {action.job}/{action.step}: {action.action}"
+
+
+def _iter_actions() -> Iterable[Action]:
     versions = {a.split("@")[0]: a.split("@")[1] for a in VERSIONS}
     root = os.path.join(_get_root(), ".github", "workflows")
-    for f in os.listdir(root):
-        if f.startswith(".") or not f.endswith(".yml"):
+    for fn in os.listdir(root):
+        if fn.startswith(".") or not fn.endswith(".yml"):
             continue
-        path = os.path.join(root, f)
+        path = os.path.join(root, fn)
         with open(path) as f:
             data = yaml.safe_load(f)
         for job in data["jobs"]:
@@ -45,18 +60,20 @@ def _iter_actions() -> Iterable[Tuple[str, str, str, str, str]]:
                     uses = step["uses"]
                     for v in versions:
                         if uses.startswith(f"{v}@"):
-                            yield path, job, step["name"], v, uses.split("@")[
-                                1
-                            ], versions[v]
+                            yield Action(
+                                path=fn,
+                                job=job,
+                                step=step["name"],
+                                action=v,
+                                version=uses.split("@")[1],
+                                expected=versions[v],
+                            )
                             break
 
 
-@pytest.mark.parametrize(
-    ("path", "job", "step", "action", "ver", "exp"), list(_iter_actions())
-)
-def test_actions(
-    path: str, job: str, step: str, action: str, ver: str, exp: str
-) -> None:
-    assert (
-        ver == exp
-    ), f"{path}:{job}/{step}: {action}@{exp} required (@{ver} used)"
+@pytest.mark.parametrize("action", list(_iter_actions()), ids=action_label)
+def test_actions(action: Action) -> None:
+    loc = f"{action.path}: {action.job}/{action.step}"
+    v_exp = f"{action.action}@{action.expected}"
+    msg = f"{loc}: {v_exp} required (@{action.version} used)"
+    assert action.version == action.expected, msg

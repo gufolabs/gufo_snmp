@@ -8,6 +8,7 @@
 # Python modules
 import os
 import re
+from functools import lru_cache
 from typing import List, Optional, Set
 
 # Third-party modules
@@ -20,16 +21,14 @@ rx_link_def = re.compile(r"^\[([^\]]+)\]:", re.MULTILINE)
 rx_footnote = re.compile(r"[^\]]\[(\^\d+)\][^\[]", re.MULTILINE)
 
 
+@lru_cache(maxsize=1)
 def get_docs() -> List[str]:
-    global _doc_files
-
-    if _doc_files is None:
-        _doc_files = []
-        for root, _, files in os.walk("docs"):
-            for f in files:
-                if f.endswith(".md") and not f.startswith("."):
-                    _doc_files.append(os.path.join(root, f))
-    return _doc_files
+    doc_files: List[str] = []
+    for root, _, files in os.walk("docs"):
+        for f in files:
+            if f.endswith(".md") and not f.startswith("."):
+                doc_files.append(os.path.join(root, f))
+    return doc_files
 
 
 def get_file(path: str) -> str:
