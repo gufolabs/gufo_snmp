@@ -1,5 +1,63 @@
 [build-system]
-requires = ["setuptools", "wheel", "setuptools-rust"]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=61.2", "wheel", "setuptools-rust"]
+
+[project]
+authors = [{name = "Gufo Labs"}]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Intended Audience :: System Administrators",
+  "Intended Audience :: Telecommunications Industry",
+  "Programming Language :: Rust",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "License :: OSI Approved :: BSD License",
+  "Topic :: Software Development",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: System :: Networking",
+  "Topic :: System :: Networking :: Monitoring",
+  "Operating System :: POSIX :: Linux",
+  "Typing :: Typed",
+]
+dynamic = ["version"]
+keywords = ["error"]
+license = {text = "BSD 3-Clause License"}
+name = "gufo_snmp"
+requires-python = ">=3.8"
+
+[project.readme]
+content-type = "text/markdown"
+file = "README.md"
+
+[project.urls]
+"Bug Tracker" = "https://github.com/gufolabs/gufo_snmp/issues"
+Changelog = "https://github.com/gufolabs/gufo_snmp/blob/master/CHANGELOG.md"
+Documentation = "https://docs.gufolabs.com/gufo_snmp/"
+Homepage = "https://github.com/gufolabs/gufo_snmp/"
+"Source Code" = "https://github.com/gufolabs/gufo_snmp/"
+
+[tool.setuptools]
+include-package-data = true
+package-dir = {"" = "src"}
+zip-safe = false
+
+[tool.setuptools.packages.find]
+namespaces = true
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
+[tool.setuptools.dynamic]
+version = {attr = "gufo.snmp.__version__"}
+
+[tool.distutils.build_rust]
+inplace = true
+release = true
 
 [tool.black]
 line-length = 79

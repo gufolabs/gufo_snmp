@@ -10,7 +10,6 @@ on:
       - "tools/build/setup-rust.sh"
       - "src/**"
       - "tests/**"
-      - "setup.cfg"
       - "setup.py"
       - "pyproject.toml"
     branches:

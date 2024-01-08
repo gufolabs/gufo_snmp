@@ -27,7 +27,6 @@ The code base of the project has following structure:
 * `Dockerfile` - [Dockerfile][Dockerfile] for development container.
 * `mkdocs.yml` - [Mkdocs][Mkdocs] configuration file.
 * `pyproject.toml` - [pyproject.toml][Pyproject] file for python tools configuration.
-* `setup.cfg` - Python library [setup][Setup] configuration.
 
 [Remote Containers]: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers
 [GitHub Workflows]: https://docs.github.com/en/actions/using-workflows
@@ -40,4 +39,3 @@ The code base of the project has following structure:
 [Dockerfile]: https://docs.docker.com/engine/reference/builder/
 [Gitignore]: https://git-scm.com/docs/gitignore
 [Pyproject]: https://pip.pypa.io/en/stable/reference/build-system/pyproject-toml/
-[Setup]: https://docs.python.org/3/distutils/configfile.html

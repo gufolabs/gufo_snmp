@@ -9,8 +9,8 @@ directory matches the project's root directory.
 
 To test the package build run:
 
-```
-$ python -m build --sdist --wheel
+``` shell
+python -m build --sdist --wheel
 ```
 
 Compiled packages will be available in the `dist/` directory.
@@ -19,22 +19,22 @@ Compiled packages will be available in the `dist/` directory.
 
 To rebuild Rust modules for debug and testing:
 
-```
-$ python setup.py build_rust
+``` shell
+python setup.py build_rust
 ```
 
 ## Running tests
 
 Rebuild rust modules, if changed:
 
-```
-$ python setup.py develop
+``` shell
+python setup.py develop
 ```
 
 To run the test suit:
 
-```
-$ pytest -vv
+``` shell
+pytest -vv
 ```
 
 ## Running Lints
@@ -48,13 +48,13 @@ manually before committing to the project.
 requirement in our [Code Quality](codequality.md) standards. To check code
 formatting run:
 
-```
-$ black --check examples/ src/ tests/
+``` shell
+black --check examples/ src/ tests/
 ```
 
 To fix formatting errors run:
-```
-$ black examples/ src/ tests/
+``` shell
+black examples/ src/ tests/
 ```
 
 We recommend setting python code formatting on file saving
@@ -67,8 +67,8 @@ out of the box).
 requirement in our [Code Quality](codequality.md) standards. To check code
 for linting errors run:
 
-```
-$ ruff src/ tests/
+``` shell
+ruff src/ tests/
 ```
 
 ### Python Code Static Checks
@@ -77,28 +77,28 @@ $ ruff src/ tests/
 requirement in our [Code Quality](codequality.md) standards. To check code
 for typing errors run:
 
-```
-$ mypy --strict src/
+``` shell
+mypy --strict src/
 ```
 
 ## Python Test Code Coverage Check
 
 To evaluate code coverage run tests:
 
-```
-$ coverage run -m pytest -vv
+``` shell
+coverage run -m pytest -vv
 ```
 
 To report the coverage after the test run:
 
-```
-$ coverage report
+``` shell
+coverage report
 ```
 
 To show line-by-line coverage:
 
 ```
-$ coverage html
+coverage html
 ```
 
 Then open `dist/coverage/index.html` file in your browser.
@@ -107,8 +107,8 @@ Then open `dist/coverage/index.html` file in your browser.
 
 To rebuild and check documentation run
 
-```
-$ mkdocs serve
+``` shell
+mkdocs serve
 ```
 
 We recommend using [Grammarly][Grammarly] service to check
@@ -124,14 +124,14 @@ crate-type = ["cdylib"] # Comment for bench
 
 and uncomment
 
-```
+``` toml
 # crate-type = ["cdylib", "rlib"] # Uncomment for bench
 ```
 
 Then run bencmarks:
 
-```
-$ cargo bench
+``` shell
+cargo bench
 ```
 
 Revert `Cargo.toml` when you completed.
