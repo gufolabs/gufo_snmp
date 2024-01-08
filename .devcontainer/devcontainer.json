@@ -23,7 +23,7 @@
     "customizations": {
         "vscode": {
             "settings": {
-                "python.pythonPath": "/usr/local/bin/python",
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
                 "[python]": {
                     "editor.defaultFormatter": "ms-python.black-formatter",
                     "black-formatter.path": "/usr/local/bin/black",
