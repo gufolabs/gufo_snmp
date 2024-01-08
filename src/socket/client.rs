@@ -5,6 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
+use super::RequestId;
 use crate::ber::{BerEncoder, SnmpOid, ToPython};
 use crate::buf::Buffer;
 use crate::error::SnmpError;
@@ -21,7 +22,6 @@ use pyo3::{
     prelude::*,
     types::{PyDict, PyList, PyTuple},
 };
-use rand::Rng;
 use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 use std::net::SocketAddr;
 use std::os::fd::AsRawFd;
@@ -33,7 +33,7 @@ pub struct SnmpClientSocket {
     addr: SockAddr,
     community: String,
     version: SnmpVersion,
-    request_id: i64,
+    request_id: RequestId,
     buf: Buffer,
 }
 
@@ -99,7 +99,7 @@ impl SnmpClientSocket {
             addr: sock_addr.into(),
             community,
             version,
-            request_id: 0,
+            request_id: RequestId::default(),
             buf: Buffer::default(),
         })
     }
@@ -129,14 +129,12 @@ impl SnmpClientSocket {
     fn send_getnext(&mut self, iter: &GetNextIter) -> PyResult<()> {
         // Start from clear buffer
         self.buf.reset();
-        // Get new request id
-        let request_id = self.new_request_id();
         // Encode message
         let msg = SnmpMessage {
             version: self.version.clone(),
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetNextRequest(SnmpGet {
-                request_id,
+                request_id: self.request_id.next(),
                 vars: vec![iter.get_next_oid()],
             }),
         };
@@ -152,14 +150,12 @@ impl SnmpClientSocket {
     fn send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
         // Start from clear buffer
         self.buf.reset();
-        // Get new request id
-        let request_id = self.new_request_id();
         // Encode message
         let msg = SnmpMessage {
             version: self.version.clone(),
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetBulkRequest(SnmpGetBulk {
-                request_id,
+                request_id: self.request_id.next(),
                 non_repeaters: 0,
                 max_repetitions: iter.get_max_repetitions(),
                 vars: vec![iter.get_next_oid()],
@@ -197,7 +193,7 @@ impl SnmpClientSocket {
             match msg.pdu {
                 SnmpPdu::GetResponse(resp) => {
                     // Check request id
-                    if resp.request_id != self.request_id {
+                    if !self.request_id.check(resp.request_id) {
                         continue; // Not our request
                     }
                     // Check error_index
@@ -250,7 +246,7 @@ impl SnmpClientSocket {
             match msg.pdu {
                 SnmpPdu::GetResponse(resp) => {
                     // Check request id
-                    if resp.request_id != self.request_id {
+                    if !self.request_id.check(resp.request_id) {
                         continue; // Not our request
                     }
                     // Check error_index
@@ -301,7 +297,7 @@ impl SnmpClientSocket {
             match msg.pdu {
                 SnmpPdu::GetResponse(resp) => {
                     // Check request id
-                    if resp.request_id != self.request_id {
+                    if !self.request_id.check(resp.request_id) {
                         continue; // Not our request
                     }
                     // Check error_index
@@ -355,7 +351,7 @@ impl SnmpClientSocket {
             match msg.pdu {
                 SnmpPdu::GetResponse(resp) => {
                     // Check request id
-                    if resp.request_id != self.request_id {
+                    if !self.request_id.check(resp.request_id) {
                         continue; // Not our request
                     }
                     // Check error_index
@@ -420,24 +416,18 @@ impl SnmpClientSocket {
         }
         Err(PyOSError::new_err("unable to set buffer size"))
     }
-    //
-    fn new_request_id(&mut self) -> i64 {
-        let mut rng = rand::thread_rng();
-        let x: i64 = rng.gen();
-        self.request_id = x & 0x7fffffff;
-        self.request_id
-    }
     /// Send GET request
     fn _send_get(&mut self, vars: Vec<SnmpOid>) -> PyResult<()> {
         // Start from clear buffer
         self.buf.reset();
-        // Get new request id
-        let request_id = self.new_request_id();
         // Encode message
         let msg = SnmpMessage {
             version: self.version.clone(),
             community: self.community.as_ref(),
-            pdu: SnmpPdu::GetRequest(SnmpGet { request_id, vars }),
+            pdu: SnmpPdu::GetRequest(SnmpGet {
+                request_id: self.request_id.next(),
+                vars,
+            }),
         };
         msg.push_ber(&mut self.buf)
             .map_err(|_| PyValueError::new_err("failed to encode message"))?;
