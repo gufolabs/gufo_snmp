@@ -1,5 +1,5 @@
 # Lint Requirements
 black==23.1.0
-mypy==0.991
-ruff==0.0.246
+mypy==1.5.1
+ruff==0.1.5
 types-PyYAML==6.0.12.3
