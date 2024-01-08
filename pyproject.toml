@@ -151,10 +151,12 @@ max-complexity = 15
 ]
 "tests/*.py" = [
   "D100", # Missing docstring in public module
+  "D101", # Missing docstring in public class
   "D103", # Missing docstring in public function
   "S101", # Use of assert detected
   "PT011", # {exc} is too broad, set the `match` parameter or use a more specific exception.
   "PLR2004", # Magic value used in comparison, consider replacing {value} with a constant variable
+  "S311", # Standard pseudo-random generators are not suitable for cryptographic purposes
 ]
 [tool.mypy]
 explicit_package_bases = true
