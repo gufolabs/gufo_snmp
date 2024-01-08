@@ -87,6 +87,9 @@ max-complexity = 15
   "D100", # Missing docstring in public module
   "D103", # Missing docstring in public function
 ]
+"src/gufo/snmp/snmpd.py" = [
+  "S603", # `subprocess` call: check for execution of untrusted input
+]
 "tests/*.py" = [
   "D100", # Missing docstring in public module
   "D103", # Missing docstring in public function
