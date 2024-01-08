@@ -6,6 +6,8 @@
 // ------------------------------------------------------------------------
 
 pub mod client;
-pub mod reqid;
-pub use client::{GetBulkIter, GetNextIter, SnmpClientSocket};
+mod iter;
+mod reqid;
+pub use client::SnmpClientSocket;
+pub use iter::{GetBulkIter, GetNextIter};
 use reqid::RequestId;
