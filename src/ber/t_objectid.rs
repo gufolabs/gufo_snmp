@@ -59,7 +59,7 @@ impl BerEncoder for SnmpOid {
         // Push length
         buf.push_ber_len(buf.len() - start_len)?;
         // Push tag
-        buf.push_u8(TAG_OBJECT_ID as u8)?;
+        buf.push_u8(TAG_OBJECT_ID)?;
         Ok(())
     }
 }

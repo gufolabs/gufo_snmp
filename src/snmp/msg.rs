@@ -51,7 +51,7 @@ impl<'a> BerEncoder for SnmpMessage<'a> {
         // Push community
         buf.push(self.community)?;
         buf.push_ber_len(self.community.len())?;
-        buf.push_u8(TAG_OCTET_STRING as u8)?;
+        buf.push_u8(TAG_OCTET_STRING)?;
         // Push version
         self.version.push_ber(buf)?;
         // Push top-level sequence

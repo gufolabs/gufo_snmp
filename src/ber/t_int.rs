@@ -39,7 +39,7 @@ impl<'a> BerDecoder<'a> for SnmpInt {
     }
 }
 
-const ZERO_BER: [u8; 3] = [2u8, 1, 0];
+const ZERO_BER: [u8; 3] = [TAG_INT, 1, 0];
 
 impl BerEncoder for SnmpInt {
     fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
@@ -67,7 +67,7 @@ impl BerEncoder for SnmpInt {
                 // Write length
                 buf.push_ber_len(buf.len() - start)?;
                 // Write tag
-                buf.push_u8(TAG_INT as u8)?;
+                buf.push_u8(TAG_INT)?;
                 Ok(())
             }
             Ordering::Less => {
@@ -103,7 +103,7 @@ impl BerEncoder for SnmpInt {
                 // Write length
                 buf.push_ber_len(buf.len() - start)?;
                 // Write tag
-                buf.push_u8(TAG_INT as u8)?;
+                buf.push_u8(TAG_INT)?;
                 Ok(())
             }
         }
