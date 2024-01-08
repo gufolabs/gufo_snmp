@@ -20,7 +20,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 * devcontainer: Move `settings` to the `customisations.vscode.settings`
 * docs: mkdocs-material 9.2.3
-* Rust 1.72.0
+* Rust 1.75.0
 
 ## 0.2.0 - 2023-02-27
 

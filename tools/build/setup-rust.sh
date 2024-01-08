@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------
 # Gufo Labs: Install and setup rust
 # ------------------------------------------------------------------------
-# Copyright (C) 2023, Gufo Labs
+# Copyright (C) 2023-24, Gufo Labs
 # ------------------------------------------------------------------------
 
 set -x
@@ -13,7 +13,7 @@ if [ -z "${RUST_ARCH}" ]; then
     exit 2
 fi
 
-RUST_VERSION=${RUST_VERSION:-1.72.0}
+RUST_VERSION=${RUST_VERSION:-1.75.0}
 
 # @todo: Allow override
 export RUSTUP_HOME=${RUSTUP_HOME:-/usr/local/rustup}
