@@ -22,6 +22,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 * docs: mkdocs-material 9.2.3
 * Rust 1.75.0
 * PyO3 0.20
+* socket2 0.5
 
 ## 0.2.0 - 2023-02-27
 
