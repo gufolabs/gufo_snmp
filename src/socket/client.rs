@@ -6,9 +6,9 @@
 // ------------------------------------------------------------------------
 
 use super::iter::{GetBulkIter, GetNextIter};
-use super::RequestId;
-use crate::ber::{BerEncoder, SnmpOid, ToPython};
-use crate::buf::Buffer;
+use super::reqid::RequestId;
+use super::transport::SnmpTransport;
+use crate::ber::{SnmpOid, ToPython};
 use crate::error::SnmpError;
 use crate::snmp::get::SnmpGet;
 use crate::snmp::getbulk::SnmpGetBulk;
@@ -18,24 +18,19 @@ use crate::snmp::value::SnmpValue;
 use crate::snmp::SnmpVersion;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::{
-    exceptions::PyBlockingIOError,
-    exceptions::{PyOSError, PyStopAsyncIteration, PyValueError},
+    exceptions::{PyStopAsyncIteration, PyValueError},
     prelude::*,
     types::{PyDict, PyList, PyTuple},
 };
-use socket2::{Domain, Protocol, SockAddr, Socket, Type};
-use std::net::SocketAddr;
 use std::os::fd::AsRawFd;
 
 /// Python class wrapping socket implementation
 #[pyclass]
 pub struct SnmpClientSocket {
-    io: Socket,
-    addr: SockAddr,
+    io: SnmpTransport,
     community: String,
     version: SnmpVersion,
     request_id: RequestId,
-    buf: Buffer,
 }
 
 #[pymethods]
@@ -50,45 +45,18 @@ impl SnmpClientSocket {
         send_buffer_size: usize,
         recv_buffer_size: usize,
     ) -> PyResult<Self> {
+        // Transport
+        let io = SnmpTransport::new(addr, tos, send_buffer_size, recv_buffer_size)?;
         // Check version
         let version = version
             .try_into()
             .map_err(|_| PyValueError::new_err("invalid version"))?;
-        // Parse address
-        let sock_addr = addr
-            .parse()
-            .map_err(|_| PyOSError::new_err("invalid address"))?;
-        // Detect the socket domain
-        let domain = match sock_addr {
-            SocketAddr::V4(_) => Domain::IPV4,
-            SocketAddr::V6(_) => Domain::IPV6,
-        };
-        // Create internal socket
-        let io = Socket::new(domain, Type::DGRAM, Some(Protocol::UDP))
-            .map_err(|e| PyOSError::new_err(e.to_string()))?;
-        // Mark socket as non-blocking
-        io.set_nonblocking(true)
-            .map_err(|e| PyOSError::new_err(e.to_string()))?;
-        // Set ToS
-        if tos > 0 {
-            io.set_tos(tos)
-                .map_err(|e| PyOSError::new_err(e.to_string()))?;
-        }
-        // Set buffers
-        if send_buffer_size > 0 {
-            Self::set_send_buffer_size(&io, send_buffer_size)?;
-        }
-        if recv_buffer_size > 0 {
-            Self::set_recv_buffer_size(&io, recv_buffer_size)?;
-        }
         //
         Ok(Self {
             io,
-            addr: sock_addr.into(),
             community,
             version,
             request_id: RequestId::default(),
-            buf: Buffer::default(),
         })
     }
     /// Get socket's file descriptor
@@ -97,49 +65,47 @@ impl SnmpClientSocket {
     }
     // Prepare and send GET request with single oid
     fn send_get(&mut self, oid: &str) -> PyResult<()> {
-        // Encode oid
-        let b_oid = SnmpOid::try_from(oid).map_err(|_| PyValueError::new_err("invalid oid"))?;
-        // Send
-        self._send_get(vec![b_oid])
+        Ok(self.io.send(SnmpMessage {
+            version: self.version.clone(),
+            community: self.community.as_ref(),
+            pdu: SnmpPdu::GetRequest(SnmpGet {
+                request_id: self.request_id.next(),
+                vars: vec![
+                    SnmpOid::try_from(oid).map_err(|_| PyValueError::new_err("invalid oid"))?
+                ],
+            }),
+        })?)
     }
     // Prepare and send GET request with multiple oids
     fn send_get_many(&mut self, oids: Vec<&str>) -> PyResult<()> {
-        // Encode oids
-        let vars = oids
-            .into_iter()
-            .map(SnmpOid::try_from)
-            .collect::<Result<Vec<SnmpOid>, SnmpError>>()
-            .map_err(|_| PyValueError::new_err("invalid oid"))?;
-        // Send
-        self._send_get(vars)
+        Ok(self.io.send(SnmpMessage {
+            version: self.version.clone(),
+            community: self.community.as_ref(),
+            pdu: SnmpPdu::GetRequest(SnmpGet {
+                request_id: self.request_id.next(),
+                vars: oids
+                    .into_iter()
+                    .map(SnmpOid::try_from)
+                    .collect::<Result<Vec<SnmpOid>, SnmpError>>()
+                    .map_err(|_| PyValueError::new_err("invalid oid"))?,
+            }),
+        })?)
     }
     // Send GetNext request according to iter
     fn send_getnext(&mut self, iter: &GetNextIter) -> PyResult<()> {
-        // Start from clear buffer
-        self.buf.reset();
-        // Encode message
-        let msg = SnmpMessage {
+        Ok(self.io.send(SnmpMessage {
             version: self.version.clone(),
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetNextRequest(SnmpGet {
                 request_id: self.request_id.next(),
                 vars: vec![iter.get_next_oid()],
             }),
-        };
-        msg.push_ber(&mut self.buf)
-            .map_err(|_| PyValueError::new_err("failed to encode message"))?;
-        // Send
-        self.io
-            .send_to(self.buf.data(), &self.addr)
-            .map_err(|_| PyOSError::new_err("failed to send"))?;
-        Ok(())
+        })?)
     }
     // Send GetBulk request according to iter
     fn send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
-        // Start from clear buffer
-        self.buf.reset();
         // Encode message
-        let msg = SnmpMessage {
+        Ok(self.io.send(SnmpMessage {
             version: self.version.clone(),
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetBulkRequest(SnmpGetBulk {
@@ -148,28 +114,13 @@ impl SnmpClientSocket {
                 max_repetitions: iter.get_max_repetitions(),
                 vars: vec![iter.get_next_oid()],
             }),
-        };
-        msg.push_ber(&mut self.buf)
-            .map_err(|_| PyValueError::new_err("failed to encode message"))?;
-        // Send
-        self.io
-            .send_to(self.buf.data(), &self.addr)
-            .map_err(|_| PyOSError::new_err("failed to send"))?;
-        Ok(())
+        })?)
     }
     // Try to receive GETRESPONSE
     fn recv_getresponse(&mut self, py: Python) -> PyResult<Option<PyObject>> {
         loop {
-            // Receive response
-            let size = match self.io.recv_from(self.buf.as_mut()) {
-                Ok((s, _)) => s,
-                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                    return Err(PyBlockingIOError::new_err("blocked"))
-                }
-                Err(e) => return Err(PyOSError::new_err(e.to_string())),
-            };
-            // Parse response
-            let msg = SnmpMessage::try_from(self.buf.as_slice(size))?;
+            // Receive and decode message
+            let msg = self.io.recv::<SnmpMessage>()?;
             // Check version match
             if msg.version != self.version {
                 continue; // Mismatched version, not our response.
@@ -213,16 +164,8 @@ impl SnmpClientSocket {
     }
     fn recv_getresponse_many(&mut self, py: Python) -> PyResult<PyObject> {
         loop {
-            // Receive response
-            let size = match self.io.recv_from(self.buf.as_mut()) {
-                Ok((s, _)) => s,
-                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                    return Err(PyBlockingIOError::new_err("blocked"))
-                }
-                Err(e) => return Err(PyOSError::new_err(e.to_string())),
-            };
-            // Parse response
-            let msg = SnmpMessage::try_from(self.buf.as_slice(size))?;
+            // Receive and decode message
+            let msg = self.io.recv::<SnmpMessage>()?;
             // Check version match
             if msg.version != self.version {
                 continue; // Mismatched version, not our response.
@@ -264,16 +207,8 @@ impl SnmpClientSocket {
         py: Python,
     ) -> PyResult<(PyObject, PyObject)> {
         loop {
-            // Receive response
-            let size = match self.io.recv_from(self.buf.as_mut()) {
-                Ok((s, _)) => s,
-                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                    return Err(PyBlockingIOError::new_err("blocked"))
-                }
-                Err(e) => return Err(PyOSError::new_err(e.to_string())),
-            };
-            // Parse response
-            let msg = SnmpMessage::try_from(self.buf.as_slice(size))?;
+            // Receive and decode message
+            let msg = self.io.recv::<SnmpMessage>()?;
             // Check version match
             if msg.version != self.version {
                 continue; // Mismatched version, not our response.
@@ -318,16 +253,8 @@ impl SnmpClientSocket {
     // Try to receive GETRESPONSE for GETBULK
     fn recv_getresponse_bulk(&mut self, iter: &mut GetBulkIter, py: Python) -> PyResult<PyObject> {
         loop {
-            // Receive response
-            let size = match self.io.recv_from(self.buf.as_mut()) {
-                Ok((s, _)) => s,
-                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                    return Err(PyBlockingIOError::new_err("blocked"))
-                }
-                Err(e) => return Err(PyOSError::new_err(e.to_string())),
-            };
-            // Parse response
-            let msg = SnmpMessage::try_from(self.buf.as_slice(size))?;
+            // Receive and decode message
+            let msg = self.io.recv::<SnmpMessage>()?;
             // Check version match
             if msg.version != self.version {
                 continue; // Mismatched version, not our response.
@@ -376,53 +303,5 @@ impl SnmpClientSocket {
                 _ => continue,
             }
         }
-    }
-}
-
-impl SnmpClientSocket {
-    /// Set internal socket's send buffer size
-    fn set_send_buffer_size(io: &Socket, size: usize) -> PyResult<()> {
-        // @todo: get wmem_max limit on Linux
-        let mut effective_size = size;
-        while effective_size > 0 {
-            if io.set_send_buffer_size(effective_size).is_ok() {
-                return Ok(());
-            }
-            effective_size >>= 1;
-        }
-        Err(PyOSError::new_err("unable to set buffer size"))
-    }
-
-    /// Set internal socket's receive buffer size
-    fn set_recv_buffer_size(io: &Socket, size: usize) -> PyResult<()> {
-        let mut effective_size = size;
-        while effective_size > 0 {
-            if io.set_recv_buffer_size(effective_size).is_ok() {
-                return Ok(());
-            }
-            effective_size >>= 1;
-        }
-        Err(PyOSError::new_err("unable to set buffer size"))
-    }
-    /// Send GET request
-    fn _send_get(&mut self, vars: Vec<SnmpOid>) -> PyResult<()> {
-        // Start from clear buffer
-        self.buf.reset();
-        // Encode message
-        let msg = SnmpMessage {
-            version: self.version.clone(),
-            community: self.community.as_ref(),
-            pdu: SnmpPdu::GetRequest(SnmpGet {
-                request_id: self.request_id.next(),
-                vars,
-            }),
-        };
-        msg.push_ber(&mut self.buf)
-            .map_err(|_| PyValueError::new_err("failed to encode message"))?;
-        // Send
-        self.io
-            .send_to(self.buf.data(), &self.addr)
-            .map_err(|_| PyOSError::new_err("failed to send"))?;
-        Ok(())
     }
 }

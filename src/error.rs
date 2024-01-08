@@ -7,7 +7,7 @@
 
 use pyo3::{
     create_exception,
-    exceptions::{PyException, PyNotImplementedError},
+    exceptions::{PyBlockingIOError, PyException, PyNotImplementedError, PyOSError},
     PyErr,
 };
 
@@ -37,6 +37,10 @@ pub enum SnmpError {
     NotImplemented,
     /// No such instance
     NoSuchInstance,
+    /// Socket errors
+    SocketError(String),
+    /// Blocking operation
+    WouldBlock,
 }
 
 impl From<nom::Err<SnmpError>> for SnmpError {
@@ -99,6 +103,8 @@ impl From<SnmpError> for PyErr {
             SnmpError::OutOfBuffer => PySnmpEncodeError::new_err("out of buffer"),
             SnmpError::NotImplemented => PyNotImplementedError::new_err("not implemented"),
             SnmpError::NoSuchInstance => PyNoSuchInstance::new_err("no such instance"),
+            SnmpError::WouldBlock => PyBlockingIOError::new_err("blocked"),
+            SnmpError::SocketError(x) => PyOSError::new_err(x),
         }
     }
 }
