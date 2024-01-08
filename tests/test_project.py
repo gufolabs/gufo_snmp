@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo Labs: Project structure tests
 # ---------------------------------------------------------------------
-# Copyright (C) 2022-23, Gufo Labs
+# Copyright (C) 2022-24, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -9,6 +9,7 @@
 import inspect
 import os
 import sys
+from pathlib import Path
 from typing import Tuple, Union
 
 # Third-party modules
@@ -30,13 +31,22 @@ def _get_project_info() -> Tuple[str, str]:
     """
 
     def explore_dir(*args: str) -> str:
+        def is_not_rust(path: Path) -> bool:
+            if not path.is_dir():
+                return True
+            return not any(path.rglob("*.rs"))
+
+        root = Path(*args)
         d = [
             f
             for f in os.listdir(os.path.join(*args))
             if not f.startswith(".")
             and not f.startswith("_")
             and not f.endswith(".egg-info")
+            and not f.endswith(".rs")
         ]
+        if len(d) > 1:
+            d = [x for x in d if is_not_rust(root / x)]
         assert len(d) == 1
         return d[0]
 

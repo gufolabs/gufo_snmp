@@ -78,7 +78,7 @@ requirement in our [Code Quality](codequality.md) standards. To check code
 for typing errors run:
 
 ``` shell
-mypy --strict src/
+mypy src/
 ```
 
 ## Python Test Code Coverage Check
