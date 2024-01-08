@@ -39,6 +39,7 @@ do
         3.9) ABI=cp39-cp39 ;;
         3.10) ABI=cp310-cp310 ;;
         3.11) ABI=cp311-cp311 ;;
+        3.12) ABI=cp312-cp312 ;;
         *)
             echo "Unknown Python version $1"
             exit 2

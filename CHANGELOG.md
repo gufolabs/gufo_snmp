@@ -12,6 +12,10 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ## [Unreleased]
 
+### Added
+
+* Python 3.12 builds
+
 ### Changed
 
 * docs: Fancy front page
