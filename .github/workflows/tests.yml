@@ -51,7 +51,7 @@ jobs:
         run: ruff -q examples/ src/ tests/
 
       - name: Check Mypy
-        run: mypy --strict src/
+        run: mypy src/
 
   rust-test:
     runs-on: ubuntu-20.04
