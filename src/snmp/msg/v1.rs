@@ -1,27 +1,28 @@
 // ------------------------------------------------------------------------
-// Gufo SNMP: SNMP Message
+// Gufo SNMP: SNMP v1 Message
 // ------------------------------------------------------------------------
-// Copyright (C) 2023, Gufo Labs
+// Copyright (C) 2023-24, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
-use super::pdu::SnmpPdu;
-use super::SnmpVersion;
 use crate::ber::{
-    BerDecoder, BerEncoder, SnmpInt, SnmpOctetString, SnmpSequence, TAG_OCTET_STRING,
+    BerDecoder, BerEncoder, SnmpInt, SnmpOctetString, SnmpSequence, TAG_INT, TAG_OCTET_STRING,
 };
 use crate::buf::Buffer;
 use crate::error::SnmpError;
+use crate::snmp::pdu::SnmpPdu;
+use crate::snmp::SNMP_V1;
 
-pub struct SnmpMessage<'a> {
-    pub version: SnmpVersion,
+pub struct SnmpV1Message<'a> {
     pub community: &'a [u8],
     pub pdu: SnmpPdu<'a>,
 }
 
-impl<'a> TryFrom<&'a [u8]> for SnmpMessage<'a> {
+const V1_BER: [u8; 3] = [TAG_INT, 1, SNMP_V1];
+
+impl<'a> TryFrom<&'a [u8]> for SnmpV1Message<'a> {
     type Error = SnmpError;
 
-    fn try_from(i: &'a [u8]) -> Result<SnmpMessage<'a>, SnmpError> {
+    fn try_from(i: &'a [u8]) -> Result<SnmpV1Message<'a>, SnmpError> {
         // Top-level sequence
         let (tail, envelope) = SnmpSequence::from_ber(i)?;
         if !tail.is_empty() {
@@ -29,22 +30,23 @@ impl<'a> TryFrom<&'a [u8]> for SnmpMessage<'a> {
         }
         // Version
         let (tail, v_code) = SnmpInt::from_ber(envelope.0)?;
-        let vc: u8 = v_code.into();
-        let version = vc.try_into()?;
+        let vc = v_code.into();
+        if vc != SNMP_V1 {
+            return Err(SnmpError::InvalidVersion(vc));
+        }
         // Parse community
         let (tail, community) = SnmpOctetString::from_ber(tail)?;
         // Parse PDU
         let pdu = SnmpPdu::try_from(tail)?;
         //
-        Ok(SnmpMessage {
-            version,
+        Ok(SnmpV1Message {
             community: community.0,
             pdu,
         })
     }
 }
 
-impl<'a> BerEncoder for SnmpMessage<'a> {
+impl<'a> BerEncoder for SnmpV1Message<'a> {
     fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
         // Push PDU
         self.pdu.push_ber(buf)?;
@@ -53,7 +55,7 @@ impl<'a> BerEncoder for SnmpMessage<'a> {
         buf.push_ber_len(self.community.len())?;
         buf.push_u8(TAG_OCTET_STRING)?;
         // Push version
-        self.version.push_ber(buf)?;
+        buf.push(&V1_BER)?;
         // Push top-level sequence
         buf.push_ber_len(buf.len())?;
         buf.push_u8(0x30)?;
@@ -80,7 +82,7 @@ mod tests {
             SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 3]),
             SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 2]),
         ];
-        let msg = SnmpMessage::try_from(data.as_ref())?;
+        let msg = SnmpV1Message::try_from(data.as_ref())?;
         // Check version
         assert_eq!(msg.version, SnmpVersion::V1);
         // community == public
@@ -108,7 +110,7 @@ mod tests {
             SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 3]),
             SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 2]),
         ];
-        let msg = SnmpMessage::try_from(data.as_ref())?;
+        let msg = SnmpV1Message::try_from(data.as_ref())?;
         // Check version
         assert_eq!(msg.version, SnmpVersion::V2C);
         // community == public
@@ -139,7 +141,7 @@ mod tests {
             6, 7, 43, 6, 1, 2, 1, 1, 6, // Oid 1.3.6.1.2.1.1.6
             129, 0, // NoSuchObject
         ];
-        let msg = SnmpMessage::try_from(data.as_ref())?;
+        let msg = SnmpV1Message::try_from(data.as_ref())?;
         // Check version
         assert_eq!(msg.version, SnmpVersion::V2C);
         // community == public
@@ -174,7 +176,7 @@ mod tests {
             6, 8, 43, 6, 1, 2, 1, 1, 6, 0, // OID 1.3.6.1.2.1.1.6.0
             4, 14, 71, 117, 102, 111, 32, 83, 78, 77, 80, 32, 84, 101, 115, 116, // String
         ];
-        let msg = SnmpMessage::try_from(data.as_ref())?;
+        let msg = SnmpV1Message::try_from(data.as_ref())?;
         // Check version
         assert_eq!(msg.version, SnmpVersion::V2C);
         // community == public
@@ -226,7 +228,7 @@ mod tests {
             4, 23, 116, 101, 115, 116, 32, 60, 116, 101, 115, 116, 64, 101, 120, 97, 109, 112, 108,
             101, 46, 99, 111, 109, 62, // OCTET STRING
         ];
-        let msg = SnmpMessage::try_from(data.as_ref())?;
+        let msg = SnmpV1Message::try_from(data.as_ref())?;
         // Check version
         assert_eq!(msg.version, SnmpVersion::V2C);
         // community == public
@@ -296,7 +298,7 @@ mod tests {
             4, 23, 116, 101, 115, 116, 32, 60, 116, 101, 115, 116, 64, 101, 120, 97, 109, 112, 108,
             101, 46, 99, 111, 109, 62, // OCTET STRING
         ];
-        let msg = SnmpMessage::try_from(data.as_ref())?;
+        let msg = SnmpV1Message::try_from(data.as_ref())?;
         // Check version
         assert_eq!(msg.version, SnmpVersion::V2C);
         // community == public
@@ -348,7 +350,7 @@ mod tests {
             0x30, 0x0b, 0x06, 0x07, 0x2b, 0x06, 0x01, 0x02, 0x01, 0x01, 0x02, 0x05, 0x00,
         ];
         let community = [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63];
-        let msg = SnmpMessage {
+        let msg = SnmpV1Message {
             version: SnmpVersion::V1,
             community: &community,
             pdu: SnmpPdu::GetRequest(SnmpGet {
@@ -373,7 +375,7 @@ mod tests {
             0x30, 0x0b, 0x06, 0x07, 0x2b, 0x06, 0x01, 0x02, 0x01, 0x01, 0x02, 0x05, 0x00,
         ];
         let community = [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63];
-        let msg = SnmpMessage {
+        let msg = SnmpV1Message {
             version: SnmpVersion::V2C,
             community: &community,
             pdu: SnmpPdu::GetRequest(SnmpGet {

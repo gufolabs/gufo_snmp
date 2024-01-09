@@ -23,5 +23,3 @@ pub mod getresponse;
 pub mod msg;
 pub mod pdu;
 pub mod value;
-pub mod version;
-pub use version::SnmpVersion;

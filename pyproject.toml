@@ -146,6 +146,11 @@ max-complexity = 15
   "D100", # Missing docstring in public module
   "D103", # Missing docstring in public function
 ]
+"src/gufo/snmp/protocol.py" = [
+  "D100", # Missing docstring in public module
+  "D101", # Missing docstring in public class
+  "D102", # Missing docstring in public method
+]
 "src/gufo/snmp/snmpd.py" = [
   "S603", # `subprocess` call: check for execution of untrusted input
 ]

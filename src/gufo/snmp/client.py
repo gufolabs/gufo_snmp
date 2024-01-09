@@ -13,10 +13,14 @@ from types import TracebackType
 from typing import AsyncIterator, Dict, Iterable, Optional, Tuple, Type, Union
 
 # Gufo Labs modules
-from ._fast import SnmpClientSocket
+from ._fast import (
+    SnmpV1ClientSocket,
+    SnmpV2cClientSocket,
+)
 from .getbulk import GetBulkIter
 from .getnext import GetNextIter
 from .policer import BasePolicer, RPSPolicer
+from .protocol import SnmpClientSocketProtocol
 from .typing import ValueType
 from .version import SnmpVersion
 
@@ -74,14 +78,26 @@ class SnmpSession(object):
         policer: Optional[BasePolicer] = None,
         limit_rps: Optional[Union[int, float]] = None,
     ) -> None:
-        self._sock = SnmpClientSocket(
-            f"{addr}:{port}",
-            community,
-            version.value,
-            tos,
-            send_buffer,
-            recv_buffer,
-        )
+        self._sock: SnmpClientSocketProtocol
+        if version == SnmpVersion.v1:
+            self._sock = SnmpV1ClientSocket(
+                f"{addr}:{port}",
+                community,
+                tos,
+                send_buffer,
+                recv_buffer,
+            )
+        elif version == SnmpVersion.v2c:
+            self._sock = SnmpV2cClientSocket(
+                f"{addr}:{port}",
+                community,
+                tos,
+                send_buffer,
+                recv_buffer,
+            )
+        else:
+            msg = "Invalid SNMP Protocol"
+            raise ValueError(msg)
         self._fd = self._sock.get_fd()
         self._timeout = timeout
         self._max_repetitions = max_repetitions

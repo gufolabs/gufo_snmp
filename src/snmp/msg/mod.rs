@@ -1,15 +1,11 @@
 // ------------------------------------------------------------------------
-// Gufo SNMP: Socket classes
+// Gufo SNMP: SNMP Messages
 // ------------------------------------------------------------------------
 // Copyright (C) 2023-24, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-mod iter;
-mod reqid;
-mod transport;
 mod v1;
 mod v2c;
-pub use iter::{GetBulkIter, GetNextIter};
-pub use v1::SnmpV1ClientSocket;
-pub use v2c::SnmpV2cClientSocket;
+pub use v1::SnmpV1Message;
+pub use v2c::SnmpV2cMessage;

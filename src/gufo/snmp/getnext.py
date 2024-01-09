@@ -14,8 +14,8 @@ from typing import Optional, Tuple
 
 # Gufo Labs Modules
 from ._fast import GetNextIter as _Iter
-from ._fast import SnmpClientSocket
 from .policer import BasePolicer
+from .protocol import SnmpClientSocketProtocol
 from .typing import ValueType
 
 
@@ -32,7 +32,7 @@ class GetNextIter(object):
 
     def __init__(
         self: "GetNextIter",
-        sock: SnmpClientSocket,
+        sock: SnmpClientSocketProtocol,
         oid: str,
         timeout: float,
         policer: Optional[BasePolicer] = None,

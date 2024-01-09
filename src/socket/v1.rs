@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo SNMP: SnmpClientSocket
+// Gufo SNMP: SnmpV1ClientSocket
 // ------------------------------------------------------------------------
 // Copyright (C) 2023-24, Gufo Labs
 // See LICENSE.md for details
@@ -12,10 +12,9 @@ use crate::ber::{SnmpOid, ToPython};
 use crate::error::SnmpError;
 use crate::snmp::get::SnmpGet;
 use crate::snmp::getbulk::SnmpGetBulk;
-use crate::snmp::msg::SnmpMessage;
+use crate::snmp::msg::SnmpV1Message;
 use crate::snmp::pdu::SnmpPdu;
 use crate::snmp::value::SnmpValue;
-use crate::snmp::SnmpVersion;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::{
     exceptions::{PyStopAsyncIteration, PyValueError},
@@ -26,36 +25,29 @@ use std::os::fd::AsRawFd;
 
 /// Python class wrapping socket implementation
 #[pyclass]
-pub struct SnmpClientSocket {
+pub struct SnmpV1ClientSocket {
     io: SnmpTransport,
     community: String,
-    version: SnmpVersion,
     request_id: RequestId,
 }
 
 #[pymethods]
-impl SnmpClientSocket {
+impl SnmpV1ClientSocket {
     /// Python constructor
     #[new]
     fn new(
         addr: String,
         community: String,
-        version: u8,
         tos: u32,
         send_buffer_size: usize,
         recv_buffer_size: usize,
     ) -> PyResult<Self> {
         // Transport
         let io = SnmpTransport::new(addr, tos, send_buffer_size, recv_buffer_size)?;
-        // Check version
-        let version = version
-            .try_into()
-            .map_err(|_| PyValueError::new_err("invalid version"))?;
         //
         Ok(Self {
             io,
             community,
-            version,
             request_id: RequestId::default(),
         })
     }
@@ -65,8 +57,7 @@ impl SnmpClientSocket {
     }
     // Prepare and send GET request with single oid
     fn send_get(&mut self, oid: &str) -> PyResult<()> {
-        Ok(self.io.send(SnmpMessage {
-            version: self.version.clone(),
+        Ok(self.io.send(SnmpV1Message {
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetRequest(SnmpGet {
                 request_id: self.request_id.next(),
@@ -78,8 +69,7 @@ impl SnmpClientSocket {
     }
     // Prepare and send GET request with multiple oids
     fn send_get_many(&mut self, oids: Vec<&str>) -> PyResult<()> {
-        Ok(self.io.send(SnmpMessage {
-            version: self.version.clone(),
+        Ok(self.io.send(SnmpV1Message {
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetRequest(SnmpGet {
                 request_id: self.request_id.next(),
@@ -93,8 +83,7 @@ impl SnmpClientSocket {
     }
     // Send GetNext request according to iter
     fn send_getnext(&mut self, iter: &GetNextIter) -> PyResult<()> {
-        Ok(self.io.send(SnmpMessage {
-            version: self.version.clone(),
+        Ok(self.io.send(SnmpV1Message {
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetNextRequest(SnmpGet {
                 request_id: self.request_id.next(),
@@ -105,8 +94,7 @@ impl SnmpClientSocket {
     // Send GetBulk request according to iter
     fn send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
         // Encode message
-        Ok(self.io.send(SnmpMessage {
-            version: self.version.clone(),
+        Ok(self.io.send(SnmpV1Message {
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetBulkRequest(SnmpGetBulk {
                 request_id: self.request_id.next(),
@@ -120,11 +108,7 @@ impl SnmpClientSocket {
     fn recv_getresponse(&mut self, py: Python) -> PyResult<Option<PyObject>> {
         loop {
             // Receive and decode message
-            let msg = self.io.recv::<SnmpMessage>()?;
-            // Check version match
-            if msg.version != self.version {
-                continue; // Mismatched version, not our response.
-            }
+            let msg = self.io.recv::<SnmpV1Message>()?;
             // Check community match
             if msg.community != self.community.as_bytes() {
                 continue; // Community mismatch, not our response.
@@ -165,11 +149,7 @@ impl SnmpClientSocket {
     fn recv_getresponse_many(&mut self, py: Python) -> PyResult<PyObject> {
         loop {
             // Receive and decode message
-            let msg = self.io.recv::<SnmpMessage>()?;
-            // Check version match
-            if msg.version != self.version {
-                continue; // Mismatched version, not our response.
-            }
+            let msg = self.io.recv::<SnmpV1Message>()?;
             // Check community match
             if msg.community != self.community.as_bytes() {
                 continue; // Community mismatch, not our response.
@@ -208,11 +188,7 @@ impl SnmpClientSocket {
     ) -> PyResult<(PyObject, PyObject)> {
         loop {
             // Receive and decode message
-            let msg = self.io.recv::<SnmpMessage>()?;
-            // Check version match
-            if msg.version != self.version {
-                continue; // Mismatched version, not our response.
-            }
+            let msg = self.io.recv::<SnmpV1Message>()?;
             // Check community match
             if msg.community != self.community.as_bytes() {
                 continue; // Community mismatch, not our response.
@@ -254,11 +230,7 @@ impl SnmpClientSocket {
     fn recv_getresponse_bulk(&mut self, iter: &mut GetBulkIter, py: Python) -> PyResult<PyObject> {
         loop {
             // Receive and decode message
-            let msg = self.io.recv::<SnmpMessage>()?;
-            // Check version match
-            if msg.version != self.version {
-                continue; // Mismatched version, not our response.
-            }
+            let msg = self.io.recv::<SnmpV1Message>()?;
             // Check community match
             if msg.community != self.community.as_bytes() {
                 continue; // Community mismatch, not our response.

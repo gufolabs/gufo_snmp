@@ -14,8 +14,8 @@ from typing import List, Optional, Tuple
 
 # Gufo Labs Modules
 from ._fast import GetBulkIter as _Iter
-from ._fast import SnmpClientSocket
 from .policer import BasePolicer
+from .protocol import SnmpClientSocketProtocol
 from .typing import ValueType
 
 
@@ -32,7 +32,7 @@ class GetBulkIter(object):
 
     def __init__(
         self: "GetBulkIter",
-        sock: SnmpClientSocket,
+        sock: SnmpClientSocketProtocol,
         oid: str,
         timeout: float,
         max_repetitions: int,
