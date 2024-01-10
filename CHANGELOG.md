@@ -20,6 +20,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 ### Changed
 
 * docs: Fancy front page
+* Build on GLibc 2.28 rather than on 2.24
 
 ### Infrastructure
 
