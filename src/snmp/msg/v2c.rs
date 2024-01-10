@@ -71,35 +71,7 @@ mod tests {
     use crate::snmp::value::SnmpValue;
 
     #[test]
-    fn test_parse_snmp_v1_get() -> Result<(), SnmpError> {
-        let data = [
-            0x30u8, 0x35, 0x02, 0x01, 0x00, 0x04, 0x06, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0xa0,
-            0x28, 0x02, 0x04, 0x63, 0xcc, 0xac, 0x7d, 0x02, 0x01, 0x00, 0x02, 0x01, 0x00, 0x30,
-            0x1a, 0x30, 0x0b, 0x06, 0x07, 0x2b, 0x06, 0x01, 0x02, 0x01, 0x01, 0x03, 0x05, 0x00,
-            0x30, 0x0b, 0x06, 0x07, 0x2b, 0x06, 0x01, 0x02, 0x01, 0x01, 0x02, 0x05, 0x00,
-        ];
-        let vars: Vec<SnmpOid> = vec![
-            SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 3]),
-            SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 2]),
-        ];
-        let msg = SnmpV2cMessage::try_from(data.as_ref())?;
-        // Check version
-        assert_eq!(msg.version, SnmpVersion::V1);
-        // community == public
-        assert_eq!(msg.community, [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63]);
-        // Analyze PDU
-        match msg.pdu {
-            SnmpPdu::GetRequest(pdu) => {
-                assert_eq!(pdu.request_id, 0x63ccac7d);
-                assert_eq!(pdu.vars, vars);
-            }
-            _ => return Err(SnmpError::InvalidPdu),
-        }
-        Ok(())
-    }
-
-    #[test]
-    fn test_parse_snmp_v2c_get() -> Result<(), SnmpError> {
+    fn test_parse_snmp_get() -> Result<(), SnmpError> {
         let data = [
             0x30u8, 0x35, 0x02, 0x01, 0x01, 0x04, 0x06, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0xa0,
             0x28, 0x02, 0x04, 0x63, 0xcc, 0xac, 0x7d, 0x02, 0x01, 0x00, 0x02, 0x01, 0x00, 0x30,
@@ -111,8 +83,6 @@ mod tests {
             SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 2]),
         ];
         let msg = SnmpV2cMessage::try_from(data.as_ref())?;
-        // Check version
-        assert_eq!(msg.version, SnmpVersion::V2C);
         // community == public
         assert_eq!(msg.community, [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63]);
         // Analyze PDU
@@ -127,7 +97,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_snmpv2_getresponse_exception() -> Result<(), SnmpError> {
+    fn test_parse_snmp_getresponse_exception() -> Result<(), SnmpError> {
         let data = [
             48u8, 40, // Seq 40 bytes
             2, 1, 1, // INTEGER 1, v2C
@@ -142,8 +112,6 @@ mod tests {
             129, 0, // NoSuchObject
         ];
         let msg = SnmpV2cMessage::try_from(data.as_ref())?;
-        // Check version
-        assert_eq!(msg.version, SnmpVersion::V2C);
         // community == public
         assert_eq!(msg.community, [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63]);
         //
@@ -162,7 +130,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_parse_snmpv2_getresponse() -> Result<(), SnmpError> {
+    fn test_parse_snmp_getresponse() -> Result<(), SnmpError> {
         let data = [
             48u8, 55, // Seq 55 bytes
             2, 1, 1, // INTEGER, v2c
@@ -177,8 +145,6 @@ mod tests {
             4, 14, 71, 117, 102, 111, 32, 83, 78, 77, 80, 32, 84, 101, 115, 116, // String
         ];
         let msg = SnmpV2cMessage::try_from(data.as_ref())?;
-        // Check version
-        assert_eq!(msg.version, SnmpVersion::V2C);
         // community == public
         assert_eq!(msg.community, [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63]);
         //
@@ -202,7 +168,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_parse_snmpv2_getresponse_many() -> Result<(), SnmpError> {
+    fn test_parse_snmp_getresponse_many() -> Result<(), SnmpError> {
         let data = [
             48u8, 129, 134, // Sequence, 134 bytes
             2, 1, 1, // ITEGER, v2c
@@ -229,8 +195,6 @@ mod tests {
             101, 46, 99, 111, 109, 62, // OCTET STRING
         ];
         let msg = SnmpV2cMessage::try_from(data.as_ref())?;
-        // Check version
-        assert_eq!(msg.version, SnmpVersion::V2C);
         // community == public
         assert_eq!(msg.community, [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63]);
         //
@@ -272,7 +236,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_parse_snmpv2_getresponse_many_rel() -> Result<(), SnmpError> {
+    fn test_parse_snmp_getresponse_many_rel() -> Result<(), SnmpError> {
         let data = [
             48u8, 116, // Sequence, 116 bytes
             2, 1, 1, // ITEGER, v2c
@@ -299,8 +263,6 @@ mod tests {
             101, 46, 99, 111, 109, 62, // OCTET STRING
         ];
         let msg = SnmpV2cMessage::try_from(data.as_ref())?;
-        // Check version
-        assert_eq!(msg.version, SnmpVersion::V2C);
         // community == public
         assert_eq!(msg.community, [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63]);
         //
@@ -341,33 +303,9 @@ mod tests {
         }
         Ok(())
     }
+
     #[test]
-    fn test_encode_snmp_v1_get() -> Result<(), SnmpError> {
-        let expected = [
-            0x30u8, 0x35, 0x02, 0x01, 0x00, 0x04, 0x06, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0xa0,
-            0x28, 0x02, 0x04, 0x63, 0xcc, 0xac, 0x7d, 0x02, 0x01, 0x00, 0x02, 0x01, 0x00, 0x30,
-            0x1a, 0x30, 0x0b, 0x06, 0x07, 0x2b, 0x06, 0x01, 0x02, 0x01, 0x01, 0x03, 0x05, 0x00,
-            0x30, 0x0b, 0x06, 0x07, 0x2b, 0x06, 0x01, 0x02, 0x01, 0x01, 0x02, 0x05, 0x00,
-        ];
-        let community = [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63];
-        let msg = SnmpV2cMessage {
-            version: SnmpVersion::V1,
-            community: &community,
-            pdu: SnmpPdu::GetRequest(SnmpGet {
-                request_id: 0x63ccac7d,
-                vars: vec![
-                    SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 3]),
-                    SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 2]),
-                ],
-            }),
-        };
-        let mut buf = Buffer::default();
-        msg.push_ber(&mut buf)?;
-        assert_eq!(buf.data(), &expected);
-        Ok(())
-    }
-    #[test]
-    fn test_encode_snmp_v2c_get() -> Result<(), SnmpError> {
+    fn test_encode_snmp_get() -> Result<(), SnmpError> {
         let expected = [
             0x30u8, 0x35, 0x02, 0x01, 0x01, 0x04, 0x06, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0xa0,
             0x28, 0x02, 0x04, 0x63, 0xcc, 0xac, 0x7d, 0x02, 0x01, 0x00, 0x02, 0x01, 0x00, 0x30,
@@ -376,7 +314,6 @@ mod tests {
         ];
         let community = [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63];
         let msg = SnmpV2cMessage {
-            version: SnmpVersion::V2C,
             community: &community,
             pdu: SnmpPdu::GetRequest(SnmpGet {
                 request_id: 0x63ccac7d,
