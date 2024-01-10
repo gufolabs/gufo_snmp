@@ -8,13 +8,12 @@
 use crate::ber::BerEncoder;
 use crate::buf::Buffer;
 use crate::error::SnmpError;
-use socket2::{Domain, Protocol, SockAddr, Socket, Type};
+use socket2::{Domain, Protocol, Socket, Type};
 use std::net::SocketAddr;
 use std::os::fd::{AsRawFd, RawFd};
 
 pub struct SnmpTransport {
     io: Socket,
-    addr: SockAddr,
     buf: Buffer,
 }
 
@@ -52,10 +51,12 @@ impl SnmpTransport {
         if recv_buffer_size > 0 {
             Self::set_recv_buffer_size(&io, recv_buffer_size)?;
         }
+        // Make socket connected
+        io.connect(&sock_addr.into())
+            .map_err(|e| SnmpError::SocketError(e.to_string()))?;
         //
         Ok(Self {
             io,
-            addr: sock_addr.into(),
             buf: Buffer::default(),
         })
     }
@@ -68,7 +69,7 @@ impl SnmpTransport {
         msg.push_ber(&mut self.buf)?;
         // Send
         self.io
-            .send_to(self.buf.data(), &self.addr)
+            .send(self.buf.data())
             .map_err(|e| SnmpError::SocketError(e.to_string()))?;
         Ok(())
     }
@@ -78,10 +79,13 @@ impl SnmpTransport {
         T: TryFrom<&'a [u8], Error = SnmpError>,
         'b: 'a,
     {
-        let size = match self.io.recv_from(self.buf.as_mut()) {
-            Ok((s, _)) => s,
+        let size = match self.io.recv(self.buf.as_mut()) {
+            Ok(s) => s,
             Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
                 return Err(SnmpError::WouldBlock)
+            }
+            Err(e) if e.kind() == std::io::ErrorKind::ConnectionRefused => {
+                return Err(SnmpError::ConnectionRefused)
             }
             Err(e) => return Err(SnmpError::SocketError(e.to_string())),
         };

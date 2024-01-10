@@ -7,7 +7,9 @@
 
 use pyo3::{
     create_exception,
-    exceptions::{PyBlockingIOError, PyException, PyNotImplementedError, PyOSError},
+    exceptions::{
+        PyBlockingIOError, PyException, PyNotImplementedError, PyOSError, PyTimeoutError,
+    },
     PyErr,
 };
 
@@ -41,6 +43,8 @@ pub enum SnmpError {
     SocketError(String),
     /// Blocking operation
     WouldBlock,
+    /// Connection refused
+    ConnectionRefused,
 }
 
 impl From<nom::Err<SnmpError>> for SnmpError {
@@ -105,6 +109,7 @@ impl From<SnmpError> for PyErr {
             SnmpError::NoSuchInstance => PyNoSuchInstance::new_err("no such instance"),
             SnmpError::WouldBlock => PyBlockingIOError::new_err("blocked"),
             SnmpError::SocketError(x) => PyOSError::new_err(x),
+            SnmpError::ConnectionRefused => PyTimeoutError::new_err("connection refused"),
         }
     }
 }
