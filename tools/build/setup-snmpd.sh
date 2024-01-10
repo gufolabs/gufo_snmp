@@ -33,7 +33,14 @@ case $OS in
         /usr/sbin/snmpd --version
         ;;
     debian)
-        $SUDO apt-get update
+        SOURCES_LIST="/etc/apt/sources.list"
+        if [ -e "$SOURCES_LIST" ]; then
+            if grep -q "stretch main" "$SOURCES_LIST"; then
+                # Switch Debian9 to archive
+                sed -i "s/deb.debian.org/archive.debian.org/g" "$SOURCES_LIST"
+            fi
+        fi
+        $SUDO apt-get update || true
         $SUDO apt-get install -y --no-install-recommends snmpd
         # Test
         /usr/sbin/snmpd --version
