@@ -9,7 +9,6 @@
 
 
 # Python modules
-import asyncio
 from typing import Optional, Tuple
 
 # Gufo Labs Modules
@@ -17,6 +16,7 @@ from ._fast import GetNextIter as _Iter
 from .policer import BasePolicer
 from .protocol import SnmpClientSocketProtocol
 from .typing import ValueType
+from .util import send_and_recv
 
 
 class GetNextIter(object):
@@ -50,37 +50,12 @@ class GetNextIter(object):
     async def __anext__(self: "GetNextIter") -> Tuple[str, ValueType]:
         """Get next value."""
 
-        async def get_response() -> Tuple[str, ValueType]:
-            while True:
-                # Wait until data will be available
-                r_ev = asyncio.Event()
-                loop.add_reader(self._fd, r_ev.set)
-                try:
-                    await r_ev.wait()
-                finally:
-                    loop.remove_reader(self._fd)
-                # Read data or get BlockingIOError
-                # if no valid data available.
-                try:
-                    return self._sock.recv_getresponse_next(self._ctx)
-                except BlockingIOError:
-                    continue
+        def sender() -> None:
+            self._sock.send_getnext(self._ctx)
 
-        loop = asyncio.get_running_loop()
-        # Process limits
-        if self._policer:
-            await self._policer.wait()
-        # Wait for socket became writable
-        w_ev = asyncio.Event()
-        loop.add_writer(self._fd, w_ev.set)
-        try:
-            await w_ev.wait()
-        finally:
-            loop.remove_writer(self._fd)
-        # Send request
-        self._sock.send_getnext(self._ctx)
-        # Await response or timeout
-        try:
-            return await asyncio.wait_for(get_response(), self._timeout)
-        except asyncio.TimeoutError as e:
-            raise TimeoutError from e  # Remap the error
+        def receiver() -> Tuple[str, ValueType]:
+            return self._sock.recv_getresponse_next(self._ctx)
+
+        return await send_and_recv(
+            self._fd, sender, receiver, self._policer, self._timeout
+        )

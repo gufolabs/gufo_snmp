@@ -22,6 +22,7 @@ from .getnext import GetNextIter
 from .policer import BasePolicer, RPSPolicer
 from .protocol import SnmpClientSocketProtocol
 from .typing import ValueType
+from .util import send_and_recv
 from .version import SnmpVersion
 
 
@@ -141,40 +142,16 @@ class SnmpSession(object):
             SnmpError: On other SNMP-related errors.
         """
 
-        async def get_response() -> ValueType:
-            while True:
-                # Wait until data will be available
-                r_ev = asyncio.Event()
-                loop.add_reader(self._fd, r_ev.set)
-                try:
-                    await r_ev.wait()
-                finally:
-                    loop.remove_reader(self._fd)
-                # Read data or get BlockingIOError
-                # if no valid data available.
-                try:
-                    return self._sock.recv_getresponse()
-                except BlockingIOError:
-                    continue
+        def sender() -> None:
+            self._sock.send_get(oid)
 
-        loop = asyncio.get_running_loop()
-        # Process limits
-        if self._policer:
-            await self._policer.wait()
-        # Wait for socket became writable
-        w_ev = asyncio.Event()
-        loop.add_writer(self._fd, w_ev.set)
-        try:
-            await w_ev.wait()
-        finally:
-            loop.remove_writer(self._fd)
-        # Send request
-        self._sock.send_get(oid)
-        # Await response or timeout
-        try:
-            return await asyncio.wait_for(get_response(), self._timeout)
-        except asyncio.TimeoutError as e:
-            raise TimeoutError from e  # Remap the error
+        return await send_and_recv(
+            self._fd,
+            sender,
+            self._sock.recv_getresponse,
+            self._policer,
+            self._timeout,
+        )
 
     async def get_many(
         self: "SnmpSession", oids: Iterable[str]
@@ -201,40 +178,16 @@ class SnmpSession(object):
             SnmpError: On other SNMP-related errors.
         """
 
-        async def get_response() -> Dict[str, ValueType]:
-            while True:
-                # Wait until data will be available
-                r_ev = asyncio.Event()
-                loop.add_reader(self._fd, r_ev.set)
-                try:
-                    await r_ev.wait()
-                finally:
-                    loop.remove_reader(self._fd)
-                # Read data or get BlockingIOError
-                # if no valid data available.
-                try:
-                    return self._sock.recv_getresponse_many()
-                except BlockingIOError:
-                    continue
+        def sender() -> None:
+            self._sock.send_get_many(list(oids))
 
-        loop = asyncio.get_running_loop()
-        # Process limits
-        if self._policer:
-            await self._policer.wait()
-        # Wait for socket became writable
-        w_ev = asyncio.Event()
-        loop.add_writer(self._fd, w_ev.set)
-        try:
-            await w_ev.wait()
-        finally:
-            loop.remove_writer(self._fd)
-        # Send request
-        self._sock.send_get_many(list(oids))
-        # Await response or timeout
-        try:
-            return await asyncio.wait_for(get_response(), self._timeout)
-        except asyncio.TimeoutError as e:
-            raise TimeoutError from e  # Remap the error
+        return await send_and_recv(
+            self._fd,
+            sender,
+            self._sock.recv_getresponse_many,
+            self._policer,
+            self._timeout,
+        )
 
     def getnext(
         self: "SnmpSession", oid: str

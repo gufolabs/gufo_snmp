@@ -17,6 +17,7 @@ from ._fast import GetBulkIter as _Iter
 from .policer import BasePolicer
 from .protocol import SnmpClientSocketProtocol
 from .typing import ValueType
+from .util import send_and_recv
 
 
 class GetBulkIter(object):
@@ -54,47 +55,23 @@ class GetBulkIter(object):
     async def __anext__(self: "GetBulkIter") -> Tuple[str, ValueType]:
         """Get next value."""
 
-        async def get_response() -> List[Tuple[str, ValueType]]:
-            while True:
-                # Wait until data will be available
-                r_ev = asyncio.Event()
-                loop.add_reader(self._fd, r_ev.set)
-                try:
-                    await r_ev.wait()
-                finally:
-                    loop.remove_reader(self._fd)
-                # Read data or get BlockingIOError
-                # if no valid data available.
-                try:
-                    return self._sock.recv_getresponse_bulk(self._ctx)
-                except BlockingIOError:
-                    continue
+        def sender() -> None:
+            self._sock.send_getbulk(self._ctx)
+
+        def receiver() -> List[Tuple[str, ValueType]]:
+            return self._sock.recv_getresponse_bulk(self._ctx)
 
         # Return item from buffer, if present
         if self._buffer:
             return self._buffer.pop(0)
+        # Complete
         if self._stop:
             raise StopAsyncIteration
-        # Send request
-        loop = asyncio.get_running_loop()
-        # Process limits
-        if self._policer:
-            await self._policer.wait()
-        r_ev = asyncio.Event()
-        loop.add_writer(self._fd, r_ev.set)
-        try:
-            await r_ev.wait()
-        finally:
-            loop.remove_writer(self._fd)
-        # Send request
-        self._sock.send_getbulk(self._ctx)
-        # Await response or timeout
-        try:
-            self._buffer = await asyncio.wait_for(
-                get_response(), self._timeout
-            )
-        except asyncio.TimeoutError as e:
-            raise TimeoutError from e  # Remap the error
+        #
+        self._buffer = await send_and_recv(
+            self._fd, sender, receiver, self._policer, self._timeout
+        )
+        # End?
         if not self._buffer:
             raise StopAsyncIteration  # End of view
         self._stop = len(self._buffer) < self._max_repetitions
