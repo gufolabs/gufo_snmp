@@ -10,11 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 To see unreleased changes, please see the [CHANGELOG on the main branch guide](https://github.com/gufolabs/gufo_snmp/blob/main/CHANGELOG.md).
 
-## [Unreleased]
+## 0.3.0 - 2024-01-10
 
 ### Added
 
 * Python 3.12 builds
+* Optimized performance (measured L.A. reduction in 1.5 times)
 
 ### Changed
 
