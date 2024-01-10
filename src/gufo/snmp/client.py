@@ -1,14 +1,13 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: SnmpSession
 # ---------------------------------------------------------------------
-# Copyright (C) 2023, Gufo Labs
+# Copyright (C) 2023-24, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
 """SnmpSession implementation."""
 
 # Python modules
-import asyncio
 from types import TracebackType
 from typing import AsyncIterator, Dict, Iterable, Optional, Tuple, Type, Union
 

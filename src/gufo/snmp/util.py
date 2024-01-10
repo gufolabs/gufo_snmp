@@ -1,15 +1,15 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: Utilities
 # ---------------------------------------------------------------------
-# Copyright (C) 2023, Gufo Labs
+# Copyright (C) 2023-24, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
 """Various utilities."""
 
 # Python modules
+from asyncio import Future, get_running_loop, wait_for
 from asyncio import TimeoutError as AIOTimeoutError
-from asyncio import get_running_loop, wait_for
 from typing import Callable, Optional, TypeVar
 
 # Gufo SNMP modules
@@ -40,11 +40,11 @@ async def send_and_recv(
         def read_callback() -> None:
             try:
                 fut.set_result(receiver())
-            except BaseException as e:
+            except BaseException as e:  # noqa: BLE001
                 fut.set_exception(e)
 
         while True:
-            fut = loop.create_future()
+            fut: Future[T] = loop.create_future()
             loop.add_reader(fd, read_callback)
             try:
                 return await fut
@@ -56,7 +56,7 @@ async def send_and_recv(
     def write_callback() -> None:
         try:
             fut.set_result(sender())
-        except BaseException as e:
+        except BaseException as e:  # noqa: BLE001
             fut.set_exception(e)
 
     loop = get_running_loop()
@@ -67,7 +67,7 @@ async def send_and_recv(
     try:
         sender()
     except BlockingIOError:
-        fut = loop.create_future()
+        fut: Future[None] = loop.create_future()
         loop.add_writer(fd, write_callback)
         try:
             await fut

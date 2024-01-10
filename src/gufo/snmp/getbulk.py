@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: GetBulkIter
 # ---------------------------------------------------------------------
-# Copyright (C) 2023, Gufo Labs
+# Copyright (C) 2023-24, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -9,7 +9,6 @@
 
 
 # Python modules
-import asyncio
 from typing import List, Optional, Tuple
 
 # Gufo Labs Modules
