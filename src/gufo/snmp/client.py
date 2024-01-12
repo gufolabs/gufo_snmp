@@ -15,6 +15,7 @@ from typing import AsyncIterator, Dict, Iterable, Optional, Tuple, Type, Union
 from ._fast import (
     SnmpV1ClientSocket,
     SnmpV2cClientSocket,
+    SnmpV3ClientSocket,
 )
 from .getbulk import GetBulkIter
 from .getnext import GetNextIter
@@ -34,7 +35,9 @@ class SnmpSession(object):
     Args:
         addr: SNMP agent address, either IPv4 or IPv6.
         port: SNMP agent port.
-        community: SNMP community.
+        community: SNMP community (v1, v2c).
+        engine_id: SNMP Engine id (v3).
+        user_name: User name (v3).
         version: Protocol version.
         timeout: Request timeout in seconds.
         tos: Set ToS/DSCP mark on egress packets.
@@ -68,6 +71,8 @@ class SnmpSession(object):
         addr: str,
         port: int = 161,
         community: str = "public",
+        engine_id: Optional[bytes] = None,
+        user_name: Optional[str] = None,
         version: SnmpVersion = SnmpVersion.v2c,
         timeout: float = 10.0,
         tos: int = 0,
@@ -91,6 +96,21 @@ class SnmpSession(object):
             self._sock = SnmpV2cClientSocket(
                 f"{addr}:{port}",
                 community,
+                tos,
+                send_buffer,
+                recv_buffer,
+            )
+        elif version == SnmpVersion.v3:
+            if not user_name:
+                msg = "SNMPv3 requires user_name"
+                raise ValueError(msg)
+            if not engine_id:
+                msg = "SNMPv3 requires engine_id"
+                raise ValueError(msg)
+            self._sock = SnmpV3ClientSocket(
+                f"{addr}:{port}",
+                engine_id if engine_id else b"",
+                user_name,
                 tos,
                 send_buffer,
                 recv_buffer,

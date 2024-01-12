@@ -72,6 +72,7 @@ async with Snmpd(), SnmpSession(addr="127.0.0.1", port=10161) as session:
 
 * Clean async API.
 * SNMP v1/v2c support.
+* SNMP v3 support (plaintext, no auth).
 * High-performance.
 * Zero-copy BER parsing.
 * Full Python typing support.

@@ -121,7 +121,7 @@ impl<'a> ToPython for &SnmpValue<'a> {
         Ok(match self {
             SnmpValue::Bool(x) => x.try_to_python(py)?,
             SnmpValue::Int(x) => x.try_to_python(py)?,
-            SnmpValue::Null => todo!(),
+            SnmpValue::Null => todo!("None"),
             SnmpValue::OctetString(x) => x.try_to_python(py)?,
             SnmpValue::Oid(x) => x.try_to_python(py)?,
             SnmpValue::ObjectDescriptor(x) => x.try_to_python(py)?,

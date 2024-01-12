@@ -16,3 +16,4 @@ class SnmpVersion(enum.IntEnum):
 
     v1 = 0
     v2c = 1
+    v3 = 3

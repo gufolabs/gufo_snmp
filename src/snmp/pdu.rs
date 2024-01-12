@@ -8,7 +8,10 @@
 use super::get::SnmpGet;
 use super::getbulk::SnmpGetBulk;
 use super::getresponse::SnmpGetResponse;
-use super::{PDU_GETNEXT_REQUEST, PDU_GET_BULK_REQUEST, PDU_GET_REQUEST, PDU_GET_RESPONSE};
+use super::report::SnmpReport;
+use super::{
+    PDU_GETNEXT_REQUEST, PDU_GET_BULK_REQUEST, PDU_GET_REQUEST, PDU_GET_RESPONSE, PDU_REPORT,
+};
 use crate::ber::{BerDecoder, BerEncoder, SnmpOption};
 use crate::buf::Buffer;
 use crate::error::SnmpError;
@@ -19,6 +22,7 @@ pub enum SnmpPdu<'a> {
     GetNextRequest(SnmpGet),
     GetResponse(SnmpGetResponse<'a>),
     GetBulkRequest(SnmpGetBulk),
+    Report(SnmpReport<'a>),
 }
 
 impl<'a> TryFrom<&'a [u8]> for SnmpPdu<'a> {
@@ -31,6 +35,7 @@ impl<'a> TryFrom<&'a [u8]> for SnmpPdu<'a> {
             PDU_GETNEXT_REQUEST => SnmpPdu::GetNextRequest(SnmpGet::try_from(opt.value)?),
             PDU_GET_RESPONSE => SnmpPdu::GetResponse(SnmpGetResponse::try_from(opt.value)?),
             PDU_GET_BULK_REQUEST => SnmpPdu::GetBulkRequest(SnmpGetBulk::try_from(opt.value)?),
+            PDU_REPORT => SnmpPdu::Report(SnmpReport::try_from(opt.value)?),
             _ => return Err(SnmpError::UnknownPdu),
         })
     }

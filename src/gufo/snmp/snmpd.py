@@ -10,13 +10,54 @@
 # Python modules
 import logging
 import queue
+import random
+import string
 import subprocess
 import threading
+from dataclasses import dataclass
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from types import TracebackType
-from typing import Optional, Type
+from typing import List, Optional, Type
 
 logger = logging.getLogger("gufo.snmp.snmpd")
+
+# Net-snmp always adds prefix to engine id
+_NETSNMP_ENGINE_ID_PREFIX = b"\x80\x00\x1f\x88\x04"
+# Length of generated engine id
+# Not including prefix.
+_ENGINE_ID_LENGTH = 8
+
+
+@dataclass
+class User(object):
+    """
+    SNMPv3 user.
+
+    Attributes:
+        name: user name
+    """
+
+    name: str
+
+    @property
+    def rouser(self: "User") -> str:
+        """
+        `rouser` part of config.
+
+        Returns:
+            rouser configuration directive.
+        """
+        return f"rouser {self.name} noauth"
+
+    @property
+    def create_user(self: "User") -> str:
+        """
+        createUser part of config.
+
+        Returns:
+            createUser configuration directive.
+        """
+        return f"createUser {self.name}"
 
 
 class Snmpd(object):
@@ -34,12 +75,15 @@ class Snmpd(object):
         community: SNMP v1/v2c community.
         location: sysLocation value.
         contact: sysContact value.
-        user: SNMP v3 user.
+        engine_id: Optional explicit engine id for SNMPv3.
+            Use generated value if not set.
+        users: Optional list of SNMPv3 users.
         start_timeout: Maximum time to wait for snmpd to start.
         log_packets: Log SNMP requests and responses.
 
     Attributes:
         version: Net-SNMP version.
+        engine_id: SNMPv3 engine id.
 
     Note:
         Using the ports below 1024 usually requires
@@ -66,7 +110,8 @@ class Snmpd(object):
         community: str = "public",
         location: str = "Test",
         contact: str = "test <test@example.com>",
-        user: str = "rouser",
+        engine_id: Optional[str] = None,
+        users: Optional[List[User]] = None,
         start_timeout: float = 5.0,
         log_packets: bool = False,
     ) -> None:
@@ -76,12 +121,30 @@ class Snmpd(object):
         self._community = community
         self._location = location
         self._contact = contact
-        self._user = user
+        self._users = users or [User(name="rouser")]
         self._start_timeout = start_timeout
         self._log_packets = log_packets
         self.version: Optional[str] = None
         self._cfg: Optional[_TemporaryFileWrapper[str]] = None
         self._proc: Optional[subprocess.Popen[str]] = None
+        if engine_id:
+            self._cfg_engine_id = engine_id
+        else:
+            self._cfg_engine_id = self._get_engine_id()
+        self.engine_id = (
+            _NETSNMP_ENGINE_ID_PREFIX + self._cfg_engine_id.encode()
+        )
+
+    @staticmethod
+    def _get_engine_id() -> str:
+        """
+        Generate random engine id.
+
+        Returns:
+            Random engine id for snmpd.conf
+        """
+        chars = string.ascii_letters + string.digits
+        return "".join(random.choices(chars, k=_ENGINE_ID_LENGTH))  # noqa:S311
 
     def get_config(self: "Snmpd") -> str:
         """
@@ -90,20 +153,29 @@ class Snmpd(object):
         Returns:
             snmpd configuration.
         """
+        rousers = "\n".join(u.rouser for u in self._users)
+        create_users = "\n".join(u.create_user for u in self._users)
+
         return f"""# Gufo SNMP Test Suite
 master agentx
 agentaddress udp:{self._address}:{self._port}
 agentXsocket tcp:{self._address}:{self._port}
+# SNMPv3 engine id
+engineId {self._cfg_engine_id}
 # Listen address
 # SNMPv1/SNMPv2c R/O community
 rocommunity {self._community} 127.0.0.1
 # SNMPv3 R/O User
-rouser {self._user} auth
+{rousers}
+{create_users}
 # System information
 syslocation {self._location}
 syscontact  {self._contact}
 #
 sysServices 72"""
+
+    # @todo: createUser
+    # http://www.net-snmp.org/docs/man/snmpd.conf.html
 
     def _start(self: "Snmpd") -> None:
         """Run snmpd instance."""
@@ -127,9 +199,8 @@ sysServices 72"""
             "-V",  # Verbose
         ]
         if self._log_packets:
-            args += [
-                "-d",  # Dump packets
-            ]
+            args += ["-d"]  # Dump packets
+            args += ["-Dsnmpd,dump,usm"]
         logger.debug("Running: %s", " ".join(args))
         self._proc = subprocess.Popen(
             args,

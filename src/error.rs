@@ -45,6 +45,10 @@ pub enum SnmpError {
     WouldBlock,
     /// Connection refused
     ConnectionRefused,
+    /// Unknown Security Model
+    UnknownSecurityModel,
+    /// Authentication error
+    AuthenticationFailed,
 }
 
 impl From<nom::Err<SnmpError>> for SnmpError {
@@ -87,6 +91,7 @@ create_exception!(
     PySnmpError,
     "Requested OID is not found"
 );
+create_exception!(_fast, PySnmpAuthError, PySnmpError, "Authentication failed");
 
 impl From<SnmpError> for PyErr {
     fn from(value: SnmpError) -> PyErr {
@@ -110,6 +115,8 @@ impl From<SnmpError> for PyErr {
             SnmpError::WouldBlock => PyBlockingIOError::new_err("blocked"),
             SnmpError::SocketError(x) => PyOSError::new_err(x),
             SnmpError::ConnectionRefused => PyTimeoutError::new_err("connection refused"),
+            SnmpError::UnknownSecurityModel => PySnmpDecodeError::new_err("unknown security model"),
+            SnmpError::AuthenticationFailed => PySnmpAuthError::new_err("authentication failed"),
         }
     }
 }

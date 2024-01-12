@@ -31,7 +31,8 @@ impl<'a> BerDecoder<'a> for SnmpOption<'a> {
             return Err(Err::Failure(SnmpError::Incomplete));
         }
         let (tail, hdr) = BerHeader::from_ber(i)?;
-        if !hdr.constructed || hdr.class != BerClass::Context {
+        if !hdr.constructed || (hdr.class != BerClass::Context && hdr.class != BerClass::Universal)
+        {
             return Err(Err::Failure(SnmpError::UnexpectedTag));
         }
         //

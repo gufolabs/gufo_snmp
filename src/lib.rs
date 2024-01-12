@@ -19,9 +19,11 @@ fn gufo_ping(py: Python, m: &PyModule) -> PyResult<()> {
     m.add("SnmpError", py.get_type::<error::PySnmpError>())?;
     m.add("SnmpEncodeError", py.get_type::<error::PySnmpEncodeError>())?;
     m.add("SnmpDecodeError", py.get_type::<error::PySnmpDecodeError>())?;
+    m.add("SnmpAuthError", py.get_type::<error::PySnmpAuthError>())?;
     m.add("NoSuchInstance", py.get_type::<error::PyNoSuchInstance>())?;
     m.add_class::<socket::SnmpV1ClientSocket>()?;
     m.add_class::<socket::SnmpV2cClientSocket>()?;
+    m.add_class::<socket::SnmpV3ClientSocket>()?;
     m.add_class::<socket::GetNextIter>()?;
     m.add_class::<socket::GetBulkIter>()?;
     Ok(())

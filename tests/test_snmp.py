@@ -16,7 +16,7 @@ import pytest
 
 # Gufo Labs modules
 from gufo.snmp import NoSuchInstance, SnmpSession, SnmpVersion, ValueType
-from gufo.snmp.snmpd import Snmpd
+from gufo.snmp.snmpd import Snmpd, User
 
 SNMPD_ADDRESS = "127.0.0.1"
 SNMPD_PORT = random.randint(52000, 53999)
@@ -24,7 +24,13 @@ SNMPD_PATH = "/usr/sbin/snmpd"
 SNMP_COMMUNITY = "public"
 SNMP_LOCATION = "Gufo SNMP Test"
 SNMP_CONTACT = "test <test@example.com>"
-SNMP_USER = "rouser"
+SNMP_USERS = [User(name="user1")]
+
+V1 = [{"version": SnmpVersion.v1, "community": SNMP_COMMUNITY}]
+V2 = [{"version": SnmpVersion.v2c, "community": SNMP_COMMUNITY}]
+V3 = [{"version": SnmpVersion.v3, "user_name": "user1"}]
+
+ALL = V1 + V2 + V3
 
 
 @pytest.fixture(scope="module")
@@ -38,7 +44,8 @@ def snmpd() -> Iterator[Snmpd]:
         community=SNMP_COMMUNITY,
         location=SNMP_LOCATION,
         contact=SNMP_CONTACT,
-        user=SNMP_USER,
+        users=SNMP_USERS,
+        # log_packets=True,
     ) as snmpd:
         yield snmpd
 
@@ -47,13 +54,15 @@ def test_snmpd_version(snmpd: Snmpd) -> None:
     assert snmpd.version
 
 
-def test_timeout1(snmpd: Snmpd) -> None:
+@pytest.mark.parametrize("cfg", ALL)
+def test_timeout1(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     async def inner() -> ValueType:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT + 1,
-            community=SNMP_COMMUNITY,
             timeout=1.0,
+            engine_id=snmpd.engine_id,
+            **cfg,
         ) as session:
             return await session.get("1.3.6.1.2.1.1")
 
@@ -61,13 +70,15 @@ def test_timeout1(snmpd: Snmpd) -> None:
         asyncio.run(inner())
 
 
-def test_timeout2(snmpd: Snmpd) -> None:
+@pytest.mark.parametrize("cfg", ALL)
+def test_timeout2(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     async def inner() -> Dict[str, ValueType]:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT + 1,
-            community=SNMP_COMMUNITY,
             timeout=1.0,
+            engine_id=snmpd.engine_id,
+            **cfg,
         ) as session:
             return await session.get_many(["1.3.6.1.2.1.1"])
 
@@ -75,16 +86,20 @@ def test_timeout2(snmpd: Snmpd) -> None:
         asyncio.run(inner())
 
 
-async def snmp_get(oid: str) -> ValueType:
+async def snmp_get(
+    cfg: Dict[str, Any], engine_id: bytes, oid: str
+) -> ValueType:
     async with SnmpSession(
         addr=SNMPD_ADDRESS,
         port=SNMPD_PORT,
-        community=SNMP_COMMUNITY,
         timeout=1.0,
+        engine_id=engine_id,
+        **cfg,
     ) as session:
         return await session.get(oid)
 
 
+@pytest.mark.parametrize("cfg", ALL)
 @pytest.mark.parametrize(
     ("oid", "expected"),
     [
@@ -92,36 +107,43 @@ async def snmp_get(oid: str) -> ValueType:
         ("1.3.6.1.2.1.1.4.0", SNMP_CONTACT.encode()),
     ],
 )
-def test_get(oid: str, expected: ValueType, snmpd: Snmpd) -> None:
-    r = asyncio.run(snmp_get(oid))
+def test_get(
+    cfg: Dict[str, Any], oid: str, expected: ValueType, snmpd: Snmpd
+) -> None:
+    r = asyncio.run(snmp_get(cfg, snmpd.engine_id, oid))
     assert r == expected
 
 
-def test_get_nosuchinstance(snmpd: Snmpd) -> None:
+@pytest.mark.parametrize("cfg", V2 + V3)
+def test_get_nosuchinstance(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     with pytest.raises(NoSuchInstance):
-        asyncio.run(snmp_get("1.3.6.1.2.1.1.6"))
+        asyncio.run(snmp_get(cfg, snmpd.engine_id, "1.3.6.1.2.1.1.6"))
 
 
-def test_sys_uptime(snmpd: Snmpd) -> None:
+@pytest.mark.parametrize("cfg", ALL)
+def test_sys_uptime(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     """sysUptime.0 returns TimeTicks type."""
-    r = asyncio.run(snmp_get("1.3.6.1.2.1.1.3.0"))
+    r = asyncio.run(snmp_get(cfg, snmpd.engine_id, "1.3.6.1.2.1.1.3.0"))
     assert isinstance(r, int)
 
 
-def test_sys_objectid(snmpd: Snmpd) -> None:
+@pytest.mark.parametrize("cfg", ALL)
+def test_sys_objectid(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     """sysObjectId.0 returns OBJECT IDENTIFIER type."""
-    r = asyncio.run(snmp_get("1.3.6.1.2.1.1.2.0"))
+    r = asyncio.run(snmp_get(cfg, snmpd.engine_id, "1.3.6.1.2.1.1.2.0"))
     assert isinstance(r, str)
     assert r.startswith("1.3.6.1.4.1.8072.3.2.")
 
 
-def test_get_many(snmpd: Snmpd) -> None:
+@pytest.mark.parametrize("cfg", ALL)
+def test_get_many(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     async def inner() -> Dict[str, ValueType]:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT,
-            community=SNMP_COMMUNITY,
             timeout=1.0,
+            engine_id=snmpd.engine_id,
+            **cfg,
         ) as session:
             return await session.get_many(
                 [
@@ -146,13 +168,15 @@ def test_get_many(snmpd: Snmpd) -> None:
     assert r["1.3.6.1.2.1.1.4.0"] == SNMP_CONTACT.encode()
 
 
-def test_get_many_skip(snmpd: Snmpd) -> None:
+@pytest.mark.parametrize("cfg", V2 + V3)
+def test_get_many_skip(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     async def inner() -> Dict[str, Any]:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT,
-            community=SNMP_COMMUNITY,
             timeout=1.0,
+            engine_id=snmpd.engine_id,
+            **cfg,
         ) as session:
             return await session.get_many(
                 [
@@ -173,13 +197,15 @@ def test_get_many_skip(snmpd: Snmpd) -> None:
     assert "1.3.6.1.2.1.1.4.0" in r
 
 
-def test_getmany_long_request(snmpd: Snmpd) -> None:
+@pytest.mark.parametrize("cfg", ALL)
+def test_getmany_long_request(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     async def inner() -> Dict[str, Any]:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT,
-            community=SNMP_COMMUNITY,
             timeout=1.0,
+            engine_id=snmpd.engine_id,
+            **cfg,
         ) as session:
             return await session.get_many(oids)
 
@@ -198,7 +224,8 @@ def test_getmany_long_request(snmpd: Snmpd) -> None:
         assert oid in r
 
 
-def test_getnext(snmpd: Snmpd) -> None:
+@pytest.mark.parametrize("cfg", ALL)
+def test_getnext(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     """Iterate over whole MIB."""
 
     async def inner() -> int:
@@ -206,8 +233,9 @@ def test_getnext(snmpd: Snmpd) -> None:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT,
-            community=SNMP_COMMUNITY,
             timeout=1.0,
+            engine_id=snmpd.engine_id,
+            **cfg,
         ) as session:
             async for _ in session.getnext("1.3.6"):
                 n += 1
@@ -217,7 +245,8 @@ def test_getnext(snmpd: Snmpd) -> None:
     assert n > 0
 
 
-def test_getnext_single(snmpd: Snmpd) -> None:
+@pytest.mark.parametrize("cfg", ALL)
+def test_getnext_single(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     """Test single value is returned with bulk."""
 
     async def inner() -> int:
@@ -225,8 +254,9 @@ def test_getnext_single(snmpd: Snmpd) -> None:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT,
-            community=SNMP_COMMUNITY,
             timeout=1.0,
+            engine_id=snmpd.engine_id,
+            **cfg,
         ) as session:
             async for oid, value in session.getnext("1.3.6.1.2.1.1.2"):
                 assert oid == "1.3.6.1.2.1.1.2.0"
@@ -238,7 +268,8 @@ def test_getnext_single(snmpd: Snmpd) -> None:
     assert n == 1
 
 
-def test_getbulk(snmpd: Snmpd) -> None:
+@pytest.mark.parametrize("cfg", V2 + V3)
+def test_getbulk(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     """Iterate over whole MIB."""
 
     async def inner() -> int:
@@ -246,8 +277,9 @@ def test_getbulk(snmpd: Snmpd) -> None:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT,
-            community=SNMP_COMMUNITY,
             timeout=1.0,
+            engine_id=snmpd.engine_id,
+            **cfg,
         ) as session:
             async for _ in session.getbulk("1.3.6"):
                 n += 1
@@ -257,7 +289,8 @@ def test_getbulk(snmpd: Snmpd) -> None:
     assert n > 0
 
 
-def test_getbulk_single(snmpd: Snmpd) -> None:
+@pytest.mark.parametrize("cfg", V2 + V3)
+def test_getbulk_single(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     """Test single value is returned with bulk."""
 
     async def inner() -> int:
@@ -265,8 +298,9 @@ def test_getbulk_single(snmpd: Snmpd) -> None:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT,
-            community=SNMP_COMMUNITY,
             timeout=1.0,
+            engine_id=snmpd.engine_id,
+            **cfg,
         ) as session:
             async for oid, value in session.getbulk("1.3.6.1.2.1.1.2"):
                 assert oid == "1.3.6.1.2.1.1.2.0"
@@ -278,7 +312,8 @@ def test_getbulk_single(snmpd: Snmpd) -> None:
     assert n == 1
 
 
-def test_getnext_getbulk(snmpd: Snmpd) -> None:
+@pytest.mark.parametrize("cfg", V2)
+def test_getnext_getbulk(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     """Cross-test of getnext and getbulk."""
 
     def is_valid(oid: str) -> bool:
@@ -289,8 +324,9 @@ def test_getnext_getbulk(snmpd: Snmpd) -> None:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT,
-            community=SNMP_COMMUNITY,
             timeout=1.0,
+            engine_id=snmpd.engine_id,
+            **cfg,
         ) as session:
             async for oid, _ in session.getnext("1.3.6"):
                 if is_valid(oid):
@@ -302,8 +338,9 @@ def test_getnext_getbulk(snmpd: Snmpd) -> None:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT,
-            community=SNMP_COMMUNITY,
             timeout=1.0,
+            engine_id=snmpd.engine_id,
+            **cfg,
         ) as session:
             async for oid, _ in session.getbulk("1.3.6"):
                 if is_valid(oid):
@@ -316,24 +353,17 @@ def test_getnext_getbulk(snmpd: Snmpd) -> None:
     assert diff == set()
 
 
-@pytest.mark.parametrize(
-    ("version", "allow_bulk"),
-    [
-        (SnmpVersion.v1, False),
-        (SnmpVersion.v1, True),
-        (SnmpVersion.v2c, False),
-        (SnmpVersion.v2c, True),
-    ],
-)
-def test_fetch(version: SnmpVersion, allow_bulk: bool, snmpd: Snmpd) -> None:
+@pytest.mark.parametrize("cfg", ALL)
+@pytest.mark.parametrize("allow_bulk", [False, True])
+def test_fetch(cfg: Dict[str, Any], allow_bulk: bool, snmpd: Snmpd) -> None:
     async def inner() -> None:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
             port=SNMPD_PORT,
-            version=version,
-            community=SNMP_COMMUNITY,
             timeout=1.0,
             allow_bulk=allow_bulk,
+            engine_id=snmpd.engine_id,
+            **cfg,
         ) as session:
             n = 0
             async for _, _ in session.fetch("1.3.6.1.2.1.1"):
@@ -343,8 +373,11 @@ def test_fetch(version: SnmpVersion, allow_bulk: bool, snmpd: Snmpd) -> None:
     asyncio.run(inner())
 
 
+@pytest.mark.parametrize("cfg", ALL)
 @pytest.mark.parametrize("allow_bulk", [False, True])
-def test_fetch_file_not_found(allow_bulk: bool, snmpd: Snmpd) -> None:
+def test_fetch_file_not_found(
+    cfg: Dict[str, Any], allow_bulk: bool, snmpd: Snmpd
+) -> None:
     """Test issue #1 condition."""
 
     async def inner() -> None:
@@ -352,8 +385,9 @@ def test_fetch_file_not_found(allow_bulk: bool, snmpd: Snmpd) -> None:
             async with SnmpSession(
                 addr=SNMPD_ADDRESS,
                 port=SNMPD_PORT,
-                community=SNMP_COMMUNITY,
                 allow_bulk=allow_bulk,
+                engine_id=snmpd.engine_id,
+                **cfg,
             ) as session:
                 async for _ in session.fetch("1.3.6.1.2.1.1.3"):
                     pass

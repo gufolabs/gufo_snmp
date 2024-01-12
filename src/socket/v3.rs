@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------
-// Gufo SNMP: SnmpV1ClientSocket
+// Gufo SNMP: SnmpV3ClientSocket
 // ------------------------------------------------------------------------
 // Copyright (C) 2023-24, Gufo Labs
 // See LICENSE.md for details
@@ -12,7 +12,7 @@ use crate::ber::{SnmpOid, ToPython};
 use crate::error::SnmpError;
 use crate::snmp::get::SnmpGet;
 use crate::snmp::getbulk::SnmpGetBulk;
-use crate::snmp::msg::SnmpV1Message;
+use crate::snmp::msg::{SnmpV3Message, UsmParameters};
 use crate::snmp::pdu::SnmpPdu;
 use crate::snmp::value::SnmpValue;
 use pyo3::exceptions::PyRuntimeError;
@@ -25,19 +25,24 @@ use std::os::fd::AsRawFd;
 
 /// Python class wrapping socket implementation
 #[pyclass]
-pub struct SnmpV1ClientSocket {
+pub struct SnmpV3ClientSocket {
     io: SnmpTransport,
-    community: String,
+    engine_id: Vec<u8>,
+    user_name: String,
+    msg_id: RequestId,
     request_id: RequestId,
 }
 
+const EMPTY: [u8; 0] = [];
+
 #[pymethods]
-impl SnmpV1ClientSocket {
+impl SnmpV3ClientSocket {
     /// Python constructor
     #[new]
     fn new(
         addr: String,
-        community: String,
+        engine_id: Vec<u8>,
+        user_name: String,
         tos: u32,
         send_buffer_size: usize,
         recv_buffer_size: usize,
@@ -47,7 +52,9 @@ impl SnmpV1ClientSocket {
         //
         Ok(Self {
             io,
-            community,
+            engine_id,
+            user_name,
+            msg_id: RequestId::default(),
             request_id: RequestId::default(),
         })
     }
@@ -57,8 +64,14 @@ impl SnmpV1ClientSocket {
     }
     // Prepare and send GET request with single oid
     fn send_get(&mut self, oid: &str) -> PyResult<()> {
-        Ok(self.io.send(SnmpV1Message {
-            community: self.community.as_ref(),
+        Ok(self.io.send(SnmpV3Message {
+            msg_id: self.msg_id.next(),
+            usm: UsmParameters {
+                engine_id: &self.engine_id,
+                user_name: self.user_name.as_ref(),
+                auth_params: &EMPTY,
+                privacy_params: &EMPTY,
+            },
             pdu: SnmpPdu::GetRequest(SnmpGet {
                 request_id: self.request_id.next(),
                 vars: vec![
@@ -69,8 +82,14 @@ impl SnmpV1ClientSocket {
     }
     // Prepare and send GET request with multiple oids
     fn send_get_many(&mut self, oids: Vec<&str>) -> PyResult<()> {
-        Ok(self.io.send(SnmpV1Message {
-            community: self.community.as_ref(),
+        Ok(self.io.send(SnmpV3Message {
+            msg_id: self.msg_id.next(),
+            usm: UsmParameters {
+                engine_id: &self.engine_id,
+                user_name: self.user_name.as_ref(),
+                auth_params: &EMPTY,
+                privacy_params: &EMPTY,
+            },
             pdu: SnmpPdu::GetRequest(SnmpGet {
                 request_id: self.request_id.next(),
                 vars: oids
@@ -83,8 +102,14 @@ impl SnmpV1ClientSocket {
     }
     // Send GetNext request according to iter
     fn send_getnext(&mut self, iter: &GetNextIter) -> PyResult<()> {
-        Ok(self.io.send(SnmpV1Message {
-            community: self.community.as_ref(),
+        Ok(self.io.send(SnmpV3Message {
+            msg_id: self.msg_id.next(),
+            usm: UsmParameters {
+                engine_id: &self.engine_id,
+                user_name: self.user_name.as_ref(),
+                auth_params: &EMPTY,
+                privacy_params: &EMPTY,
+            },
             pdu: SnmpPdu::GetNextRequest(SnmpGet {
                 request_id: self.request_id.next(),
                 vars: vec![iter.get_next_oid()],
@@ -94,8 +119,14 @@ impl SnmpV1ClientSocket {
     // Send GetBulk request according to iter
     fn send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
         // Encode message
-        Ok(self.io.send(SnmpV1Message {
-            community: self.community.as_ref(),
+        Ok(self.io.send(SnmpV3Message {
+            msg_id: self.msg_id.next(),
+            usm: UsmParameters {
+                engine_id: &self.engine_id,
+                user_name: self.user_name.as_ref(),
+                auth_params: &EMPTY,
+                privacy_params: &EMPTY,
+            },
             pdu: SnmpPdu::GetBulkRequest(SnmpGetBulk {
                 request_id: self.request_id.next(),
                 non_repeaters: 0,
@@ -108,10 +139,12 @@ impl SnmpV1ClientSocket {
     fn recv_getresponse(&mut self, py: Python) -> PyResult<Option<PyObject>> {
         loop {
             // Receive and decode message
-            let msg = self.io.recv::<SnmpV1Message>()?;
-            // Check community match
-            if msg.community != self.community.as_bytes() {
-                continue; // Community mismatch, not our response.
+            let msg = self.io.recv::<SnmpV3Message>()?;
+            if !(self.user_name.as_bytes() == msg.usm.user_name
+                && msg.usm.engine_id == self.engine_id
+                && self.msg_id.check(msg.msg_id))
+            {
+                continue; // Not our message
             }
             match msg.pdu {
                 SnmpPdu::GetResponse(resp) => {
@@ -142,6 +175,7 @@ impl SnmpV1ClientSocket {
                         _ => return Err(SnmpError::InvalidPdu.into()),
                     }
                 }
+                SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
                 _ => continue,
             }
         }
@@ -149,11 +183,14 @@ impl SnmpV1ClientSocket {
     fn recv_getresponse_many(&mut self, py: Python) -> PyResult<PyObject> {
         loop {
             // Receive and decode message
-            let msg = self.io.recv::<SnmpV1Message>()?;
-            // Check community match
-            if msg.community != self.community.as_bytes() {
-                continue; // Community mismatch, not our response.
+            let msg = self.io.recv::<SnmpV3Message>()?;
+            if !(self.user_name.as_bytes() == msg.usm.user_name
+                && msg.usm.engine_id == self.engine_id
+                && self.msg_id.check(msg.msg_id))
+            {
+                continue; // Not our message
             }
+            // @todo: Check username
             match msg.pdu {
                 SnmpPdu::GetResponse(resp) => {
                     // Check request id
@@ -176,6 +213,7 @@ impl SnmpV1ClientSocket {
                     }
                     return Ok(dict.into());
                 }
+                SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
                 _ => continue,
             }
         }
@@ -188,10 +226,12 @@ impl SnmpV1ClientSocket {
     ) -> PyResult<(PyObject, PyObject)> {
         loop {
             // Receive and decode message
-            let msg = self.io.recv::<SnmpV1Message>()?;
-            // Check community match
-            if msg.community != self.community.as_bytes() {
-                continue; // Community mismatch, not our response.
+            let msg = self.io.recv::<SnmpV3Message>()?;
+            if !(self.user_name.as_bytes() == msg.usm.user_name
+                && msg.usm.engine_id == self.engine_id
+                && self.msg_id.check(msg.msg_id))
+            {
+                continue; // Not our message
             }
             match msg.pdu {
                 SnmpPdu::GetResponse(resp) => {
@@ -211,18 +251,18 @@ impl SnmpV1ClientSocket {
                             if !iter.set_next_oid(&var.oid) {
                                 return Err(PyStopAsyncIteration::new_err("stop"));
                             }
-                            // v1 may return Null at end of mib
-                            return match &var.value {
-                                SnmpValue::EndOfMibView | SnmpValue::Null => {
-                                    Err(PyStopAsyncIteration::new_err("stop"))
-                                }
-                                value => Ok((var.oid.try_to_python(py)?, value.try_to_python(py)?)),
-                            };
+                            let value = &var.value;
+                            if let SnmpValue::EndOfMibView = value {
+                                // End of MIB, stop iteration
+                                return Err(PyStopAsyncIteration::new_err("stop"));
+                            }
+                            return Ok((var.oid.try_to_python(py)?, value.try_to_python(py)?));
                         }
                         // Multiple response, surely an error
                         _ => return Err(SnmpError::InvalidPdu.into()),
                     }
                 }
+                SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
                 _ => continue,
             }
         }
@@ -231,10 +271,12 @@ impl SnmpV1ClientSocket {
     fn recv_getresponse_bulk(&mut self, iter: &mut GetBulkIter, py: Python) -> PyResult<PyObject> {
         loop {
             // Receive and decode message
-            let msg = self.io.recv::<SnmpV1Message>()?;
-            // Check community match
-            if msg.community != self.community.as_bytes() {
-                continue; // Community mismatch, not our response.
+            let msg = self.io.recv::<SnmpV3Message>()?;
+            if !(self.user_name.as_bytes() == msg.usm.user_name
+                && msg.usm.engine_id == self.engine_id
+                && self.msg_id.check(msg.msg_id))
+            {
+                continue; // Not our message
             }
             match msg.pdu {
                 SnmpPdu::GetResponse(resp) => {
@@ -273,6 +315,7 @@ impl SnmpV1ClientSocket {
                     }
                     return Ok(list.into());
                 }
+                SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
                 _ => continue,
             }
         }
