@@ -60,7 +60,7 @@ impl SnmpV1ClientSocket {
         Ok(self.io.send(SnmpV1Message {
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetRequest(SnmpGet {
-                request_id: self.request_id.next(),
+                request_id: self.request_id.get_next(),
                 vars: vec![
                     SnmpOid::try_from(oid).map_err(|_| PyValueError::new_err("invalid oid"))?
                 ],
@@ -72,7 +72,7 @@ impl SnmpV1ClientSocket {
         Ok(self.io.send(SnmpV1Message {
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetRequest(SnmpGet {
-                request_id: self.request_id.next(),
+                request_id: self.request_id.get_next(),
                 vars: oids
                     .into_iter()
                     .map(SnmpOid::try_from)
@@ -86,7 +86,7 @@ impl SnmpV1ClientSocket {
         Ok(self.io.send(SnmpV1Message {
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetNextRequest(SnmpGet {
-                request_id: self.request_id.next(),
+                request_id: self.request_id.get_next(),
                 vars: vec![iter.get_next_oid()],
             }),
         })?)
@@ -97,7 +97,7 @@ impl SnmpV1ClientSocket {
         Ok(self.io.send(SnmpV1Message {
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetBulkRequest(SnmpGetBulk {
-                request_id: self.request_id.next(),
+                request_id: self.request_id.get_next(),
                 non_repeaters: 0,
                 max_repetitions: iter.get_max_repetitions(),
                 vars: vec![iter.get_next_oid()],

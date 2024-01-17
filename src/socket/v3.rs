@@ -42,6 +42,7 @@ const EMPTY: [u8; 0] = [];
 #[pymethods]
 impl SnmpV3ClientSocket {
     /// Python constructor
+    #[allow(clippy::too_many_arguments)] // Internal interface
     #[new]
     fn new(
         addr: String,
@@ -76,7 +77,7 @@ impl SnmpV3ClientSocket {
     }
     // Prepare and send GET request with single oid
     fn send_get(&mut self, oid: &str) -> PyResult<()> {
-        let request_id = self.request_id.next();
+        let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(SnmpPdu::GetRequest(SnmpGet {
             request_id,
             vars: vec![SnmpOid::try_from(oid).map_err(|_| PyValueError::new_err("invalid oid"))?],
@@ -84,7 +85,7 @@ impl SnmpV3ClientSocket {
     }
     // Prepare and send GET request with multiple oids
     fn send_get_many(&mut self, oids: Vec<&str>) -> PyResult<()> {
-        let request_id = self.request_id.next();
+        let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(SnmpPdu::GetRequest(SnmpGet {
             request_id,
             vars: oids
@@ -96,7 +97,7 @@ impl SnmpV3ClientSocket {
     }
     // Send GetNext request according to iter
     fn send_getnext(&mut self, iter: &GetNextIter) -> PyResult<()> {
-        let request_id = self.request_id.next();
+        let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(SnmpPdu::GetNextRequest(SnmpGet {
             request_id,
             vars: vec![iter.get_next_oid()],
@@ -104,7 +105,7 @@ impl SnmpV3ClientSocket {
     }
     // Send GetBulk request according to iter
     fn send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
-        let request_id = self.request_id.next();
+        let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(SnmpPdu::GetBulkRequest(SnmpGetBulk {
             request_id,
             non_repeaters: 0,
@@ -114,9 +115,9 @@ impl SnmpV3ClientSocket {
     }
     // Send GET+Report
     fn send_refresh(&mut self) -> PyResult<()> {
-        let request_id = self.request_id.next();
+        let request_id = self.request_id.get_next();
         Ok(self.io.send(SnmpV3Message {
-            msg_id: self.msg_id.next(),
+            msg_id: self.msg_id.get_next(),
             flag_auth: false,
             flag_priv: false,
             flag_report: true,
@@ -305,7 +306,7 @@ impl SnmpV3ClientSocket {
     fn wrap_and_send(&mut self, pdu: SnmpPdu) -> SnmpResult<()> {
         // Prepare message
         let msg = SnmpV3Message {
-            msg_id: self.msg_id.next(),
+            msg_id: self.msg_id.get_next(),
             flag_auth: self.auth_key.has_auth(),
             flag_priv: false,
             flag_report: false,

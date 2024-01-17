@@ -12,7 +12,7 @@ pub struct RequestId(i64);
 
 impl RequestId {
     /// Get next value
-    pub fn next(&mut self) -> i64 {
+    pub fn get_next(&mut self) -> i64 {
         let mut rng = rand::thread_rng();
         let x: i64 = rng.gen();
         self.0 = x & 0x7fffffff;
@@ -37,15 +37,15 @@ mod tests {
     #[test]
     fn test_check() {
         let mut r = RequestId::default();
-        let v1 = r.next();
+        let v1 = r.get_next();
         assert!(r.check(v1))
     }
 
     #[test]
     fn test_seq() {
         let mut r = RequestId::default();
-        let v1 = r.next();
-        let v2 = r.next();
+        let v1 = r.get_next();
+        let v2 = r.get_next();
         assert!(v1 != v2)
     }
 }
