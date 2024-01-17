@@ -14,10 +14,12 @@ import random
 import string
 import subprocess
 import threading
-from dataclasses import dataclass
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from types import TracebackType
 from typing import List, Optional, Type
+
+# Gufo SNMP modules
+from .user import User
 
 logger = logging.getLogger("gufo.snmp.snmpd")
 
@@ -26,38 +28,6 @@ _NETSNMP_ENGINE_ID_PREFIX = b"\x80\x00\x1f\x88\x04"
 # Length of generated engine id
 # Not including prefix.
 _ENGINE_ID_LENGTH = 8
-
-
-@dataclass
-class User(object):
-    """
-    SNMPv3 user.
-
-    Attributes:
-        name: user name
-    """
-
-    name: str
-
-    @property
-    def rouser(self: "User") -> str:
-        """
-        `rouser` part of config.
-
-        Returns:
-            rouser configuration directive.
-        """
-        return f"rouser {self.name} noauth"
-
-    @property
-    def create_user(self: "User") -> str:
-        """
-        createUser part of config.
-
-        Returns:
-            createUser configuration directive.
-        """
-        return f"createUser {self.name}"
 
 
 class Snmpd(object):
@@ -153,8 +123,8 @@ class Snmpd(object):
         Returns:
             snmpd configuration.
         """
-        rousers = "\n".join(u.rouser for u in self._users)
-        create_users = "\n".join(u.create_user for u in self._users)
+        rousers = "\n".join(u.snmpd_rouser for u in self._users)
+        create_users = "\n".join(u.snmpd_create_user for u in self._users)
 
         return f"""# Gufo SNMP Test Suite
 master agentx

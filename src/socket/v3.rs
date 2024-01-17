@@ -6,10 +6,11 @@
 // ------------------------------------------------------------------------
 
 use super::iter::{GetBulkIter, GetNextIter};
-use super::reqid::RequestId;
 use super::transport::SnmpTransport;
+use crate::auth::AuthKey;
 use crate::ber::{SnmpOid, ToPython};
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
+use crate::reqid::RequestId;
 use crate::snmp::get::SnmpGet;
 use crate::snmp::getbulk::SnmpGetBulk;
 use crate::snmp::msg::{SnmpV3Message, UsmParameters};
@@ -28,7 +29,10 @@ use std::os::fd::AsRawFd;
 pub struct SnmpV3ClientSocket {
     io: SnmpTransport,
     engine_id: Vec<u8>,
+    engine_boots: i64,
+    engine_time: i64,
     user_name: String,
+    auth_key: AuthKey,
     msg_id: RequestId,
     request_id: RequestId,
 }
@@ -43,6 +47,8 @@ impl SnmpV3ClientSocket {
         addr: String,
         engine_id: Vec<u8>,
         user_name: String,
+        auth_alg: u8,
+        auth_key: Vec<u8>,
         tos: u32,
         send_buffer_size: usize,
         recv_buffer_size: usize,
@@ -50,10 +56,16 @@ impl SnmpV3ClientSocket {
         // Transport
         let io = SnmpTransport::new(addr, tos, send_buffer_size, recv_buffer_size)?;
         //
+        let mut auth_key = AuthKey::new(auth_alg, auth_key)?;
+        auth_key.localize(engine_id.as_ref());
+        //
         Ok(Self {
             io,
             engine_id,
+            engine_boots: 0,
+            engine_time: 0,
             user_name,
+            auth_key,
             msg_id: RequestId::default(),
             request_id: RequestId::default(),
         })
@@ -64,157 +76,128 @@ impl SnmpV3ClientSocket {
     }
     // Prepare and send GET request with single oid
     fn send_get(&mut self, oid: &str) -> PyResult<()> {
-        Ok(self.io.send(SnmpV3Message {
-            msg_id: self.msg_id.next(),
-            usm: UsmParameters {
-                engine_id: &self.engine_id,
-                user_name: self.user_name.as_ref(),
-                auth_params: &EMPTY,
-                privacy_params: &EMPTY,
-            },
-            pdu: SnmpPdu::GetRequest(SnmpGet {
-                request_id: self.request_id.next(),
-                vars: vec![
-                    SnmpOid::try_from(oid).map_err(|_| PyValueError::new_err("invalid oid"))?
-                ],
-            }),
-        })?)
+        let request_id = self.request_id.next();
+        Ok(self.wrap_and_send(SnmpPdu::GetRequest(SnmpGet {
+            request_id,
+            vars: vec![SnmpOid::try_from(oid).map_err(|_| PyValueError::new_err("invalid oid"))?],
+        }))?)
     }
     // Prepare and send GET request with multiple oids
     fn send_get_many(&mut self, oids: Vec<&str>) -> PyResult<()> {
+        let request_id = self.request_id.next();
+        Ok(self.wrap_and_send(SnmpPdu::GetRequest(SnmpGet {
+            request_id,
+            vars: oids
+                .into_iter()
+                .map(SnmpOid::try_from)
+                .collect::<SnmpResult<Vec<SnmpOid>>>()
+                .map_err(|_| PyValueError::new_err("invalid oid"))?,
+        }))?)
+    }
+    // Send GetNext request according to iter
+    fn send_getnext(&mut self, iter: &GetNextIter) -> PyResult<()> {
+        let request_id = self.request_id.next();
+        Ok(self.wrap_and_send(SnmpPdu::GetNextRequest(SnmpGet {
+            request_id,
+            vars: vec![iter.get_next_oid()],
+        }))?)
+    }
+    // Send GetBulk request according to iter
+    fn send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
+        let request_id = self.request_id.next();
+        Ok(self.wrap_and_send(SnmpPdu::GetBulkRequest(SnmpGetBulk {
+            request_id,
+            non_repeaters: 0,
+            max_repetitions: iter.get_max_repetitions(),
+            vars: vec![iter.get_next_oid()],
+        }))?)
+    }
+    // Send GET+Report
+    fn send_refresh(&mut self) -> PyResult<()> {
+        let request_id = self.request_id.next();
         Ok(self.io.send(SnmpV3Message {
             msg_id: self.msg_id.next(),
+            flag_auth: false,
+            flag_priv: false,
+            flag_report: true,
             usm: UsmParameters {
-                engine_id: &self.engine_id,
+                engine_id: &EMPTY,
+                engine_boots: 0,
+                engine_time: 0,
                 user_name: self.user_name.as_ref(),
                 auth_params: &EMPTY,
                 privacy_params: &EMPTY,
             },
             pdu: SnmpPdu::GetRequest(SnmpGet {
-                request_id: self.request_id.next(),
-                vars: oids
-                    .into_iter()
-                    .map(SnmpOid::try_from)
-                    .collect::<Result<Vec<SnmpOid>, SnmpError>>()
-                    .map_err(|_| PyValueError::new_err("invalid oid"))?,
-            }),
-        })?)
-    }
-    // Send GetNext request according to iter
-    fn send_getnext(&mut self, iter: &GetNextIter) -> PyResult<()> {
-        Ok(self.io.send(SnmpV3Message {
-            msg_id: self.msg_id.next(),
-            usm: UsmParameters {
-                engine_id: &self.engine_id,
-                user_name: self.user_name.as_ref(),
-                auth_params: &EMPTY,
-                privacy_params: &EMPTY,
-            },
-            pdu: SnmpPdu::GetNextRequest(SnmpGet {
-                request_id: self.request_id.next(),
-                vars: vec![iter.get_next_oid()],
-            }),
-        })?)
-    }
-    // Send GetBulk request according to iter
-    fn send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
-        // Encode message
-        Ok(self.io.send(SnmpV3Message {
-            msg_id: self.msg_id.next(),
-            usm: UsmParameters {
-                engine_id: &self.engine_id,
-                user_name: self.user_name.as_ref(),
-                auth_params: &EMPTY,
-                privacy_params: &EMPTY,
-            },
-            pdu: SnmpPdu::GetBulkRequest(SnmpGetBulk {
-                request_id: self.request_id.next(),
-                non_repeaters: 0,
-                max_repetitions: iter.get_max_repetitions(),
-                vars: vec![iter.get_next_oid()],
+                request_id,
+                vars: vec![],
             }),
         })?)
     }
     // Try to receive GETRESPONSE
     fn recv_getresponse(&mut self, py: Python) -> PyResult<Option<PyObject>> {
         loop {
-            // Receive and decode message
-            let msg = self.io.recv::<SnmpV3Message>()?;
-            if !(self.user_name.as_bytes() == msg.usm.user_name
-                && msg.usm.engine_id == self.engine_id
-                && self.msg_id.check(msg.msg_id))
-            {
-                continue; // Not our message
-            }
-            match msg.pdu {
-                SnmpPdu::GetResponse(resp) => {
-                    // Check request id
-                    if !self.request_id.check(resp.request_id) {
-                        continue; // Not our request
-                    }
-                    // Check error_index
-                    // Check varbinds size
-                    match resp.vars.len() {
-                        // Empty response, return None
-                        0 => return Ok(None),
-                        // Return value
-                        1 => {
-                            let var = &resp.vars[0];
-                            let value = &var.value;
-                            match value {
-                                SnmpValue::NoSuchObject
-                                | SnmpValue::NoSuchInstance
-                                | SnmpValue::EndOfMibView => {
-                                    return Err(SnmpError::NoSuchInstance.into())
+            match self.recv_and_unwrap()? {
+                Some(pdu) => match pdu {
+                    SnmpPdu::GetResponse(resp) => {
+                        // Check error_index
+                        // Check varbinds size
+                        match resp.vars.len() {
+                            // Empty response, return None
+                            0 => return Ok(None),
+                            // Return value
+                            1 => {
+                                let var = &resp.vars[0];
+                                let value = &var.value;
+                                match value {
+                                    SnmpValue::NoSuchObject
+                                    | SnmpValue::NoSuchInstance
+                                    | SnmpValue::EndOfMibView => {
+                                        return Err(SnmpError::NoSuchInstance.into())
+                                    }
+                                    SnmpValue::Null => return Ok(None),
+                                    _ => return Ok(Some(value.try_to_python(py)?)),
                                 }
-                                SnmpValue::Null => return Ok(None),
-                                _ => return Ok(Some(value.try_to_python(py)?)),
                             }
+                            // Multiple response, surely an error
+                            _ => return Err(SnmpError::InvalidPdu.into()),
                         }
-                        // Multiple response, surely an error
-                        _ => return Err(SnmpError::InvalidPdu.into()),
                     }
-                }
-                SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
-                _ => continue,
+                    SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
+                    _ => continue,
+                },
+                None => continue,
             }
         }
     }
     fn recv_getresponse_many(&mut self, py: Python) -> PyResult<PyObject> {
         loop {
-            // Receive and decode message
-            let msg = self.io.recv::<SnmpV3Message>()?;
-            if !(self.user_name.as_bytes() == msg.usm.user_name
-                && msg.usm.engine_id == self.engine_id
-                && self.msg_id.check(msg.msg_id))
-            {
-                continue; // Not our message
-            }
-            // @todo: Check username
-            match msg.pdu {
-                SnmpPdu::GetResponse(resp) => {
-                    // Check request id
-                    if !self.request_id.check(resp.request_id) {
-                        continue; // Not our request
-                    }
-                    // Check error_index
-                    // Build resulting dict
-                    let dict = PyDict::new(py);
-                    for var in resp.vars.iter() {
-                        match &var.value {
-                            SnmpValue::Null
-                            | SnmpValue::NoSuchObject
-                            | SnmpValue::NoSuchInstance
-                            | SnmpValue::EndOfMibView => continue,
-                            _ => dict
-                                .set_item(var.oid.try_to_python(py)?, var.value.try_to_python(py)?)
-                                .map_err(|e| PyRuntimeError::new_err(e.to_string()))?,
+            match self.recv_and_unwrap()? {
+                Some(pdu) => match pdu {
+                    SnmpPdu::GetResponse(resp) => {
+                        // Check error_index
+                        // Build resulting dict
+                        let dict = PyDict::new(py);
+                        for var in resp.vars.iter() {
+                            match &var.value {
+                                SnmpValue::Null
+                                | SnmpValue::NoSuchObject
+                                | SnmpValue::NoSuchInstance
+                                | SnmpValue::EndOfMibView => continue,
+                                _ => dict
+                                    .set_item(
+                                        var.oid.try_to_python(py)?,
+                                        var.value.try_to_python(py)?,
+                                    )
+                                    .map_err(|e| PyRuntimeError::new_err(e.to_string()))?,
+                            }
                         }
+                        return Ok(dict.into());
                     }
-                    return Ok(dict.into());
-                }
-                SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
-                _ => continue,
+                    SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
+                    _ => continue,
+                },
+                None => continue,
             }
         }
     }
@@ -225,99 +208,141 @@ impl SnmpV3ClientSocket {
         py: Python,
     ) -> PyResult<(PyObject, PyObject)> {
         loop {
-            // Receive and decode message
-            let msg = self.io.recv::<SnmpV3Message>()?;
-            if !(self.user_name.as_bytes() == msg.usm.user_name
-                && msg.usm.engine_id == self.engine_id
-                && self.msg_id.check(msg.msg_id))
-            {
-                continue; // Not our message
-            }
-            match msg.pdu {
-                SnmpPdu::GetResponse(resp) => {
-                    // Check request id
-                    if !self.request_id.check(resp.request_id) {
-                        continue; // Not our request
-                    }
-                    // Check error_index
-                    // Check varbinds size
-                    match resp.vars.len() {
-                        // Empty response, stop iteration
-                        0 => return Err(PyStopAsyncIteration::new_err("stop")),
-                        // Return value
-                        1 => {
-                            let var = &resp.vars[0];
-                            // Check if we can continue
-                            if !iter.set_next_oid(&var.oid) {
-                                return Err(PyStopAsyncIteration::new_err("stop"));
+            match self.recv_and_unwrap()? {
+                Some(pdu) => match pdu {
+                    SnmpPdu::GetResponse(resp) => {
+                        // Check error_index
+                        // Check varbinds size
+                        match resp.vars.len() {
+                            // Empty response, stop iteration
+                            0 => return Err(PyStopAsyncIteration::new_err("stop")),
+                            // Return value
+                            1 => {
+                                let var = &resp.vars[0];
+                                // Check if we can continue
+                                if !iter.set_next_oid(&var.oid) {
+                                    return Err(PyStopAsyncIteration::new_err("stop"));
+                                }
+                                let value = &var.value;
+                                if let SnmpValue::EndOfMibView = value {
+                                    // End of MIB, stop iteration
+                                    return Err(PyStopAsyncIteration::new_err("stop"));
+                                }
+                                return Ok((var.oid.try_to_python(py)?, value.try_to_python(py)?));
                             }
-                            let value = &var.value;
-                            if let SnmpValue::EndOfMibView = value {
-                                // End of MIB, stop iteration
-                                return Err(PyStopAsyncIteration::new_err("stop"));
-                            }
-                            return Ok((var.oid.try_to_python(py)?, value.try_to_python(py)?));
+                            // Multiple response, surely an error
+                            _ => return Err(SnmpError::InvalidPdu.into()),
                         }
-                        // Multiple response, surely an error
-                        _ => return Err(SnmpError::InvalidPdu.into()),
                     }
-                }
-                SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
-                _ => continue,
+                    SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
+                    _ => continue,
+                },
+                None => continue,
             }
         }
     }
     // Try to receive GETRESPONSE for GETBULK
     fn recv_getresponse_bulk(&mut self, iter: &mut GetBulkIter, py: Python) -> PyResult<PyObject> {
         loop {
-            // Receive and decode message
-            let msg = self.io.recv::<SnmpV3Message>()?;
-            if !(self.user_name.as_bytes() == msg.usm.user_name
-                && msg.usm.engine_id == self.engine_id
-                && self.msg_id.check(msg.msg_id))
-            {
-                continue; // Not our message
-            }
-            match msg.pdu {
-                SnmpPdu::GetResponse(resp) => {
-                    // Check request id
-                    if !self.request_id.check(resp.request_id) {
-                        continue; // Not our request
-                    }
-                    // Check error_index
-                    // Check varbinds size
-                    if resp.vars.is_empty() {
-                        return Err(PyStopAsyncIteration::new_err("stop"));
-                    }
-                    let list = PyList::empty(py);
-                    for var in resp.vars.iter() {
-                        match &var.value {
-                            SnmpValue::Null
-                            | SnmpValue::NoSuchObject
-                            | SnmpValue::NoSuchInstance
-                            | SnmpValue::EndOfMibView => continue,
-                            _ => {
-                                // Check if we can continue
-                                if !iter.set_next_oid(&var.oid) {
-                                    break;
+            match self.recv_and_unwrap()? {
+                Some(pdu) => match pdu {
+                    SnmpPdu::GetResponse(resp) => {
+                        // Check error_index
+                        // Check varbinds size
+                        if resp.vars.is_empty() {
+                            return Err(PyStopAsyncIteration::new_err("stop"));
+                        }
+                        let list = PyList::empty(py);
+                        for var in resp.vars.iter() {
+                            match &var.value {
+                                SnmpValue::Null
+                                | SnmpValue::NoSuchObject
+                                | SnmpValue::NoSuchInstance
+                                | SnmpValue::EndOfMibView => continue,
+                                _ => {
+                                    // Check if we can continue
+                                    if !iter.set_next_oid(&var.oid) {
+                                        break;
+                                    }
+                                    // Append to list
+                                    list.append(PyTuple::new(
+                                        py,
+                                        vec![
+                                            var.oid.try_to_python(py)?,
+                                            var.value.try_to_python(py)?,
+                                        ],
+                                    ))
+                                    .map_err(|e| PyRuntimeError::new_err(e.to_string()))?
                                 }
-                                // Append to list
-                                list.append(PyTuple::new(
-                                    py,
-                                    vec![var.oid.try_to_python(py)?, var.value.try_to_python(py)?],
-                                ))
-                                .map_err(|e| PyRuntimeError::new_err(e.to_string()))?
                             }
                         }
+                        if list.is_empty() {
+                            return Err(PyStopAsyncIteration::new_err("stop"));
+                        }
+                        return Ok(list.into());
                     }
-                    if list.is_empty() {
-                        return Err(PyStopAsyncIteration::new_err("stop"));
-                    }
-                    return Ok(list.into());
-                }
-                SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
-                _ => continue,
+                    SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
+                    _ => continue,
+                },
+                None => continue,
             }
         }
+    }
+    // Receive refresh report
+    fn recv_refresh(&mut self) -> PyResult<()> {
+        let msg = self.io.recv::<SnmpV3Message>()?;
+        self.engine_boots = msg.usm.engine_boots;
+        self.engine_time = msg.usm.engine_time;
+        if self.engine_id.is_empty() {
+            // Auto-detect engine id
+            self.engine_id.clone_from_slice(msg.usm.engine_id);
+        }
+        Ok(())
+    }
+}
+impl SnmpV3ClientSocket {
+    // Wrap PDU and send
+    fn wrap_and_send(&mut self, pdu: SnmpPdu) -> SnmpResult<()> {
+        // Prepare message
+        let msg = SnmpV3Message {
+            msg_id: self.msg_id.next(),
+            flag_auth: self.auth_key.has_auth(),
+            flag_priv: false,
+            flag_report: false,
+            usm: UsmParameters {
+                engine_id: &self.engine_id,
+                engine_boots: self.engine_boots,
+                engine_time: self.engine_time,
+                user_name: self.user_name.as_ref(),
+                auth_params: self.auth_key.placeholder(),
+                privacy_params: &EMPTY,
+            },
+            pdu,
+        };
+        // Serialize BER to buffer
+        self.io.push_ber(msg)?;
+        // Apply auth
+        self.auth_key.sign(self.io.data_mut())?;
+        // Send buffer
+        self.io.send_buffer()
+    }
+    // Receive and unwrap PDU
+    fn recv_and_unwrap(&mut self) -> SnmpResult<Option<SnmpPdu>> {
+        let msg = self.io.recv::<SnmpV3Message>()?;
+        // Global header check
+        if !(self.user_name.as_bytes() == msg.usm.user_name
+            && msg.usm.engine_id == self.engine_id
+            && self.msg_id.check(msg.msg_id)
+            && msg.pdu.check(&self.request_id))
+        {
+            return Ok(None);
+        }
+        self.engine_boots = msg.usm.engine_boots;
+        self.engine_time = msg.usm.engine_time;
+        if self.engine_id.is_empty() {
+            // Auto-detect engine id
+            self.engine_id.clone_from_slice(msg.usm.engine_id);
+        }
+        Ok(Some(msg.pdu))
     }
 }

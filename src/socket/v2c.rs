@@ -6,10 +6,10 @@
 // ------------------------------------------------------------------------
 
 use super::iter::{GetBulkIter, GetNextIter};
-use super::reqid::RequestId;
 use super::transport::SnmpTransport;
 use crate::ber::{SnmpOid, ToPython};
 use crate::error::SnmpError;
+use crate::reqid::RequestId;
 use crate::snmp::get::SnmpGet;
 use crate::snmp::getbulk::SnmpGetBulk;
 use crate::snmp::msg::SnmpV2cMessage;

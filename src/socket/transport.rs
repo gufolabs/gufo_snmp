@@ -7,7 +7,7 @@
 
 use crate::ber::BerEncoder;
 use crate::buf::Buffer;
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
 use socket2::{Domain, Protocol, Socket, Type};
 use std::net::SocketAddr;
 use std::os::fd::{AsRawFd, RawFd};
@@ -60,18 +60,33 @@ impl SnmpTransport {
             buf: Buffer::default(),
         })
     }
-    /// Send message to socket
-    pub fn send<T>(&mut self, msg: T) -> Result<(), SnmpError>
+    /// Get buffer as mutable slice
+    pub fn data_mut(&mut self) -> &mut [u8] {
+        self.buf.data_mut()
+    }
+    /// Serialize message to buffer
+    pub fn push_ber<T>(&mut self, msg: T) -> SnmpResult<()>
     where
         T: BerEncoder,
     {
         self.buf.reset();
         msg.push_ber(&mut self.buf)?;
-        // Send
+        Ok(())
+    }
+    /// Send content of the buffer
+    pub fn send_buffer(&mut self) -> SnmpResult<()> {
         self.io
             .send(self.buf.data())
             .map_err(|e| SnmpError::SocketError(e.to_string()))?;
         Ok(())
+    }
+    /// Send message to socket
+    pub fn send<T>(&mut self, msg: T) -> SnmpResult<()>
+    where
+        T: BerEncoder,
+    {
+        self.push_ber(msg)?;
+        self.send_buffer()
     }
     /// Receive message from socket
     pub fn recv<'a, 'b, T>(&'b mut self) -> Result<T, SnmpError>

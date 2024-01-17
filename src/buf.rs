@@ -50,6 +50,10 @@ impl Buffer {
         &self.data[MAX_SIZE - self.len..]
     }
     #[inline]
+    pub fn data_mut(&mut self) -> &mut [u8] {
+        &mut self.data[MAX_SIZE - self.len..]
+    }
+    #[inline]
     pub fn push_u8(&mut self, v: u8) -> Result<(), SnmpError> {
         if self.is_full() {
             return Err(SnmpError::OutOfBuffer);

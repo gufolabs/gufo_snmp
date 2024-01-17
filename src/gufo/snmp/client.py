@@ -22,6 +22,7 @@ from .getnext import GetNextIter
 from .policer import BasePolicer, RPSPolicer
 from .protocol import SnmpClientSocketProtocol
 from .typing import ValueType
+from .user import User
 from .util import send_and_recv
 from .version import SnmpVersion
 
@@ -37,7 +38,7 @@ class SnmpSession(object):
         port: SNMP agent port.
         community: SNMP community (v1, v2c).
         engine_id: SNMP Engine id (v3).
-        user_name: User name (v3).
+        user: User instance (v3).
         version: Protocol version.
         timeout: Request timeout in seconds.
         tos: Set ToS/DSCP mark on egress packets.
@@ -72,7 +73,7 @@ class SnmpSession(object):
         port: int = 161,
         community: str = "public",
         engine_id: Optional[bytes] = None,
-        user_name: Optional[str] = None,
+        user: Optional[User] = None,
         version: SnmpVersion = SnmpVersion.v2c,
         timeout: float = 10.0,
         tos: int = 0,
@@ -84,6 +85,7 @@ class SnmpSession(object):
         limit_rps: Optional[Union[int, float]] = None,
     ) -> None:
         self._sock: SnmpClientSocketProtocol
+        self._to_refresh = False
         if version == SnmpVersion.v1:
             self._sock = SnmpV1ClientSocket(
                 f"{addr}:{port}",
@@ -101,8 +103,8 @@ class SnmpSession(object):
                 recv_buffer,
             )
         elif version == SnmpVersion.v3:
-            if not user_name:
-                msg = "SNMPv3 requires user_name"
+            if not user:
+                msg = "SNMPv3 requires user"
                 raise ValueError(msg)
             if not engine_id:
                 msg = "SNMPv3 requires engine_id"
@@ -110,11 +112,14 @@ class SnmpSession(object):
             self._sock = SnmpV3ClientSocket(
                 f"{addr}:{port}",
                 engine_id if engine_id else b"",
-                user_name,
+                user.name,
+                user.get_auth_alg(),
+                user.get_auth_key(),
                 tos,
                 send_buffer,
                 recv_buffer,
             )
+            self._to_refresh = not engine_id or user.require_auth()
         else:
             msg = "Invalid SNMP Protocol"
             raise ValueError(msg)
@@ -133,6 +138,7 @@ class SnmpSession(object):
 
     async def __aenter__(self: "SnmpSession") -> "SnmpSession":
         """Asynchronous context manager entry."""
+        await self.refresh()
         return self
 
     async def __aexit__(
@@ -281,3 +287,27 @@ class SnmpSession(object):
         if self._allow_bulk:
             return self.getbulk(oid)
         return self.getnext(oid)
+
+    async def refresh(self: "SnmpSession") -> None:
+        """
+        Send and receive REPORT to refresh authentication state.
+
+        SNMPv3 only.
+
+        Refresh sent automatically on entering
+        the SnmpSession and should be resent manually
+        if over 150 seconds left from the last request.
+        """
+        if (
+            not isinstance(self._sock, SnmpV3ClientSocket)
+            or not self._to_refresh
+        ):
+            return
+
+        await send_and_recv(
+            self._fd,
+            self._sock.send_refresh,
+            self._sock.recv_refresh,
+            self._policer,
+            self._timeout,
+        )

@@ -18,6 +18,9 @@ pub struct SnmpV3Message<'a> {
     pub msg_id: i64,
     //pub context_engine_id: &'a [u8],
     //pub context_engine_name: &'a [u8],
+    pub flag_auth: bool,
+    pub flag_priv: bool,
+    pub flag_report: bool,
     pub usm: UsmParameters<'a>,
     pub pdu: SnmpPdu<'a>,
 }
@@ -27,9 +30,9 @@ const MAX_SIZE: i64 = 1500;
 const USM: u8 = 3;
 const USM_MODEL_BER: [u8; 3] = [TAG_INT, 1, USM];
 // Flags
-// const FLAG_REPORTABLE: u8 = 4;
-// const FLAG_ENCRYPTED: u8 = 2;
-// const FLAG_AUTH: u8 = 1;
+const FLAG_REPORT: u8 = 4;
+const FLAG_PRIV: u8 = 2;
+const FLAG_AUTH: u8 = 1;
 // Scoped Pdu
 const SCOPED_PLAINTEXT_CONTEXT: u8 = 0;
 const SCOPED_PLAINTEXT_UNIVERSAL: u8 = 16;
@@ -64,10 +67,6 @@ impl<'a> TryFrom<&'a [u8]> for SnmpV3Message<'a> {
             return Err(SnmpError::InvalidPdu);
         }
         let flags = flags_data.0[0];
-        if flags != 0 {
-            // @todo: Process other codes
-            return Err(SnmpError::InvalidPdu);
-        }
         // security model
         let (_, security_model) = SnmpInt::from_ber(tail)?;
         let sm: u8 = security_model.into();
@@ -94,6 +93,9 @@ impl<'a> TryFrom<&'a [u8]> for SnmpV3Message<'a> {
                     msg_id: msg_id_data.into(),
                     //context_engine_id: ctx_engine_id.0,
                     //context_engine_name: ctx_engine_name.0,
+                    flag_auth: (flags & FLAG_AUTH) != 0,
+                    flag_priv: (flags & FLAG_PRIV) != 0,
+                    flag_report: (flags & FLAG_REPORT) != 0,
                     usm,
                     pdu: SnmpPdu::try_from(tail)?,
                 })
@@ -146,7 +148,17 @@ impl<'a> BerEncoder for SnmpV3Message<'a> {
         // Push security model
         buf.push(&USM_MODEL_BER)?;
         // Push flags
-        buf.push_u8(0)?;
+        let mut flag = 0u8;
+        if self.flag_auth {
+            flag |= FLAG_AUTH
+        }
+        if self.flag_priv {
+            flag |= FLAG_PRIV
+        }
+        if self.flag_report {
+            flag |= FLAG_REPORT;
+        }
+        buf.push_u8(flag)?;
         buf.push_ber_len(1)?;
         buf.push_u8(TAG_OCTET_STRING)?;
         // Push msg max size
@@ -187,6 +199,8 @@ mod tests {
         let msg = SnmpV3Message::try_from(data.as_ref())?;
         // Analyze global header
         assert_eq!(msg.msg_id, 37320);
+        assert_eq!(msg.flag_auth, false);
+        assert_eq!(msg.flag_priv, false);
         // Analyze security parameters
         assert_eq!(msg.usm.user_name, "admin".as_bytes());
         // Analyze scoped pdu
@@ -215,6 +229,8 @@ mod tests {
         let empty: [u8; 0] = [];
         let msg = SnmpV3Message {
             msg_id: 37320,
+            flag_auth: false,
+            flag_priv: false,
             usm: UsmParameters {
                 engine_id: &empty,
                 user_name: "admin".as_bytes(),

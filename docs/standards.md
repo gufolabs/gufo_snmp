@@ -11,6 +11,7 @@ Gufo SNMP implements and is guided by the following standards:
 * [RFC-2578][RFC-2578]: Structure of Management Information Version 2 (SMIv2).
 * [RFC-3411][RFC-3411]: An Architecture for Describing Simple Network Management Protocol (SNMP) Management Frameworks.
 * [RFC-3412][RFC-3412]: Message Processing and Dispatching for the Simple Network Management Protocol (SNMP)
+* [RFC-3414][RFC-3414]: User-based Security Model (USM) for version 3 of the Simple Network Management Protocol (SNMPv3)
 
 ## ITU-T
 
@@ -29,6 +30,7 @@ Gufo SNMP implements and is guided by the following standards:
 [RFC-2578]: https://datatracker.ietf.org/doc/html/rfc2578
 [RFC-3411]: https://datatracker.ietf.org/doc/html/rfc3411
 [RFC-3412]: https://datatracker.ietf.org/doc/html/rfc3412
+[RFC-3414]: https://datatracker.ietf.org/doc/html/rfc3414
 [PEP8]: https://peps.python.org/pep-0008/
 [PEP484]: https://peps.python.org/pep-0484/
 [PEP561]: https://peps.python.org/pep-0561/

@@ -12,6 +12,7 @@ name = "gufo_snmp"
 strip = "debuginfo"
 
 [dependencies]
+md5 = "0.7"
 nom = "7.1"
 pyo3 = {version = "0.20", features = ["extension-module"]}
 rand = "0.8"

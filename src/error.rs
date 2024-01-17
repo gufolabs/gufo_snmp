@@ -13,6 +13,8 @@ use pyo3::{
     PyErr,
 };
 
+pub type SnmpResult<T> = Result<T, SnmpError>;
+
 #[derive(Debug)]
 pub enum SnmpError {
     /// Too short

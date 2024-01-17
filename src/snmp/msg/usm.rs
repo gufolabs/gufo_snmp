@@ -6,15 +6,15 @@
 // ------------------------------------------------------------------------
 
 use crate::ber::{
-    BerDecoder, BerEncoder, SnmpInt, SnmpOctetString, SnmpSequence, TAG_INT, TAG_OCTET_STRING,
+    BerDecoder, BerEncoder, SnmpInt, SnmpOctetString, SnmpSequence, TAG_OCTET_STRING,
 };
 use crate::buf::Buffer;
 use crate::error::SnmpError;
 
 pub struct UsmParameters<'a> {
     pub engine_id: &'a [u8],
-    // pub engine_boots: i64,
-    // pub engine_time: i64,
+    pub engine_boots: i64,
+    pub engine_time: i64,
     pub user_name: &'a [u8],
     pub auth_params: &'a [u8],
     pub privacy_params: &'a [u8],
@@ -32,9 +32,9 @@ impl<'a> TryFrom<&'a [u8]> for UsmParameters<'a> {
         // Engine id
         let (tail, engine_id) = SnmpOctetString::from_ber(envelope.0)?;
         // Engine boots
-        let (tail, _engine_boots) = SnmpInt::from_ber(tail)?;
+        let (tail, engine_boots) = SnmpInt::from_ber(tail)?;
         // Engine time
-        let (tail, _engine_time) = SnmpInt::from_ber(tail)?;
+        let (tail, engine_time) = SnmpInt::from_ber(tail)?;
         // User name
         let (tail, user_name) = SnmpOctetString::from_ber(tail)?;
         // Auth parameters
@@ -43,8 +43,8 @@ impl<'a> TryFrom<&'a [u8]> for UsmParameters<'a> {
         let (_, privacy_parameters) = SnmpOctetString::from_ber(tail)?;
         Ok(UsmParameters {
             engine_id: engine_id.0,
-            // engine_boots: engine_boots.into(),
-            // engine_time: engine_time.into(),
+            engine_boots: engine_boots.into(),
+            engine_time: engine_time.into(),
             user_name: user_name.0,
             auth_params: auth_parameters.0,
             privacy_params: privacy_parameters.0,
@@ -52,7 +52,6 @@ impl<'a> TryFrom<&'a [u8]> for UsmParameters<'a> {
     }
 }
 
-const ZERO_BER: [u8; 3] = [TAG_INT, 1, 0];
 const EMPTY_BER: [u8; 2] = [TAG_OCTET_STRING, 0];
 
 impl<'a> BerEncoder for UsmParameters<'a> {
@@ -61,15 +60,23 @@ impl<'a> BerEncoder for UsmParameters<'a> {
         // Push privacy parameters
         buf.push(&EMPTY_BER)?;
         // Push auth parameters
-        buf.push(&EMPTY_BER)?;
+        if self.auth_params.is_empty() {
+            buf.push(&EMPTY_BER)?;
+        } else {
+            buf.push(self.auth_params)?;
+            buf.push_ber_len(self.auth_params.len())?;
+            buf.push_u8(TAG_OCTET_STRING)?;
+        }
         // Push user name
         buf.push(self.user_name)?;
         buf.push_ber_len(self.user_name.len())?;
         buf.push_u8(TAG_OCTET_STRING)?;
         // Push engine time
-        buf.push(&ZERO_BER)?;
+        let engine_time: SnmpInt = self.engine_time.into();
+        engine_time.push_ber(buf)?;
         // Push engine boots
-        buf.push(&ZERO_BER)?;
+        let engine_boots: SnmpInt = self.engine_boots.into();
+        engine_boots.push_ber(buf)?;
         // Push engine id
         let ln = self.engine_id.len();
         if ln > 0 {

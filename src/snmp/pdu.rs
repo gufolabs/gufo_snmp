@@ -15,6 +15,7 @@ use super::{
 use crate::ber::{BerDecoder, BerEncoder, SnmpOption};
 use crate::buf::Buffer;
 use crate::error::SnmpError;
+use crate::reqid::RequestId;
 
 #[allow(clippy::enum_variant_names)]
 pub enum SnmpPdu<'a> {
@@ -63,6 +64,19 @@ impl<'a> BerEncoder for SnmpPdu<'a> {
                 Ok(())
             }
             _ => Err(SnmpError::NotImplemented),
+        }
+    }
+}
+
+impl<'a> SnmpPdu<'a> {
+    /// Check if request id is match
+    pub fn check(&self, request_id: &RequestId) -> bool {
+        match self {
+            SnmpPdu::GetRequest(pdu) => request_id.check(pdu.request_id),
+            SnmpPdu::GetNextRequest(pdu) => request_id.check(pdu.request_id),
+            SnmpPdu::GetBulkRequest(pdu) => request_id.check(pdu.request_id),
+            SnmpPdu::GetResponse(pdu) => request_id.check(pdu.request_id),
+            SnmpPdu::Report(_) => true,
         }
     }
 }

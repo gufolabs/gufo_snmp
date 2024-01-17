@@ -91,6 +91,8 @@ class SnmpV3ClientSocket(object):
         addr: str,
         engine_id: bytes,
         user_name: str,
+        auth_alg: int,
+        auth_key: bytes,
         tos: int,
         send_buffer_size: int,
         recv_buffer_size: int,
@@ -104,6 +106,7 @@ class SnmpV3ClientSocket(object):
     def send_getbulk(
         self: "SnmpV3ClientSocket", iter_getbulk: GetBulkIter
     ) -> None: ...
+    def send_refresh(self: "SnmpV3ClientSocket") -> None: ...
     def recv_getresponse(self: "SnmpV3ClientSocket") -> ValueType: ...
     def recv_getresponse_many(
         self: "SnmpV3ClientSocket",
@@ -114,3 +117,4 @@ class SnmpV3ClientSocket(object):
     def recv_getresponse_bulk(
         self: "SnmpV3ClientSocket", iter_getnext: GetBulkIter
     ) -> List[Tuple[str, ValueType]]: ...
+    def recv_refresh(self: "SnmpV3ClientSocket") -> None: ...

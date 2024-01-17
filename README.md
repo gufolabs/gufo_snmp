@@ -77,11 +77,13 @@ async with Snmpd(), SnmpSession(addr="127.0.0.1", port=10161) as session:
     r = await session.get("1.3.6.1.2.1.1.3.0")
 ```
 
-## Virtues
+## Features
 
 * Clean async API.
-* SNMP v1/v2c support.
-* SNMP v3 support (plaintext, no auth).
+* SNMP v1/v2c/v3 support.
+* SNMP v3 User Security Model:
+  * Authentication: HMAC-MD5-96, HMAC-SHA-96 (work in progress).
+  * Protection: work in progress.
 * High-performance.
 * Zero-copy BER parsing.
 * Full Python typing support.
