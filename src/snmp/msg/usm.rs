@@ -125,6 +125,8 @@ mod tests {
         let empty: [u8; 0] = [];
         let usm = UsmParameters {
             engine_id: &empty,
+            engine_boots: 0,
+            engine_time: 0,
             user_name: "admin".as_bytes(),
             auth_params: &empty,
             privacy_params: &empty,

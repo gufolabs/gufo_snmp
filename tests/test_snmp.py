@@ -9,7 +9,7 @@
 import asyncio
 import logging
 import random
-from typing import Any, Dict, Iterator, Set, cast
+from typing import Any, Dict, Iterator, cast
 
 # Third-party modules
 import pytest
@@ -17,7 +17,7 @@ import pytest
 # Gufo Labs modules
 from gufo.snmp import NoSuchInstance, SnmpSession, SnmpVersion, ValueType
 from gufo.snmp.snmpd import Snmpd
-from gufo.snmp.user import Md5Key, Sha1Key, User
+from gufo.snmp.user import Md5Key, User
 
 SNMPD_ADDRESS = "127.0.0.1"
 SNMPD_PORT = random.randint(52000, 53999)

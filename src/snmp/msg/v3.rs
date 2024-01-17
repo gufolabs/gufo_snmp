@@ -231,8 +231,11 @@ mod tests {
             msg_id: 37320,
             flag_auth: false,
             flag_priv: false,
+            flag_report: false,
             usm: UsmParameters {
                 engine_id: &empty,
+                engine_boots: 0,
+                engine_time: 0,
                 user_name: "admin".as_bytes(),
                 auth_params: &empty,
                 privacy_params: &empty,
