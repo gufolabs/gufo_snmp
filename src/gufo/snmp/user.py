@@ -33,12 +33,14 @@ class Md5Key(BaseAuthKey):
     """MD5 Key."""
 
     AUTH_ALG = 1
+    KEY_LENGTH = 16
 
 
 class Sha1Key(BaseAuthKey):
     """SHA-1 Key."""
 
     AUTH_ALG = 2
+    KEY_LENGTH = 20
 
 
 @dataclass

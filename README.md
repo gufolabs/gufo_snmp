@@ -82,7 +82,7 @@ async with Snmpd(), SnmpSession(addr="127.0.0.1", port=10161) as session:
 * Clean async API.
 * SNMP v1/v2c/v3 support.
 * SNMP v3 User Security Model:
-  * Authentication: HMAC-MD5-96, HMAC-SHA-96 (work in progress).
+  * Authentication: HMAC-MD5-96, HMAC-SHA-96.
   * Privacy: work in progress.
 * High-performance.
 * Zero-copy BER parsing.

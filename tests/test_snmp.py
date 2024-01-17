@@ -17,7 +17,7 @@ import pytest
 # Gufo Labs modules
 from gufo.snmp import NoSuchInstance, SnmpSession, SnmpVersion, ValueType
 from gufo.snmp.snmpd import Snmpd
-from gufo.snmp.user import Md5Key, User
+from gufo.snmp.user import Md5Key, Sha1Key, User
 
 SNMPD_ADDRESS = "127.0.0.1"
 SNMPD_PORT = random.randint(52000, 53999)
@@ -28,7 +28,7 @@ SNMP_CONTACT = "test <test@example.com>"
 SNMP_USERS = [
     User(name="user00"),
     User(name="user10", auth_key=Md5Key(b"user10key")),
-    # User(name="user20", auth_key=Sha1Key(b"user20key")),
+    User(name="user20", auth_key=Sha1Key(b"user20key")),
 ]
 
 V1 = [{"version": SnmpVersion.v1, "community": SNMP_COMMUNITY}]

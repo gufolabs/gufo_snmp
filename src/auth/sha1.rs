@@ -1,22 +1,22 @@
 // ------------------------------------------------------------------------
-// Gufo SNMP: SNMP v3 MD5 Auth
+// Gufo SNMP: SNMP v3 Sha1 Auth
 // ------------------------------------------------------------------------
 // Copyright (C) 2023-24, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
 use super::SnmpAuth;
-use md5::{compute, Context};
+use sha1::Digest;
 
-pub struct Md5(Vec<u8>);
+pub struct Sha1(Vec<u8>);
 
-impl Md5 {
-    pub fn new(key: Vec<u8>) -> Md5 {
-        Md5(key)
+impl Sha1 {
+    pub fn new(key: Vec<u8>) -> Sha1 {
+        Sha1(key)
     }
 }
 
-const KEY_LENGTH: usize = 16;
+const KEY_LENGTH: usize = 20;
 const PADDED_LENGTH: usize = 64;
 const REST_LENGTH: usize = PADDED_LENGTH - KEY_LENGTH;
 const IPAD_VALUE: u8 = 0x36;
@@ -25,20 +25,22 @@ const IPAD_REST: [u8; REST_LENGTH] = [IPAD_VALUE; REST_LENGTH];
 const OPAD_REST: [u8; REST_LENGTH] = [OPAD_VALUE; REST_LENGTH];
 const SIGN_SIZE: usize = 12;
 
-impl SnmpAuth for Md5 {
+impl SnmpAuth for Sha1 {
     fn localize(&mut self, engine_id: &[u8]) {
         let mut result = Vec::with_capacity(2 * self.0.len() + engine_id.len());
         result.extend_from_slice(self.0.as_ref());
         result.extend_from_slice(engine_id.as_ref());
         result.extend_from_slice(self.0.as_ref());
-        let digest: [u8; KEY_LENGTH] = compute(result).into();
+        let mut hasher = sha1::Sha1::new();
+        hasher.update(result);
+        let digest: [u8; KEY_LENGTH] = hasher.finalize().into();
         self.0.resize(KEY_LENGTH, 0);
         self.0.clone_from_slice(&digest);
     }
     fn sign(&self, whole_msg: &mut [u8], offset: usize) {
-        let mut ctx1 = Context::new();
-        // RFC-3414, pp. 6.3.1. Processing an outgoing message
-        // a) extend the authKey to 64 octets by appending 48 zero octets;
+        let mut ctx1 = sha1::Sha1::new();
+        // RFC-3414, pp. 7.3.1. Processing an outgoing message
+        // a) extend the authKey to 64 octets by appending 44 zero octets;
         //    save it as extendedAuthKey
         //  >>> Really not necessary
         //  b) obtain IPAD by replicating the octet 0x36 64 times;
@@ -48,13 +50,13 @@ impl SnmpAuth for Md5 {
         //  Instead:
         //  * append xored key
         let k1: Vec<u8> = self.0.iter().map(|&x| x ^ IPAD_VALUE).collect();
-        ctx1.consume(k1);
+        ctx1.update(k1);
         //  * append precalculated rest of IPAD
-        ctx1.consume(IPAD_REST);
+        ctx1.update(IPAD_REST);
         //  * append whole message
-        ctx1.consume(&whole_msg);
-        // get MD5
-        let d1: [u8; KEY_LENGTH] = ctx1.compute().into();
+        ctx1.update(&whole_msg);
+        // get Sha1
+        let d1: [u8; KEY_LENGTH] = ctx1.finalize().into();
         // d) obtain OPAD by replicating the octet 0x5C 64 times;
         // >>> Really not necessary
         // e) obtain K2 by XORing extendedAuthKey with OPAD.
@@ -63,14 +65,14 @@ impl SnmpAuth for Md5 {
         //    final digest - this is Message Authentication Code (MAC).
         // Instead:
         //  * append xored key
-        let mut ctx2 = Context::new();
+        let mut ctx2 = sha1::Sha1::new();
         let k2: Vec<u8> = self.0.iter().map(|&x| x ^ OPAD_VALUE).collect();
-        ctx2.consume(k2);
+        ctx2.update(k2);
         //  * append precalculated rest of OPAD
-        ctx2.consume(OPAD_REST);
+        ctx2.update(OPAD_REST);
         // * append previous digest
-        ctx2.consume(d1);
-        let d2: [u8; KEY_LENGTH] = ctx2.compute().into(); // use only 12 octets
+        ctx2.update(d1);
+        let d2: [u8; KEY_LENGTH] = ctx2.finalize().into(); // use only 12 octets
         whole_msg[offset..offset + SIGN_SIZE].copy_from_slice(&d2[0..SIGN_SIZE]);
     }
 }
