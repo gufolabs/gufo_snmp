@@ -13,7 +13,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 ## [Unreleased]
 
 ### Added
-* Basic SNMPv3 support (plaintext, no auth).
+* SNMPv3 support.
 * Snmpd.engine_id property.
 * Tests for all SNMP versions.
 

@@ -51,6 +51,7 @@ impl<'a> TryFrom<&'a [u8]> for SnmpGetBulk {
 impl BerEncoder for SnmpGetBulk {
     fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
         // Push all vars in the reversed order
+        let rest = buf.len();
         let null = SnmpNull {};
         for oid in self.vars.iter().rev() {
             let start = buf.len();
@@ -65,7 +66,7 @@ impl BerEncoder for SnmpGetBulk {
         }
         // Enclosing sequence for varbinds
         // Spans for the end
-        buf.push_ber_len(buf.len())?;
+        buf.push_ber_len(buf.len() - rest)?;
         buf.push_u8(0x30)?;
         // max-repetitions
         let max_repetitions: SnmpInt = self.max_repetitions.into();

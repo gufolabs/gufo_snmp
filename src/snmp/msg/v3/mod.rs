@@ -1,12 +1,15 @@
 // ------------------------------------------------------------------------
-// Gufo SNMP: SNMP Messages
+// Gufo SNMP: SNMP v3 Message
 // ------------------------------------------------------------------------
 // Copyright (C) 2023-24, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-mod v1;
-mod v2c;
-pub mod v3;
-pub use v1::SnmpV1Message;
-pub use v2c::SnmpV2cMessage;
+mod data;
+mod msg;
+mod scoped;
+mod usm;
+pub use data::MsgData;
+pub use msg::SnmpV3Message;
+pub use scoped::ScopedPdu;
+pub use usm::UsmParameters;

@@ -115,6 +115,8 @@ class SnmpSession(object):
                 user.name,
                 user.get_auth_alg(),
                 user.get_auth_key(),
+                user.get_priv_alg(),
+                user.get_priv_key(),
                 tos,
                 send_buffer,
                 recv_buffer,

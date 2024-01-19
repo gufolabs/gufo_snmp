@@ -5,7 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
 use std::mem::MaybeUninit;
 
 const MAX_SIZE: usize = 65536;
@@ -54,6 +54,14 @@ impl Buffer {
         &mut self.data[MAX_SIZE - self.len..]
     }
     #[inline]
+    pub fn skip(&mut self, size: usize) {
+        if self.len + size >= MAX_SIZE {
+            self.len = MAX_SIZE
+        } else {
+            self.len += size;
+        }
+    }
+    #[inline]
     pub fn push_u8(&mut self, v: u8) -> Result<(), SnmpError> {
         if self.is_full() {
             return Err(SnmpError::OutOfBuffer);
@@ -89,6 +97,12 @@ impl Buffer {
             self.push_u8((size | 0x80) as u8)?;
         }
         Ok(())
+    }
+    // Push tag, len, data
+    pub fn push_tagged(&mut self, tag: u8, data: &[u8]) -> SnmpResult<()> {
+        self.push(data)?;
+        self.push_ber_len(data.len())?;
+        self.push_u8(tag)
     }
     pub fn reset(&mut self) {
         self.len = 0;

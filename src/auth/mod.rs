@@ -5,86 +5,66 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-mod md5;
-mod sha1;
+mod digest;
+mod noauth;
+use enum_dispatch::enum_dispatch;
+use md5::Md5;
+use sha1::Sha1;
 
 pub use crate::error::{SnmpError, SnmpResult};
-pub use md5::Md5;
-pub use sha1::Sha1;
+pub use digest::DigestAuth;
+pub use noauth::NoAuth;
 
 pub const NO_AUTH: u8 = 0;
 pub const MD5_AUTH: u8 = 1;
 pub const SHA1_AUTH: u8 = 2;
 
+pub type Md5AuthKey = DigestAuth<Md5, 16, 12>;
+pub type Sha1AuthKey = DigestAuth<Sha1, 20, 12>;
+
+#[enum_dispatch(SnmpAuth)]
 pub enum AuthKey {
-    NoAuth,
-    Md5(Md5),
-    Sha1(Sha1),
+    NoAuth(NoAuth),
+    Md5(Md5AuthKey),
+    Sha1(Sha1AuthKey),
 }
 
+#[enum_dispatch]
 pub trait SnmpAuth {
-    // Convert key to localized key
-    fn localize(&mut self, engine_id: &[u8]);
+    // Localized key
+    fn from_localized(&mut self, key: &[u8]);
+    // Master key, localized internally
+    fn from_master(&mut self, key: &[u8], locality: &[u8]);
+    // Convert key to localized key and write to output
+    fn localize(&self, key: &[u8], locality: &[u8], out: &mut [u8]);
+    // Check if method provides auth
+    fn has_auth(&self) -> bool;
+    // Returns zero-filled placeholder
+    fn placeholder(&self) -> &'static [u8];
+    // Find signature place
+    fn find_placeholder_offset(&self, whole_msg: &[u8]) -> Option<usize>;
     // Calculate and place signature
-    fn sign(&self, whole_msg: &mut [u8], offset: usize);
+    fn sign_and_update(&self, whole_msg: &mut [u8], offset: usize);
+    //
+    fn sign(&self, whole_msg: &mut [u8]) -> SnmpResult<()> {
+        match self.find_placeholder_offset(whole_msg) {
+            Some(offset) => {
+                self.sign_and_update(whole_msg, offset);
+                Ok(())
+            }
+            None => Err(SnmpError::InvalidData),
+        }
+    }
 }
-
-const PLACEHOLDER0: [u8; 0] = [];
-const PLACEHOLDER12: [u8; 12] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-const PLACEHOLDER_MASK12: [u8; 14] = [4, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 impl AuthKey {
-    pub fn new(code: u8, key: Vec<u8>) -> Result<AuthKey, SnmpError> {
-        match code {
-            NO_AUTH => Ok(AuthKey::NoAuth),
-            MD5_AUTH => Ok(AuthKey::Md5(Md5::new(key))),
-            SHA1_AUTH => Ok(AuthKey::Sha1(Sha1::new(key))),
-            _ => Err(SnmpError::InvalidVersion(code)),
-        }
-    }
-    pub fn has_auth(&self) -> bool {
-        !matches!(self, AuthKey::NoAuth)
-    }
-    pub fn placeholder(&self) -> &'static [u8] {
-        match self {
-            AuthKey::NoAuth => &PLACEHOLDER0,
-            AuthKey::Md5(_) => &PLACEHOLDER12,
-            AuthKey::Sha1(_) => &PLACEHOLDER12,
-        }
-    }
-    pub fn localize(&mut self, engine_id: &[u8]) {
-        match self {
-            AuthKey::NoAuth => {}
-            AuthKey::Md5(x) => x.localize(engine_id),
-            AuthKey::Sha1(x) => x.localize(engine_id),
-        }
-    }
-    pub fn sign(&self, whole_msg: &mut [u8]) -> SnmpResult<()> {
-        match self {
-            AuthKey::NoAuth => Ok(()),
-            AuthKey::Md5(x) => match AuthKey::find_placeholder12_offset(whole_msg) {
-                Some(idx) => {
-                    x.sign(whole_msg, idx + 2);
-                    Ok(())
-                }
-                None => Err(SnmpError::InvalidData),
-            },
-            AuthKey::Sha1(x) => match AuthKey::find_placeholder12_offset(whole_msg) {
-                Some(idx) => {
-                    x.sign(whole_msg, idx + 2);
-                    Ok(())
-                }
-                None => Err(SnmpError::InvalidData),
-            },
-        }
-    }
-    fn find_placeholder12_offset(input: &[u8]) -> Option<usize> {
-        for (i, window) in input.windows(PLACEHOLDER_MASK12.len()).enumerate() {
-            if window == PLACEHOLDER_MASK12 {
-                return Some(i);
-            }
-        }
-        None
+    pub fn new(code: u8) -> SnmpResult<AuthKey> {
+        Ok(match code {
+            NO_AUTH => AuthKey::NoAuth(NoAuth),
+            MD5_AUTH => AuthKey::Md5(Md5AuthKey::default()),
+            SHA1_AUTH => AuthKey::Sha1(Sha1AuthKey::default()),
+            _ => return Err(SnmpError::InvalidVersion(code)),
+        })
     }
 }
 
@@ -110,11 +90,10 @@ mod tests {
             116, 100, 4, 0, 160, 28, 2, 4, 80, 85, 225, 64, 2, 1, 0, 2, 1, 0, 48, 14, 48, 12, 6, 8,
             43, 6, 1, 2, 1, 1, 4, 0, 5, 0,
         ];
-        let master_key = vec![117u8, 115, 101, 114, 49, 48, 107, 101, 121]; // user10key
+        let master_key = [117u8, 115, 101, 114, 49, 48, 107, 101, 121]; // user10key
         let engine_id = [128, 0, 31, 136, 4, 50, 55, 103, 83, 56, 54, 116, 100];
-        let mut key = Md5::new(master_key);
-        key.localize(&engine_id);
-        let auth_key = AuthKey::Md5(key);
+        let mut auth_key = Md5AuthKey::default();
+        auth_key.from_master(&master_key, &engine_id);
         auth_key.sign(&mut whole_msg)?;
         assert_eq!(whole_msg, expected);
         Ok(())
@@ -137,11 +116,10 @@ mod tests {
             100, 4, 0, 160, 28, 2, 4, 80, 85, 225, 64, 2, 1, 0, 2, 1, 0, 48, 14, 48, 12, 6, 8, 43,
             6, 1, 2, 1, 1, 4, 0, 5, 0,
         ];
-        let master_key = vec![117u8, 115, 101, 114, 50, 48, 107, 101, 121]; // user20key
+        let master_key = [117u8, 115, 101, 114, 50, 48, 107, 101, 121]; // user20key
         let engine_id = [128, 0, 31, 136, 4, 50, 55, 103, 83, 56, 54, 116, 100];
-        let mut key = Sha1::new(master_key);
-        key.localize(&engine_id);
-        let auth_key = AuthKey::Sha1(key);
+        let mut auth_key = Sha1AuthKey::default();
+        auth_key.from_master(&master_key, &engine_id);
         auth_key.sign(&mut whole_msg)?;
         assert_eq!(whole_msg, expected);
         Ok(())

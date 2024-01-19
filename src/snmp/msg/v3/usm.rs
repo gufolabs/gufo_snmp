@@ -58,14 +58,16 @@ impl<'a> BerEncoder for UsmParameters<'a> {
     fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
         let l0 = buf.len();
         // Push privacy parameters
-        buf.push(&EMPTY_BER)?;
+        if self.privacy_params.is_empty() {
+            buf.push(&EMPTY_BER)?;
+        } else {
+            buf.push_tagged(TAG_OCTET_STRING, self.privacy_params)?;
+        }
         // Push auth parameters
         if self.auth_params.is_empty() {
             buf.push(&EMPTY_BER)?;
         } else {
-            buf.push(self.auth_params)?;
-            buf.push_ber_len(self.auth_params.len())?;
-            buf.push_u8(TAG_OCTET_STRING)?;
+            buf.push_tagged(TAG_OCTET_STRING, self.auth_params)?;
         }
         // Push user name
         buf.push(self.user_name)?;

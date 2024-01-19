@@ -8,17 +8,17 @@
 
 # Python modules
 from dataclasses import dataclass
-from typing import Optional
+from typing import List, Optional
 
 
-class BaseAuthKey(object):
-    """Authentication key base class."""
+class BaseKey(object):
+    """Basic key class."""
 
-    KEY_LENGTH: int = 16
+    KEY_LENGTH: int
     PAD = b"\x00"
-    AUTH_ALG: int = 0
+    SNMPD_PREFIX: str
 
-    def __init__(self: "BaseAuthKey", key: bytes) -> None:
+    def __init__(self: "BaseKey", key: bytes) -> None:
         kl = len(key)
         self.key: bytes
         if kl > self.KEY_LENGTH:
@@ -28,12 +28,23 @@ class BaseAuthKey(object):
         else:
             self.key = key + self.PAD * (self.KEY_LENGTH - kl)
 
+    def snmpd_key(self: "BaseKey") -> List[str]:
+        """Returns key and prefix for createUser."""
+        return [self.SNMPD_PREFIX, "-m", self.key.hex()]
+
+
+class BaseAuthKey(BaseKey):
+    """Authentication key base class."""
+
+    AUTH_ALG: int
+
 
 class Md5Key(BaseAuthKey):
     """MD5 Key."""
 
     AUTH_ALG = 1
     KEY_LENGTH = 16
+    SNMPD_PREFIX = "MD5"
 
 
 class Sha1Key(BaseAuthKey):
@@ -41,6 +52,29 @@ class Sha1Key(BaseAuthKey):
 
     AUTH_ALG = 2
     KEY_LENGTH = 20
+    SNMPD_PREFIX = "SHA"
+
+
+class BasePrivKey(BaseKey):
+    """Privacy key base class."""
+
+    PRIV_ALG: int
+
+
+class DesKey(BasePrivKey):
+    """Des Key."""
+
+    PRIV_ALG = 1
+    KEY_LENGTH = 16
+    SNMPD_PREFIX = "DES"
+
+
+class Aes128Key(BasePrivKey):
+    """AES-128 Key."""
+
+    PRIV_ALG = 2
+    KEY_LENGTH = 16
+    SNMPD_PREFIX = "AES"
 
 
 @dataclass
@@ -49,12 +83,14 @@ class User(object):
     SNMPv3 user.
 
     Attributes:
-        name: user name
+        name: user name.
+        auth_key: Optional authentication key.
+        priv_key: Optional privacy key.
     """
 
     name: str
     auth_key: Optional[BaseAuthKey] = None
-    priv_key = None
+    priv_key: Optional[BasePrivKey] = None
 
     def require_auth(self: "User") -> bool:
         """
@@ -67,7 +103,7 @@ class User(object):
 
     def get_auth_alg(self: "User") -> int:
         """
-        AuthAlgorithm index.
+        Auth algorithm index.
 
         Returns:
             * 0 - No auth
@@ -76,9 +112,24 @@ class User(object):
         """
         return self.auth_key.AUTH_ALG if self.auth_key else 0
 
+    def get_priv_alg(self: "User") -> int:
+        """
+        Privacy algorithm index.
+
+        Returns:
+            * 0 - No privacy
+            * 1 - DES
+            * 2 - AES-128
+        """
+        return self.priv_key.PRIV_ALG if self.priv_key else 0
+
     def get_auth_key(self: "User") -> bytes:
         """Authentication key."""
         return self.auth_key.key if self.auth_key else b""
+
+    def get_priv_key(self: "User") -> bytes:
+        """Privacy key."""
+        return self.priv_key.key if self.priv_key else b""
 
     @property
     def snmpd_rouser(self: "User") -> str:
@@ -106,8 +157,7 @@ class User(object):
         """
         r = ["createUser", self.name]
         if self.auth_key:
-            if isinstance(self.auth_key, Md5Key):
-                r += ["MD5", "-m", self.auth_key.key.hex()]
-            elif isinstance(self.auth_key, Sha1Key):
-                r += ["SHA", "-m", self.auth_key.key.hex()]
+            r += self.auth_key.snmpd_key()
+        if self.priv_key:
+            r += self.priv_key.snmpd_key()
         return " ".join(r)

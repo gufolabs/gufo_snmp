@@ -170,7 +170,7 @@ sysServices 72"""
         ]
         if self._log_packets:
             args += ["-d"]  # Dump packets
-            args += ["-Dsnmpd,dump,usm"]
+            args += ["-Ddump,usm"]
         logger.debug("Running: %s", " ".join(args))
         self._proc = subprocess.Popen(
             args,

@@ -44,22 +44,23 @@ impl<'a> TryFrom<&'a [u8]> for SnmpPdu<'a> {
 
 impl<'a> BerEncoder for SnmpPdu<'a> {
     fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
+        let rest = buf.len();
         match self {
             SnmpPdu::GetRequest(req) => {
                 req.push_ber(buf)?;
-                buf.push_ber_len(buf.len())?;
+                buf.push_ber_len(buf.len() - rest)?;
                 buf.push_u8(160)?; // Context + Constructed + PDU_GET_REQUEST(0)
                 Ok(())
             }
             SnmpPdu::GetNextRequest(req) => {
                 req.push_ber(buf)?;
-                buf.push_ber_len(buf.len())?;
+                buf.push_ber_len(buf.len() - rest)?;
                 buf.push_u8(161)?; // Context + Constructed + PDU_GETNEXT_REQUEST(1)
                 Ok(())
             }
             SnmpPdu::GetBulkRequest(req) => {
                 req.push_ber(buf)?;
-                buf.push_ber_len(buf.len())?;
+                buf.push_ber_len(buf.len() - rest)?;
                 buf.push_u8(165)?; // Context + Constructed + PDU_GETBULK_REQUEST(5)
                 Ok(())
             }

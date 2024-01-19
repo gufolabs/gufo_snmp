@@ -93,6 +93,8 @@ class SnmpV3ClientSocket(object):
         user_name: str,
         auth_alg: int,
         auth_key: bytes,
+        priv_alg: int,
+        priv_key: bytes,
         tos: int,
         send_buffer_size: int,
         recv_buffer_size: int,

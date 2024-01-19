@@ -7,13 +7,14 @@
 
 use super::iter::{GetBulkIter, GetNextIter};
 use super::transport::SnmpTransport;
-use crate::auth::AuthKey;
+use crate::auth::{AuthKey, SnmpAuth};
 use crate::ber::{SnmpOid, ToPython};
 use crate::error::{SnmpError, SnmpResult};
+use crate::privacy::{PrivKey, SnmpPriv};
 use crate::reqid::RequestId;
 use crate::snmp::get::SnmpGet;
 use crate::snmp::getbulk::SnmpGetBulk;
-use crate::snmp::msg::{SnmpV3Message, UsmParameters};
+use crate::snmp::msg::v3::{MsgData, ScopedPdu, SnmpV3Message, UsmParameters};
 use crate::snmp::pdu::SnmpPdu;
 use crate::snmp::value::SnmpValue;
 use pyo3::exceptions::PyRuntimeError;
@@ -33,6 +34,7 @@ pub struct SnmpV3ClientSocket {
     engine_time: i64,
     user_name: String,
     auth_key: AuthKey,
+    priv_key: PrivKey,
     msg_id: RequestId,
     request_id: RequestId,
 }
@@ -49,7 +51,9 @@ impl SnmpV3ClientSocket {
         engine_id: Vec<u8>,
         user_name: String,
         auth_alg: u8,
-        auth_key: Vec<u8>,
+        auth_key: &[u8],
+        priv_alg: u8,
+        priv_key: &[u8],
         tos: u32,
         send_buffer_size: usize,
         recv_buffer_size: usize,
@@ -57,8 +61,16 @@ impl SnmpV3ClientSocket {
         // Transport
         let io = SnmpTransport::new(addr, tos, send_buffer_size, recv_buffer_size)?;
         //
-        let mut auth_key = AuthKey::new(auth_alg, auth_key)?;
-        auth_key.localize(engine_id.as_ref());
+        let mut auth = AuthKey::new(auth_alg)?;
+        auth.from_master(auth_key, &engine_id);
+        //
+        let mut pk = PrivKey::new(priv_alg)?;
+        if pk.has_priv() {
+            // Localize
+            let mut key = vec![0; priv_key.len()];
+            auth.localize(priv_key, &engine_id, &mut key);
+            pk.from_localized(&key)?;
+        }
         //
         Ok(Self {
             io,
@@ -66,7 +78,8 @@ impl SnmpV3ClientSocket {
             engine_boots: 0,
             engine_time: 0,
             user_name,
-            auth_key,
+            auth_key: auth,
+            priv_key: pk,
             msg_id: RequestId::default(),
             request_id: RequestId::default(),
         })
@@ -129,9 +142,12 @@ impl SnmpV3ClientSocket {
                 auth_params: &EMPTY,
                 privacy_params: &EMPTY,
             },
-            pdu: SnmpPdu::GetRequest(SnmpGet {
-                request_id,
-                vars: vec![],
+            data: MsgData::Plaintext(ScopedPdu {
+                engine_id: &EMPTY,
+                pdu: SnmpPdu::GetRequest(SnmpGet {
+                    request_id,
+                    vars: vec![],
+                }),
             }),
         })?)
     }
@@ -304,11 +320,28 @@ impl SnmpV3ClientSocket {
 impl SnmpV3ClientSocket {
     // Wrap PDU and send
     fn wrap_and_send(&mut self, pdu: SnmpPdu) -> SnmpResult<()> {
+        //
+        let flag_priv = self.priv_key.has_priv();
+        let scoped_pdu = ScopedPdu {
+            engine_id: &self.engine_id,
+            pdu,
+        };
+        let (privacy_params, data) = if flag_priv {
+            // Encrypted
+            let (enc_data, privacy_params) = self.priv_key.encrypt(
+                &scoped_pdu,
+                self.engine_boots as u32,
+                self.engine_time as u32,
+            )?;
+            (privacy_params, MsgData::Encrypted(enc_data))
+        } else {
+            (EMPTY.as_ref(), MsgData::Plaintext(scoped_pdu))
+        };
         // Prepare message
         let msg = SnmpV3Message {
             msg_id: self.msg_id.get_next(),
             flag_auth: self.auth_key.has_auth(),
-            flag_priv: false,
+            flag_priv,
             flag_report: false,
             usm: UsmParameters {
                 engine_id: &self.engine_id,
@@ -316,9 +349,9 @@ impl SnmpV3ClientSocket {
                 engine_time: self.engine_time,
                 user_name: self.user_name.as_ref(),
                 auth_params: self.auth_key.placeholder(),
-                privacy_params: &EMPTY,
+                privacy_params,
             },
-            pdu,
+            data,
         };
         // Serialize BER to buffer
         self.io.push_ber(msg)?;
@@ -330,11 +363,18 @@ impl SnmpV3ClientSocket {
     // Receive and unwrap PDU
     fn recv_and_unwrap(&mut self) -> SnmpResult<Option<SnmpPdu>> {
         let msg = self.io.recv::<SnmpV3Message>()?;
+        let data = match msg.data {
+            MsgData::Plaintext(x) => x,
+            MsgData::Encrypted(x) => {
+                // decode
+                self.priv_key.decrypt(x, &msg.usm)?
+            }
+        };
         // Global header check
         if !(self.user_name.as_bytes() == msg.usm.user_name
             && msg.usm.engine_id == self.engine_id
             && self.msg_id.check(msg.msg_id)
-            && msg.pdu.check(&self.request_id))
+            && data.pdu.check(&self.request_id))
         {
             return Ok(None);
         }
@@ -344,6 +384,6 @@ impl SnmpV3ClientSocket {
             // Auto-detect engine id
             self.engine_id.clone_from_slice(msg.usm.engine_id);
         }
-        Ok(Some(msg.pdu))
+        Ok(Some(data.pdu))
     }
 }

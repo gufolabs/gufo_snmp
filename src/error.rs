@@ -9,6 +9,7 @@ use pyo3::{
     create_exception,
     exceptions::{
         PyBlockingIOError, PyException, PyNotImplementedError, PyOSError, PyTimeoutError,
+        PyValueError,
     },
     PyErr,
 };
@@ -29,6 +30,8 @@ pub enum SnmpError {
     InvalidPdu,
     /// Malformed variable data
     InvalidData,
+    /// Invalid key size
+    InvalidKey,
     /// Unimplemented tag
     UnsupportedTag(String),
     /// Data beyound PDU
@@ -104,6 +107,7 @@ impl From<SnmpError> for PyErr {
             SnmpError::UnknownPdu => PySnmpDecodeError::new_err("unknown pdu"),
             SnmpError::InvalidPdu => PySnmpDecodeError::new_err("invalid pdu"),
             SnmpError::InvalidData => PySnmpDecodeError::new_err("invalid data"),
+            SnmpError::InvalidKey => PyValueError::new_err("invalid key"),
             SnmpError::UnsupportedTag(e) => {
                 PySnmpDecodeError::new_err(format!("Unsupported tag: {}", e))
             }

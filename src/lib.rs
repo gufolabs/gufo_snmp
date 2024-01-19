@@ -10,6 +10,7 @@ mod auth;
 pub mod ber;
 pub mod buf;
 pub mod error;
+mod privacy;
 pub mod reqid;
 pub mod snmp;
 mod socket;

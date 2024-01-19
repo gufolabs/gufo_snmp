@@ -4,14 +4,13 @@
 // Copyright (C) 2023-24, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
+use super::data::MsgData;
 use super::usm::UsmParameters;
 use crate::ber::{
-    BerDecoder, BerEncoder, SnmpInt, SnmpOctetString, SnmpOption, SnmpSequence, TAG_INT,
-    TAG_OCTET_STRING,
+    BerDecoder, BerEncoder, SnmpInt, SnmpOctetString, SnmpSequence, TAG_INT, TAG_OCTET_STRING,
 };
 use crate::buf::Buffer;
 use crate::error::SnmpError;
-use crate::snmp::pdu::SnmpPdu;
 use crate::snmp::SNMP_V3;
 
 pub struct SnmpV3Message<'a> {
@@ -22,7 +21,7 @@ pub struct SnmpV3Message<'a> {
     pub flag_priv: bool,
     pub flag_report: bool,
     pub usm: UsmParameters<'a>,
-    pub pdu: SnmpPdu<'a>,
+    pub data: MsgData<'a>,
 }
 
 const V3_BER: [u8; 3] = [TAG_INT, 1, SNMP_V3];
@@ -33,10 +32,6 @@ const USM_MODEL_BER: [u8; 3] = [TAG_INT, 1, USM];
 const FLAG_REPORT: u8 = 4;
 const FLAG_PRIV: u8 = 2;
 const FLAG_AUTH: u8 = 1;
-// Scoped Pdu
-const SCOPED_PLAINTEXT_CONTEXT: u8 = 0;
-const SCOPED_PLAINTEXT_UNIVERSAL: u8 = 16;
-const SCOPED_ENCRYPTED: u8 = 1;
 
 impl<'a> TryFrom<&'a [u8]> for SnmpV3Message<'a> {
     type Error = SnmpError;
@@ -78,61 +73,23 @@ impl<'a> TryFrom<&'a [u8]> for SnmpV3Message<'a> {
         //
         let (tail, security_parameters) = SnmpOctetString::from_ber(sp_tail)?;
         let usm = UsmParameters::try_from(security_parameters.0)?;
-        //
-        // Process scoped pdu
-        //
-        let (_, scoped_pdu_data) = SnmpOption::from_ber(tail)?;
-        match scoped_pdu_data.tag {
-            SCOPED_PLAINTEXT_CONTEXT | SCOPED_PLAINTEXT_UNIVERSAL => {
-                // Context engine id
-                let (tail, _ctx_engine_id) = SnmpOctetString::from_ber(scoped_pdu_data.value)?;
-                // Context engine name
-                let (tail, _ctx_engine_name) = SnmpOctetString::from_ber(tail)?;
-                // Decode PDU and return
-                Ok(SnmpV3Message {
-                    msg_id: msg_id_data.into(),
-                    //context_engine_id: ctx_engine_id.0,
-                    //context_engine_name: ctx_engine_name.0,
-                    flag_auth: (flags & FLAG_AUTH) != 0,
-                    flag_priv: (flags & FLAG_PRIV) != 0,
-                    flag_report: (flags & FLAG_REPORT) != 0,
-                    usm,
-                    pdu: SnmpPdu::try_from(tail)?,
-                })
-            }
-            SCOPED_ENCRYPTED => {
-                // @todo: Process encryption
-                Err(SnmpError::InvalidPdu)
-            }
-            _ => Err(SnmpError::UnknownPdu),
-        }
+        Ok(SnmpV3Message {
+            msg_id: msg_id_data.into(),
+            flag_auth: (flags & FLAG_AUTH) != 0,
+            flag_priv: (flags & FLAG_PRIV) != 0,
+            flag_report: (flags & FLAG_REPORT) != 0,
+            usm,
+            data: MsgData::try_from(tail)?,
+        })
     }
 }
-
-const EMPTY_BER: [u8; 2] = [TAG_OCTET_STRING, 0];
 
 impl<'a> BerEncoder for SnmpV3Message<'a> {
     fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
         //
         // Scoped PDU
         //
-        // @todo: Encryption
-        // Push PDU
-        self.pdu.push_ber(buf)?;
-        // Push context engine name
-        buf.push(&EMPTY_BER)?;
-        // Push context engine id
-        let ln = self.usm.engine_id.len();
-        if ln > 0 {
-            buf.push(self.usm.engine_id)?;
-            buf.push_ber_len(ln)?;
-            buf.push_u8(TAG_OCTET_STRING)?;
-        } else {
-            buf.push(&EMPTY_BER)?;
-        }
-        // Push option header
-        buf.push_ber_len(buf.len())?;
-        buf.push_u8(0x30)?;
+        self.data.push_ber(buf)?;
         //
         // Push security parameters
         //
@@ -184,7 +141,8 @@ mod tests {
     use super::*;
     use crate::ber::SnmpOid;
     use crate::snmp::get::SnmpGet;
-    use crate::snmp::value::SnmpValue;
+    use crate::snmp::msg::v3::ScopedPdu;
+    use crate::snmp::pdu::SnmpPdu;
 
     #[test]
     fn test_parse_snmp_get() -> Result<(), SnmpError> {
@@ -207,11 +165,14 @@ mod tests {
         assert_eq!(msg.usm.engine_id.len(), 0);
         //assert_eq!(msg.context_engine_name, vec![]);
         // Analyze PDU
-        match msg.pdu {
-            SnmpPdu::GetRequest(pdu) => {
-                assert_eq!(pdu.request_id, 37320);
-                assert_eq!(pdu.vars, vars);
-            }
+        match msg.data {
+            MsgData::Plaintext(scoped) => match scoped.pdu {
+                SnmpPdu::GetRequest(pdu) => {
+                    assert_eq!(pdu.request_id, 37320);
+                    assert_eq!(pdu.vars, vars);
+                }
+                _ => return Err(SnmpError::InvalidPdu),
+            },
             _ => return Err(SnmpError::InvalidPdu),
         }
         Ok(())
@@ -240,9 +201,12 @@ mod tests {
                 auth_params: &empty,
                 privacy_params: &empty,
             },
-            pdu: SnmpPdu::GetRequest(SnmpGet {
-                request_id: 37320,
-                vars: vec![],
+            data: MsgData::Plaintext(ScopedPdu {
+                engine_id: &empty,
+                pdu: SnmpPdu::GetRequest(SnmpGet {
+                    request_id: 37320,
+                    vars: vec![],
+                }),
             }),
         };
         let mut buf = Buffer::default();
