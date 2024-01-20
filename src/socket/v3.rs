@@ -135,7 +135,7 @@ impl SnmpV3ClientSocket {
             flag_priv: false,
             flag_report: true,
             usm: UsmParameters {
-                engine_id: &EMPTY,
+                engine_id: &self.engine_id,
                 engine_boots: 0,
                 engine_time: 0,
                 user_name: self.user_name.as_ref(),
