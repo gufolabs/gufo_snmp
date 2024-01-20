@@ -91,65 +91,65 @@ impl SnmpV3ClientSocket {
     // Prepare and send GET request with single oid
     fn send_get(&mut self, oid: &str) -> PyResult<()> {
         let request_id = self.request_id.get_next();
-        Ok(self.wrap_and_send(SnmpPdu::GetRequest(SnmpGet {
-            request_id,
-            vars: vec![SnmpOid::try_from(oid).map_err(|_| PyValueError::new_err("invalid oid"))?],
-        }))?)
+        Ok(self.wrap_and_send(
+            SnmpPdu::GetRequest(SnmpGet {
+                request_id,
+                vars: vec![
+                    SnmpOid::try_from(oid).map_err(|_| PyValueError::new_err("invalid oid"))?
+                ],
+            }),
+            false,
+        )?)
     }
     // Prepare and send GET request with multiple oids
     fn send_get_many(&mut self, oids: Vec<&str>) -> PyResult<()> {
         let request_id = self.request_id.get_next();
-        Ok(self.wrap_and_send(SnmpPdu::GetRequest(SnmpGet {
-            request_id,
-            vars: oids
-                .into_iter()
-                .map(SnmpOid::try_from)
-                .collect::<SnmpResult<Vec<SnmpOid>>>()
-                .map_err(|_| PyValueError::new_err("invalid oid"))?,
-        }))?)
+        Ok(self.wrap_and_send(
+            SnmpPdu::GetRequest(SnmpGet {
+                request_id,
+                vars: oids
+                    .into_iter()
+                    .map(SnmpOid::try_from)
+                    .collect::<SnmpResult<Vec<SnmpOid>>>()
+                    .map_err(|_| PyValueError::new_err("invalid oid"))?,
+            }),
+            false,
+        )?)
     }
     // Send GetNext request according to iter
     fn send_getnext(&mut self, iter: &GetNextIter) -> PyResult<()> {
         let request_id = self.request_id.get_next();
-        Ok(self.wrap_and_send(SnmpPdu::GetNextRequest(SnmpGet {
-            request_id,
-            vars: vec![iter.get_next_oid()],
-        }))?)
+        Ok(self.wrap_and_send(
+            SnmpPdu::GetNextRequest(SnmpGet {
+                request_id,
+                vars: vec![iter.get_next_oid()],
+            }),
+            false,
+        )?)
     }
     // Send GetBulk request according to iter
     fn send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
         let request_id = self.request_id.get_next();
-        Ok(self.wrap_and_send(SnmpPdu::GetBulkRequest(SnmpGetBulk {
-            request_id,
-            non_repeaters: 0,
-            max_repetitions: iter.get_max_repetitions(),
-            vars: vec![iter.get_next_oid()],
-        }))?)
+        Ok(self.wrap_and_send(
+            SnmpPdu::GetBulkRequest(SnmpGetBulk {
+                request_id,
+                non_repeaters: 0,
+                max_repetitions: iter.get_max_repetitions(),
+                vars: vec![iter.get_next_oid()],
+            }),
+            false,
+        )?)
     }
     // Send GET+Report
     fn send_refresh(&mut self) -> PyResult<()> {
         let request_id = self.request_id.get_next();
-        Ok(self.io.send(SnmpV3Message {
-            msg_id: self.msg_id.get_next(),
-            flag_auth: false,
-            flag_priv: false,
-            flag_report: true,
-            usm: UsmParameters {
-                engine_id: &self.engine_id,
-                engine_boots: 0,
-                engine_time: 0,
-                user_name: self.user_name.as_ref(),
-                auth_params: &EMPTY,
-                privacy_params: &EMPTY,
-            },
-            data: MsgData::Plaintext(ScopedPdu {
-                engine_id: &EMPTY,
-                pdu: SnmpPdu::GetRequest(SnmpGet {
-                    request_id,
-                    vars: vec![],
-                }),
+        Ok(self.wrap_and_send(
+            SnmpPdu::GetRequest(SnmpGet {
+                request_id,
+                vars: vec![],
             }),
-        })?)
+            true,
+        )?)
     }
     // Try to receive GETRESPONSE
     fn recv_getresponse(&mut self, py: Python) -> PyResult<Option<PyObject>> {
@@ -307,19 +307,19 @@ impl SnmpV3ClientSocket {
     }
     // Receive refresh report
     fn recv_refresh(&mut self) -> PyResult<()> {
-        let msg = self.io.recv::<SnmpV3Message>()?;
-        self.engine_boots = msg.usm.engine_boots;
-        self.engine_time = msg.usm.engine_time;
-        if self.engine_id.is_empty() {
-            // Auto-detect engine id
-            self.engine_id.clone_from_slice(msg.usm.engine_id);
+        loop {
+            match self.recv_and_unwrap()? {
+                Some(_) => {
+                    return Ok(());
+                }
+                None => continue,
+            }
         }
-        Ok(())
     }
 }
 impl SnmpV3ClientSocket {
     // Wrap PDU and send
-    fn wrap_and_send(&mut self, pdu: SnmpPdu) -> SnmpResult<()> {
+    fn wrap_and_send(&mut self, pdu: SnmpPdu, flag_report: bool) -> SnmpResult<()> {
         //
         let flag_priv = self.priv_key.has_priv();
         let scoped_pdu = ScopedPdu {
@@ -342,7 +342,7 @@ impl SnmpV3ClientSocket {
             msg_id: self.msg_id.get_next(),
             flag_auth: self.auth_key.has_auth(),
             flag_priv,
-            flag_report: false,
+            flag_report: flag_report,
             usm: UsmParameters {
                 engine_id: &self.engine_id,
                 engine_boots: self.engine_boots,
