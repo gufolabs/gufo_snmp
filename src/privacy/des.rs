@@ -55,13 +55,15 @@ impl SnmpPriv for DesKey {
         boots: u32,
         _time: u32,
     ) -> SnmpResult<(&'a [u8], &'a [u8])> {
-        // Fill IV
+        // Calculate salt
         self.priv_params[..4].clone_from_slice(&boots.to_be_bytes());
         self.priv_params[4..].clone_from_slice(&self.salt_value.to_be_bytes());
-        for (x, y) in self.priv_params.iter_mut().zip(self.pre_iv.iter()) {
-            *x ^= *y;
-        }
         self.salt_value = self.salt_value.wrapping_add(1);
+        // Get  IV
+        let mut iv = [0u8; 8];
+        for (idx, (x, y)) in self.priv_params.iter().zip(self.pre_iv.iter()).enumerate() {
+            iv[idx] = x ^ y;
+        }
         // Add padding
         self.buf.push(&PADDING)?;
         // Serialize
@@ -75,8 +77,8 @@ impl SnmpPriv for DesKey {
             scoped_pdu_len
         };
         // Encrypt
-        let encryptor = DesCbcEncryptor::new_from_slices(&self.key, &self.priv_params)
-            .map_err(|_| SnmpError::InvalidKey)?;
+        let encryptor =
+            DesCbcEncryptor::new_from_slices(&self.key, &iv).map_err(|_| SnmpError::InvalidKey)?;
         let b = self.buf.data_mut();
         encryptor
             .encrypt_padded_mut::<NoPadding>(&mut b[..padded_len], padded_len)
@@ -88,8 +90,19 @@ impl SnmpPriv for DesKey {
         data: &'b [u8],
         usm: &'b UsmParameters<'b>,
     ) -> SnmpResult<ScopedPdu<'c>> {
-        let decryptor = DesCbcDecryptor::new_from_slices(&self.key, usm.privacy_params)
-            .map_err(|_| SnmpError::InvalidKey)?;
+        // Get IV
+        let mut iv = [0u8; 8];
+        for (idx, (x, y)) in usm
+            .privacy_params
+            .iter()
+            .zip(self.pre_iv.iter())
+            .enumerate()
+        {
+            iv[idx] = x ^ y;
+        }
+        //
+        let decryptor =
+            DesCbcDecryptor::new_from_slices(&self.key, &iv).map_err(|_| SnmpError::InvalidKey)?;
         self.buf.reset();
         self.buf.skip(data.len());
         let b = self.buf.data_mut();

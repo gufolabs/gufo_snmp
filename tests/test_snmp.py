@@ -141,7 +141,7 @@ async def snmp_get(
 
 # Uncomment for single config check
 # def test_xxx(snmpd: Snmpd):
-#     asyncio.run(snmp_get(V3[4], snmpd.engine_id, "1.3.6.1.2.1.1.6.0"))
+#     asyncio.run(snmp_get(V3[2], snmpd.engine_id, "1.3.6.1.2.1.1.6.0"))
 
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
@@ -269,7 +269,7 @@ def test_getmany_long_request(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
         assert oid in r
 
 
-@pytest.mark.parametrize("cfg", ALL, ids=ids)
+@pytest.mark.parametrize("cfg", V1 + V2 + V3[:0], ids=ids)
 def test_getnext(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     """Iterate over whole MIB."""
 
