@@ -35,11 +35,12 @@ pub struct DesKey {
 
 impl SnmpPriv for DesKey {
     fn from_localized(&mut self, key: &[u8]) -> SnmpResult<()> {
-        if key.len() != KEY_LENGTH {
+        if key.len() < KEY_LENGTH {
             return Err(SnmpError::InvalidKey);
         }
         self.key.copy_from_slice(&key[..ENC_KEY_LENGTH]);
-        self.pre_iv.copy_from_slice(&key[ENC_KEY_LENGTH..]);
+        self.pre_iv
+            .copy_from_slice(&key[ENC_KEY_LENGTH..KEY_LENGTH]);
         let mut rng = rand::thread_rng();
         self.salt_value = rng.gen();
         Ok(())
