@@ -34,7 +34,7 @@ pub struct DesKey {
 }
 
 impl SnmpPriv for DesKey {
-    fn from_localized(&mut self, key: &[u8]) -> SnmpResult<()> {
+    fn as_localized(&mut self, key: &[u8]) -> SnmpResult<()> {
         if key.len() < KEY_LENGTH {
             return Err(SnmpError::InvalidKey);
         }

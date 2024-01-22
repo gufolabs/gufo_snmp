@@ -60,16 +60,16 @@ impl SnmpV3ClientSocket {
     ) -> PyResult<Self> {
         // Transport
         let io = SnmpTransport::new(addr, tos, send_buffer_size, recv_buffer_size)?;
-        //
+        // Auth key
         let mut auth = AuthKey::new(auth_alg)?;
-        auth.from_master(auth_key, &engine_id);
-        //
+        auth.as_key_type(auth_alg, auth_key, &engine_id)?;
+        // Priv key
         let mut pk = PrivKey::new(priv_alg)?;
         if pk.has_priv() {
-            // Localize
-            let mut key = vec![0; priv_key.len()];
-            auth.localize(priv_key, &engine_id, &mut key);
-            pk.from_localized(&key)?;
+            // Localize key
+            let mut pk_auth = AuthKey::new(auth_alg)?;
+            pk_auth.as_key_type(priv_alg, priv_key, &engine_id)?;
+            pk.as_localized(pk_auth.get_key())?;
         }
         //
         Ok(Self {
@@ -342,7 +342,7 @@ impl SnmpV3ClientSocket {
             msg_id: self.msg_id.get_next(),
             flag_auth: self.auth_key.has_auth(),
             flag_priv,
-            flag_report: flag_report,
+            flag_report,
             usm: UsmParameters {
                 engine_id: &self.engine_id,
                 engine_boots: self.engine_boots,

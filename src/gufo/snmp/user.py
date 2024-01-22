@@ -8,7 +8,7 @@
 
 # Python modules
 from enum import IntEnum
-from typing import List, Optional, TypeVar
+from typing import List, Optional, Type, TypeVar
 
 K = TypeVar("K", bound="BaseKey")
 
@@ -27,9 +27,15 @@ class KeyType(IntEnum):
     Master = 1
     Localized = 2
 
-    def snmpd_option(self) -> str:
+    def snmpd_option(self: "KeyType") -> str:
+        """
+        Get key option for snmpd.conf.
+
+        Returns:
+            Key type prefix like -m, -l, ...
+        """
         if self == self.Password:
-            return "-a"
+            return ""
         if self == self.Master:
             return "-m"
         if self == self.Localized:
@@ -38,31 +44,73 @@ class KeyType(IntEnum):
         raise ValueError(msg)
 
     @property
-    def is_password(self) -> bool:
+    def is_password(self: "KeyType") -> bool:
+        """Check if key type is a password."""
         return self == self.Password
 
     @property
-    def is_master(self) -> bool:
+    def is_master(self: "KeyType") -> bool:
+        """Check if key type is a master."""
         return self == self.Master
+
+    @property
+    def is_localized(self: "KeyType") -> bool:
+        """Check if key type is localized."""
+        return self == self.Localized
+
+    @property
+    def _is_aligned(self: "KeyType") -> bool:
+        """Check if the key type has a fixed length."""
+        return self.is_master or self.is_localized
+
+    @property
+    def _mask(self: "KeyType") -> int:
+        """Returns algorithm mask."""
+        return self.value << 6
 
 
 class BaseKey(object):
-    """Basic key class."""
+    """
+    Basic key class.
+
+    Args:
+        key: Key value.
+        key_type: Key type.
+    """
 
     ALG_ID: int
     SNMPD_PREFIX: str
 
     def __init__(
-        self: "BaseKey", key: bytes, key_type: KeyType = KeyType.Master
+        self: "BaseKey", key: bytes, /, key_type: KeyType = KeyType.Password
     ) -> None:
         self.key = key
         self.key_type = key_type
 
-    def pad(self, key_len: int) -> None:
-        self.key = self.padded(self.key, key_len)
+    def _pad(self: "BaseKey", key_len: int) -> None:
+        """
+        Pad key to given length.
+
+        Truncates key if its longer, than desired,
+        add trailing zeroes otherwise.
+
+        Args:
+            key_len: Desired key length.
+        """
+        self.key = self._padded(self.key, key_len)
 
     @classmethod
-    def padded(cls, key: bytes, key_len: int) -> bytes:
+    def _padded(cls: Type["BaseKey"], key: bytes, key_len: int) -> bytes:
+        """
+        Returns string aligned to given length.
+
+        Args:
+            key: Key value.
+            key_len: Desired key length.
+
+        Returns:
+            Aligned and padded key.
+        """
         kl = len(key)
         if kl == key_len:
             return key
@@ -74,7 +122,7 @@ class BaseKey(object):
     def snmpd_key(self: "BaseKey") -> List[str]:
         """Returns key and prefix for createUser."""
         if self.key_type.is_password:
-            v = f'"{self.key}"'
+            v = self.key.decode()
         else:
             v = f"0x{self.key.hex()}"
         return [self.SNMPD_PREFIX, self.key_type.snmpd_option(), v]
@@ -87,28 +135,11 @@ class BaseAuthKey(BaseKey):
     KEY_LENGTH: int
 
     def __init__(
-        self: "BaseAuthKey", key: bytes, key_type: KeyType = KeyType.Master
+        self: "BaseAuthKey", key: bytes, /, key_type: KeyType = KeyType.Master
     ) -> None:
-        if key_type.is_master:
-            key = self.padded(key, self.KEY_LENGTH)
+        if key_type._is_aligned:
+            key = self._padded(key, self.KEY_LENGTH)
         super().__init__(key, key_type)
-
-    @classmethod
-    def to_master(cls, key: K) -> K:
-        if not key.key_type.is_password:
-            msg = "Password key type required"
-            raise ValueError(msg)
-        raise NotImplementedError
-
-    @classmethod
-    def to_localized(cls, key: K, engine_id: bytes) -> K:
-        if key.key_type.is_password:
-            # Convert password to master key
-            key = cls.to_master(key)
-        if not key.key_type.is_master:
-            msg = "Master key type required"
-            raise ValueError(msg)
-        raise NotImplementedError
 
 
 class Md5Key(BaseAuthKey):
@@ -162,7 +193,7 @@ class User(object):
         name: str,
         auth_key: Optional[BaseAuthKey] = None,
         priv_key: Optional[BasePrivKey] = None,
-    ):
+    ) -> None:
         self.name = name
         self.auth_key = auth_key
         self.priv_key = priv_key
@@ -172,9 +203,9 @@ class User(object):
         if (
             self.priv_key
             and self.auth_key
-            and self.priv_key.key_type.is_master
+            and self.priv_key.key_type._is_aligned
         ):
-            self.priv_key.pad(self.auth_key.KEY_LENGTH)
+            self.priv_key._pad(self.auth_key.KEY_LENGTH)
 
     def require_auth(self: "User") -> bool:
         """
@@ -187,25 +218,36 @@ class User(object):
 
     def get_auth_alg(self: "User") -> int:
         """
-        Auth algorithm index.
+        Auth algorithm index with key type mask.
 
-        Returns:
+        Algorithms:
             * 0 - No auth
             * 1 - MD5
             * 2 - SHA1
+
+        KeyType.mask applied
         """
-        return self.auth_key.AUTH_ALG if self.auth_key else 0
+        return (
+            self.auth_key.AUTH_ALG | self.auth_key.key_type._mask
+            if self.auth_key
+            else 0
+        )
 
     def get_priv_alg(self: "User") -> int:
         """
         Privacy algorithm index.
 
-        Returns:
+        Algorithms:
             * 0 - No privacy
             * 1 - DES
             * 2 - AES-128
+        KeyType.mask applied
         """
-        return self.priv_key.PRIV_ALG if self.priv_key else 0
+        return (
+            self.priv_key.PRIV_ALG | self.priv_key.key_type._mask
+            if self.priv_key
+            else 0
+        )
 
     def get_auth_key(self: "User") -> bytes:
         """Authentication key."""

@@ -13,7 +13,7 @@ use crate::snmp::msg::v3::{ScopedPdu, UsmParameters};
 pub struct NoPriv;
 
 impl SnmpPriv for NoPriv {
-    fn from_localized(&mut self, _key: &[u8]) -> SnmpResult<()> {
+    fn as_localized(&mut self, _key: &[u8]) -> SnmpResult<()> {
         Ok(())
     }
     fn has_priv(&self) -> bool {

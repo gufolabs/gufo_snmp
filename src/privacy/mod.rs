@@ -25,7 +25,7 @@ pub enum PrivKey {
 #[enum_dispatch]
 pub trait SnmpPriv {
     // Localized key
-    fn from_localized(&mut self, key: &[u8]) -> SnmpResult<()>;
+    fn as_localized(&mut self, key: &[u8]) -> SnmpResult<()>;
     //
     fn has_priv(&self) -> bool;
     // Encrypt data.
@@ -47,10 +47,12 @@ pub trait SnmpPriv {
 const NO_PRIV: u8 = 0;
 const DES: u8 = 1;
 const AES128: u8 = 2;
+// - - X X    X X X X
+const KT_ALG_MASK: u8 = 0x3f;
 
 impl PrivKey {
     pub fn new(code: u8) -> SnmpResult<PrivKey> {
-        Ok(match code {
+        Ok(match code & KT_ALG_MASK {
             NO_PRIV => PrivKey::NoPriv(NoPriv),
             DES => PrivKey::Des(DesKey::default()),
             AES128 => PrivKey::Aes128(Aes128Key::default()),

@@ -32,15 +32,22 @@ const IPAD_VALUE: u8 = 0x36;
 const OPAD_VALUE: u8 = 0x5c;
 const IPAD_MASK: [u8; PADDED_LENGTH] = [IPAD_VALUE; PADDED_LENGTH];
 const OPAD_MASK: [u8; PADDED_LENGTH] = [OPAD_VALUE; PADDED_LENGTH];
+const MAX_PASSWORD_LEN: usize = 64;
+const MEGABYTE: usize = 1_048_576;
 
 impl<D: Digest, const KS: usize, const SS: usize> SnmpAuth for DigestAuth<D, KS, SS> {
-    fn from_localized(&mut self, key: &[u8]) {
+    fn as_localized(&mut self, key: &[u8]) {
         self.key.clone_from_slice(key);
     }
-    fn from_master(&mut self, key: &[u8], locality: &[u8]) {
+    fn as_master(&mut self, key: &[u8], locality: &[u8]) {
         let mut out = [0; KS];
         self.localize(key, locality, &mut out);
         self.key.clone_from_slice(&out);
+    }
+    fn as_password(&mut self, password: &[u8], locality: &[u8]) {
+        let mut master = [0; KS];
+        self.password_to_master(password, &mut master);
+        self.as_master(&master, locality);
     }
     fn localize(&self, key: &[u8], locality: &[u8], out: &mut [u8]) {
         let mut hasher = D::new();
@@ -49,6 +56,24 @@ impl<D: Digest, const KS: usize, const SS: usize> SnmpAuth for DigestAuth<D, KS,
         hasher.update(key);
         let digest = hasher.finalize();
         out.clone_from_slice(&digest[..out.len()]);
+    }
+    fn get_key(&self) -> &[u8] {
+        &self.key
+    }
+    fn password_to_master(&self, password: &[u8], out: &mut [u8]) {
+        let mut hasher = D::new();
+        let mut buffer = [0u8; MAX_PASSWORD_LEN];
+        let pass_len = password.len();
+        let mut pass_idx = 0;
+        for _ in 0..MEGABYTE / MAX_PASSWORD_LEN {
+            for b in buffer.iter_mut() {
+                *b = password[pass_idx % pass_len];
+                pass_idx += 1;
+            }
+            hasher.update(buffer);
+        }
+        let digest = hasher.finalize();
+        out.clone_from_slice(&digest[..KS]);
     }
     fn has_auth(&self) -> bool {
         true

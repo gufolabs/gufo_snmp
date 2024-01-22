@@ -31,7 +31,7 @@ pub struct Aes128Key {
 }
 
 impl SnmpPriv for Aes128Key {
-    fn from_localized(&mut self, key: &[u8]) -> SnmpResult<()> {
+    fn as_localized(&mut self, key: &[u8]) -> SnmpResult<()> {
         if key.len() < KEY_LENGTH {
             return Err(SnmpError::InvalidKey);
         }
