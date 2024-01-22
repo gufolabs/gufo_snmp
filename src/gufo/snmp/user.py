@@ -81,7 +81,7 @@ class BaseKey(object):
         key_type: Key type.
     """
 
-    ALG_ID: int
+    AUTH_ALG: int
     SNMPD_PREFIX: str
 
     def __init__(
