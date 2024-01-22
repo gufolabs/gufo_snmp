@@ -11,7 +11,7 @@ from enum import IntEnum
 from typing import List, Optional, Type, TypeVar
 
 # Gufo SNMP modules
-from ._fast import get_master_key
+from ._fast import get_localized_key, get_master_key
 
 K = TypeVar("K", bound="BaseKey")
 
@@ -102,6 +102,22 @@ class BaseKey(object):
             Master key. Resulting length depends on the algorithm.
         """
         return get_master_key(cls.AUTH_ALG, passwd)
+
+    @classmethod
+    def get_localized_key(
+        cls: Type["BaseKey"], master_key: bytes, engine_id: bytes
+    ) -> bytes:
+        """
+        Convert master key to localized key.
+
+        Args:
+            master_key: Master key, must have size according to algorithm.
+            engine_id: SNMP engine id.
+
+        Returns:
+            Localized key. Resulting length same as master_key.
+        """
+        return get_localized_key(cls.AUTH_ALG, master_key, engine_id)
 
     def _pad(self: "BaseKey", key_len: int) -> None:
         """
