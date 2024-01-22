@@ -73,7 +73,7 @@ V3 = [{"version": SnmpVersion.v3, "user": u} for u in SNMP_USERS]
 ALL = V1 + V2 + V3
 
 
-def ids(x) -> str:
+def ids(x: Any) -> str:
     if isinstance(x, dict) and "version" in x:
         r = [x["version"].name]
         user = x.get("user")

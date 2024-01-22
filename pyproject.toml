@@ -155,6 +155,7 @@ max-complexity = 15
   "S603", # `subprocess` call: check for execution of untrusted input
 ]
 "tests/*.py" = [
+  "ANN401", # Dynamically typed expressions (typing.Any) are disallowed in `x`
   "D100", # Missing docstring in public module
   "D101", # Missing docstring in public class
   "D103", # Missing docstring in public function
