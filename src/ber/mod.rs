@@ -82,7 +82,7 @@ pub use t_counter64::SnmpCounter64;
 pub mod t_uinteger32;
 pub use t_uinteger32::SnmpUInteger32;
 
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
 
 pub trait BerDecoder<'a>
 where
@@ -92,7 +92,7 @@ where
     const ALLOW_CONSTRUCTED: bool;
     const TAG: Tag;
 
-    fn decode(i: &'a [u8], hdr: &BerHeader) -> Result<Self, SnmpError>;
+    fn decode(i: &'a [u8], hdr: &BerHeader) -> SnmpResult<Self>;
 
     fn from_ber(i: &'a [u8]) -> IResult<&'a [u8], Self, SnmpError> {
         if i.len() < 2 {
@@ -114,10 +114,10 @@ where
 }
 
 pub trait BerEncoder {
-    fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError>;
+    fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()>;
 }
 
 // Convert value to python under the GIL held
 pub trait ToPython {
-    fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError>;
+    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>>;
 }

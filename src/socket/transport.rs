@@ -23,7 +23,7 @@ impl SnmpTransport {
         tos: u32,
         send_buffer_size: usize,
         recv_buffer_size: usize,
-    ) -> Result<Self, SnmpError> {
+    ) -> SnmpResult<Self> {
         // Parse address
         let sock_addr = addr
             .parse()
@@ -89,7 +89,7 @@ impl SnmpTransport {
         self.send_buffer()
     }
     /// Receive message from socket
-    pub fn recv<'a, 'b, T>(&'b mut self) -> Result<T, SnmpError>
+    pub fn recv<'a, 'b, T>(&'b mut self) -> SnmpResult<T>
     where
         T: TryFrom<&'a [u8], Error = SnmpError>,
         'b: 'a,
@@ -108,7 +108,7 @@ impl SnmpTransport {
         T::try_from(self.buf.as_slice(size))
     }
     /// Set internal socket's send buffer size
-    fn set_send_buffer_size(io: &Socket, size: usize) -> Result<(), SnmpError> {
+    fn set_send_buffer_size(io: &Socket, size: usize) -> SnmpResult<()> {
         // @todo: get wmem_max limit on Linux
         let mut effective_size = size;
         while effective_size > 0 {
@@ -120,7 +120,7 @@ impl SnmpTransport {
         Err(SnmpError::SocketError("unable to set buffer size".into()))
     }
     /// Set internal socket's receive buffer size
-    fn set_recv_buffer_size(io: &Socket, size: usize) -> Result<(), SnmpError> {
+    fn set_recv_buffer_size(io: &Socket, size: usize) -> SnmpResult<()> {
         let mut effective_size = size;
         while effective_size > 0 {
             if io.set_recv_buffer_size(effective_size).is_ok() {

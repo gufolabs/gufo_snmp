@@ -7,7 +7,7 @@
 
 use super::{BerDecoder, BerEncoder, BerHeader, Tag, TAG_NULL};
 use crate::buf::Buffer;
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
 
 pub struct SnmpNull;
 
@@ -17,7 +17,7 @@ impl<'a> BerDecoder<'a> for SnmpNull {
     const TAG: Tag = TAG_NULL;
 
     // Implement X.690 pp 8.8: Encoding of a null value
-    fn decode(_: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
+    fn decode(_: &'a [u8], h: &BerHeader) -> SnmpResult<Self> {
         if h.length != 0 {
             return Err(SnmpError::InvalidTagFormat);
         }
@@ -28,7 +28,7 @@ impl<'a> BerDecoder<'a> for SnmpNull {
 const NULL_BER: [u8; 2] = [5u8, 0];
 
 impl BerEncoder for SnmpNull {
-    fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
+    fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         buf.push(&NULL_BER)?;
         Ok(())
     }

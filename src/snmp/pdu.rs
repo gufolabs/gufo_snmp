@@ -14,7 +14,7 @@ use super::{
 };
 use crate::ber::{BerDecoder, BerEncoder, SnmpOption};
 use crate::buf::Buffer;
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
 use crate::reqid::RequestId;
 
 #[allow(clippy::enum_variant_names)]
@@ -43,7 +43,7 @@ impl<'a> TryFrom<&'a [u8]> for SnmpPdu<'a> {
 }
 
 impl<'a> BerEncoder for SnmpPdu<'a> {
-    fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
+    fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         let rest = buf.len();
         match self {
             SnmpPdu::GetRequest(req) => {

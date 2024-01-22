@@ -7,7 +7,7 @@
 
 use crate::ber::{BerDecoder, BerEncoder, SnmpInt, SnmpNull, SnmpOid, SnmpSequence};
 use crate::buf::Buffer;
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
 use nom::IResult;
 
 pub struct SnmpGetBulk {
@@ -49,7 +49,7 @@ impl<'a> TryFrom<&'a [u8]> for SnmpGetBulk {
 }
 
 impl BerEncoder for SnmpGetBulk {
-    fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
+    fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         // Push all vars in the reversed order
         let rest = buf.len();
         let null = SnmpNull {};

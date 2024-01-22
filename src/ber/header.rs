@@ -131,7 +131,7 @@ mod tests {
 
     // Null, zero-length content
     #[test]
-    fn test_header_null() -> Result<(), SnmpError> {
+    fn test_header_null() -> SnmpResult<()> {
         let data = [5u8, 0u8];
         let (tail, hdr) = BerHeader::from_ber(&data)?;
         assert_eq!(hdr.class, BerClass::Universal);
@@ -144,7 +144,7 @@ mod tests {
 
     // Octet-stream
     #[test]
-    fn test_header_str() -> Result<(), SnmpError> {
+    fn test_header_str() -> SnmpResult<()> {
         let data = [4u8, 5, 0x74, 0x65, 0x73, 0x74, 0x2e];
         let (tail, hdr) = BerHeader::from_ber(&data)?;
         assert_eq!(hdr.class, BerClass::Universal);
@@ -158,7 +158,7 @@ mod tests {
 
     // Non-primitive sequence
     #[test]
-    fn test_header_sequence() -> Result<(), SnmpError> {
+    fn test_header_sequence() -> SnmpResult<()> {
         // Sequece of 3 nulls
         let data = [0x30u8, 6, 5, 0, 5, 0, 5, 0];
         let (tail, hdr) = BerHeader::from_ber(&data)?;

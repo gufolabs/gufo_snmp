@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_APP_IPADDRESS};
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
 use pyo3::types::PyString;
 use pyo3::{Py, PyAny, Python};
 
@@ -18,7 +18,7 @@ impl<'a> BerDecoder<'a> for SnmpIpAddress {
     const TAG: Tag = TAG_APP_IPADDRESS;
 
     // Implement RFC
-    fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
+    fn decode(i: &'a [u8], h: &BerHeader) -> SnmpResult<Self> {
         if h.length != 4 {
             return Err(SnmpError::InvalidTagFormat);
         }
@@ -33,7 +33,7 @@ impl From<&SnmpIpAddress> for String {
 }
 
 impl ToPython for &SnmpIpAddress {
-    fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError> {
+    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
         let s: String = self.into();
         Ok(PyString::new(py, &s).into())
     }

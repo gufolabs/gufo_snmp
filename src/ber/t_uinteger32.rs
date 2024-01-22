@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_APP_UINTEGER32};
-use crate::error::SnmpError;
+use crate::error::{SnmpResult};
 use pyo3::{IntoPy, Py, PyAny, Python};
 
 pub struct SnmpUInteger32(pub(crate) u32);
@@ -17,7 +17,7 @@ impl<'a> BerDecoder<'a> for SnmpUInteger32 {
     const TAG: Tag = TAG_APP_UINTEGER32;
 
     // Implement RFC
-    fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
+    fn decode(i: &'a [u8], h: &BerHeader) -> SnmpResult<Self> {
         let v = i
             .iter()
             .take(h.length)
@@ -29,7 +29,7 @@ impl<'a> BerDecoder<'a> for SnmpUInteger32 {
 }
 
 impl ToPython for &SnmpUInteger32 {
-    fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError> {
+    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
         Ok(self.0.into_py(py))
     }
 }

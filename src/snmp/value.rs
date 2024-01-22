@@ -13,7 +13,7 @@ use crate::ber::{
     TAG_CTX_END_OF_MIB_VIEW, TAG_CTX_NO_SUCH_INSTANCE, TAG_CTX_NO_SUCH_OBJECT, TAG_INT, TAG_NULL,
     TAG_OBJECT_DESCRIPTOR, TAG_OBJECT_ID, TAG_OCTET_STRING, TAG_REAL,
 };
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
 use nom::{Err, IResult};
 use pyo3::{Py, PyAny, Python};
 
@@ -117,7 +117,7 @@ impl<'a> SnmpValue<'a> {
 }
 
 impl<'a> ToPython for &SnmpValue<'a> {
-    fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError> {
+    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
         Ok(match self {
             SnmpValue::Bool(x) => x.try_to_python(py)?,
             SnmpValue::Int(x) => x.try_to_python(py)?,
@@ -142,10 +142,10 @@ impl<'a> ToPython for &SnmpValue<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::error::SnmpError;
+    use crate::error::{SnmpError, SnmpResult};
 
     #[test]
-    fn test_bool() -> Result<(), SnmpError> {
+    fn test_bool() -> SnmpResult<()> {
         let data = [1u8, 1, 1];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -158,7 +158,7 @@ mod tests {
     }
 
     #[test]
-    fn test_int() -> Result<(), SnmpError> {
+    fn test_int() -> SnmpResult<()> {
         let data = [2u8, 1, 10];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -172,7 +172,7 @@ mod tests {
     }
 
     #[test]
-    fn test_null() -> Result<(), SnmpError> {
+    fn test_null() -> SnmpResult<()> {
         let data = [5u8, 0];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -184,7 +184,7 @@ mod tests {
     }
 
     #[test]
-    fn test_octet_string() -> Result<(), SnmpError> {
+    fn test_octet_string() -> SnmpResult<()> {
         let data = [4u8, 5, 0, 1, 2, 3, 4];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -196,7 +196,7 @@ mod tests {
         }
     }
     #[test]
-    fn test_object_id() -> Result<(), SnmpError> {
+    fn test_object_id() -> SnmpResult<()> {
         let data = [0x6u8, 0x8, 0x2b, 0x06, 0x01, 0x02, 0x01, 0x01, 0x05, 0x00];
         let expected = [1u32, 3, 6, 1, 2, 1, 1, 5, 0];
         let (tail, value) = SnmpValue::from_ber(&data)?;
@@ -209,7 +209,7 @@ mod tests {
         }
     }
     #[test]
-    fn test_object_descriptor() -> Result<(), SnmpError> {
+    fn test_object_descriptor() -> SnmpResult<()> {
         let data = [7u8, 5, 0, 1, 2, 3, 4];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -221,7 +221,7 @@ mod tests {
         }
     }
     #[test]
-    fn test_real() -> Result<(), SnmpError> {
+    fn test_real() -> SnmpResult<()> {
         let data = [9u8, 0];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -234,7 +234,7 @@ mod tests {
         }
     }
     #[test]
-    fn test_ipaddress() -> Result<(), SnmpError> {
+    fn test_ipaddress() -> SnmpResult<()> {
         let data = [0x40, 0x4, 127, 0, 0, 1];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -247,7 +247,7 @@ mod tests {
         }
     }
     #[test]
-    fn test_counter32() -> Result<(), SnmpError> {
+    fn test_counter32() -> SnmpResult<()> {
         let data = [0x41, 4, 1, 53, 16, 171];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -259,7 +259,7 @@ mod tests {
         }
     }
     #[test]
-    fn test_gauge32() -> Result<(), SnmpError> {
+    fn test_gauge32() -> SnmpResult<()> {
         let data = [0x42, 4, 1, 53, 16, 171];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -271,7 +271,7 @@ mod tests {
         }
     }
     #[test]
-    fn test_timeticks() -> Result<(), SnmpError> {
+    fn test_timeticks() -> SnmpResult<()> {
         let data = [67, 4, 1, 53, 16, 171];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -283,7 +283,7 @@ mod tests {
         }
     }
     #[test]
-    fn test_opaque() -> Result<(), SnmpError> {
+    fn test_opaque() -> SnmpResult<()> {
         let data = [0x44, 5, 0, 1, 2, 3, 4];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -295,7 +295,7 @@ mod tests {
         }
     }
     #[test]
-    fn test_counter64() -> Result<(), SnmpError> {
+    fn test_counter64() -> SnmpResult<()> {
         let data = [0x46, 4, 1, 53, 16, 171];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -307,7 +307,7 @@ mod tests {
         }
     }
     #[test]
-    fn test_uinteger32() -> Result<(), SnmpError> {
+    fn test_uinteger32() -> SnmpResult<()> {
         let data = [0x47, 4, 1, 53, 16, 171];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -319,7 +319,7 @@ mod tests {
         }
     }
     #[test]
-    fn test_no_such_object() -> Result<(), SnmpError> {
+    fn test_no_such_object() -> SnmpResult<()> {
         let data = [0x80u8, 0];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -330,7 +330,7 @@ mod tests {
         }
     }
     #[test]
-    fn test_no_such_instance() -> Result<(), SnmpError> {
+    fn test_no_such_instance() -> SnmpResult<()> {
         let data = [0x81u8, 0];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -341,7 +341,7 @@ mod tests {
         }
     }
     #[test]
-    fn test_end_of_mib_view() -> Result<(), SnmpError> {
+    fn test_end_of_mib_view() -> SnmpResult<()> {
         let data = [0x82u8, 0];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);

@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::{BerDecoder, BerHeader, SnmpOid, Tag, TAG_RELATIVE_OID};
-use crate::error::SnmpError;
+use crate::error::{SnmpResult};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct SnmpRelativeOid(pub(crate) Vec<u32>);
@@ -17,7 +17,7 @@ impl<'a> BerDecoder<'a> for SnmpRelativeOid {
     const TAG: Tag = TAG_RELATIVE_OID;
 
     // Implement X.690 pp 8.20: Encoding of a relative object identifier value
-    fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
+    fn decode(i: &'a [u8], h: &BerHeader) -> SnmpResult<Self> {
         let mut v = Vec::<u32>::with_capacity(h.length + 1);
         let mut b = 0;
         for &x in i[..h.length].iter() {

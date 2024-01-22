@@ -7,7 +7,7 @@
 
 use super::{BerDecoder, BerEncoder, BerHeader, Tag, ToPython, TAG_OBJECT_ID};
 use crate::buf::Buffer;
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
 use pyo3::types::PyString;
 use pyo3::{Py, PyAny, Python};
 
@@ -25,7 +25,7 @@ impl<'a> BerDecoder<'a> for SnmpOid {
     const TAG: Tag = TAG_OBJECT_ID;
 
     // Implement X.690 pp 8.19: Encoding of an object identifier value
-    fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
+    fn decode(i: &'a [u8], h: &BerHeader) -> SnmpResult<Self> {
         // First two elements
         let mut v = Vec::<u32>::with_capacity(h.length + 1);
         let first = i[0] as u32;
@@ -46,7 +46,7 @@ impl<'a> BerDecoder<'a> for SnmpOid {
 }
 
 impl BerEncoder for SnmpOid {
-    fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
+    fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         if self.0.len() < 2 {
             return Err(SnmpError::InvalidData); // Too short oid
         }
@@ -65,7 +65,7 @@ impl BerEncoder for SnmpOid {
 }
 
 impl ToPython for &SnmpOid {
-    fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError> {
+    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
         let v = self
             .0
             .iter()
@@ -79,7 +79,7 @@ impl ToPython for &SnmpOid {
 
 impl SnmpOid {
     #[inline]
-    fn push_subelement(buf: &mut Buffer, se: u32) -> Result<(), SnmpError> {
+    fn push_subelement(buf: &mut Buffer, se: u32) -> SnmpResult<()> {
         let mut left = se;
         // Push least significant 7 bits
         buf.push_u8((left & 0x7f) as u8)?;

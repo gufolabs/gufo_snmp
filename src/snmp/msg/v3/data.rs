@@ -34,7 +34,7 @@ impl<'a> TryFrom<&'a [u8]> for MsgData<'a> {
 }
 
 impl<'a> BerEncoder for MsgData<'a> {
-    fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
+    fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         match self {
             MsgData::Plaintext(x) => x.push_ber(buf),
             MsgData::Encrypted(x) => buf.push_tagged(TAG_OCTET_STRING, x),

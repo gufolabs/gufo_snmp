@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_BOOL};
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
 use pyo3::{IntoPy, Py, PyAny, Python};
 
 pub struct SnmpBool(bool);
@@ -17,7 +17,7 @@ impl<'a> BerDecoder<'a> for SnmpBool {
     const TAG: Tag = TAG_BOOL;
 
     // Implement X.690 pp 8.2: Encoding of a boolean value
-    fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
+    fn decode(i: &'a [u8], h: &BerHeader) -> SnmpResult<Self> {
         if h.length != 1 {
             return Err(SnmpError::InvalidData);
         }
@@ -32,7 +32,7 @@ impl From<SnmpBool> for bool {
 }
 
 impl ToPython for &SnmpBool {
-    fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError> {
+    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
         Ok(self.0.into_py(py))
     }
 }

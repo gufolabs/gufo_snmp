@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_OCTET_STRING};
-use crate::error::SnmpError;
+use crate::error::{SnmpResult};
 use pyo3::types::PyBytes;
 use pyo3::{Py, PyAny, Python};
 
@@ -18,13 +18,13 @@ impl<'a> BerDecoder<'a> for SnmpOctetString<'a> {
     const TAG: Tag = TAG_OCTET_STRING;
 
     // Implement X.690 pp 8.7: Encoding of an octetstring value
-    fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
+    fn decode(i: &'a [u8], h: &BerHeader) -> SnmpResult<Self> {
         Ok(SnmpOctetString(&i[..h.length]))
     }
 }
 
 impl<'a> ToPython for &SnmpOctetString<'a> {
-    fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError> {
+    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
         let v = PyBytes::new(py, self.0);
         Ok(v.into())
     }

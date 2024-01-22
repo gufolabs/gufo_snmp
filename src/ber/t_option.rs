@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::{BerClass, BerDecoder, BerHeader, Tag, TAG_SEQUENCE};
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
 use nom::{Err, IResult};
 
 pub struct SnmpOption<'a> {
@@ -19,7 +19,7 @@ impl<'a> BerDecoder<'a> for SnmpOption<'a> {
     const ALLOW_CONSTRUCTED: bool = true;
     const TAG: Tag = TAG_SEQUENCE;
 
-    fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
+    fn decode(i: &'a [u8], h: &BerHeader) -> SnmpResult<Self> {
         Ok(SnmpOption {
             tag: h.tag,
             value: &i[..h.length],

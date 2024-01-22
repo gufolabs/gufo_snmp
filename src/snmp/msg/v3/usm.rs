@@ -9,7 +9,7 @@ use crate::ber::{
     BerDecoder, BerEncoder, SnmpInt, SnmpOctetString, SnmpSequence, TAG_OCTET_STRING,
 };
 use crate::buf::Buffer;
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
 
 pub struct UsmParameters<'a> {
     pub engine_id: &'a [u8],
@@ -23,7 +23,7 @@ pub struct UsmParameters<'a> {
 impl<'a> TryFrom<&'a [u8]> for UsmParameters<'a> {
     type Error = SnmpError;
 
-    fn try_from(i: &'a [u8]) -> Result<UsmParameters<'a>, SnmpError> {
+    fn try_from(i: &'a [u8]) -> SnmpResult<UsmParameters<'a>> {
         // Top-level sequence
         let (tail, envelope) = SnmpSequence::from_ber(i)?;
         if !tail.is_empty() {
@@ -55,7 +55,7 @@ impl<'a> TryFrom<&'a [u8]> for UsmParameters<'a> {
 const EMPTY_BER: [u8; 2] = [TAG_OCTET_STRING, 0];
 
 impl<'a> BerEncoder for UsmParameters<'a> {
-    fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
+    fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         let l0 = buf.len();
         // Push privacy parameters
         if self.privacy_params.is_empty() {
@@ -100,7 +100,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_usm_plain() -> Result<(), SnmpError> {
+    fn test_parse_usm_plain() -> SnmpResult<()> {
         let data = [
             0x30, 0x13, 0x04, 0x00, 0x02, 0x01, 0x00, 0x02, 0x01, 0x00, 0x04, 0x05, 0x61, 0x64,
             0x6d, 0x69, 0x6e, 0x04, 0x00, 0x04, 0x00,
@@ -116,7 +116,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_push_usm_plain() -> Result<(), SnmpError> {
+    fn test_push_usm_plain() -> SnmpResult<()> {
         let expected = [
             0x30, 0x13, 0x04, 0x00, 0x02, 0x01, 0x00, 0x02, 0x01, 0x00, 0x04, 0x05, 0x61, 0x64,
             0x6d, 0x69, 0x6e, 0x04, 0x00, 0x04, 0x00,

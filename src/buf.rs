@@ -62,7 +62,7 @@ impl Buffer {
         }
     }
     #[inline]
-    pub fn push_u8(&mut self, v: u8) -> Result<(), SnmpError> {
+    pub fn push_u8(&mut self, v: u8) -> SnmpResult<()> {
         if self.is_full() {
             return Err(SnmpError::OutOfBuffer);
         }
@@ -70,7 +70,7 @@ impl Buffer {
         self.len += 1;
         Ok(())
     }
-    pub fn push(&mut self, chunk: &[u8]) -> Result<(), SnmpError> {
+    pub fn push(&mut self, chunk: &[u8]) -> SnmpResult<()> {
         let cs = chunk.len();
         if self.free() < cs {
             return Err(SnmpError::OutOfBuffer);
@@ -80,7 +80,7 @@ impl Buffer {
         self.len += cs;
         Ok(())
     }
-    pub fn push_ber_len(&mut self, v: usize) -> Result<(), SnmpError> {
+    pub fn push_ber_len(&mut self, v: usize) -> SnmpResult<()> {
         if v < 128 {
             // Short form, X.690 pp 8.3.1.4
             self.push_u8(v as u8)?;
@@ -136,7 +136,7 @@ mod tests {
     }
 
     #[test]
-    fn test_push_u8() -> Result<(), SnmpError> {
+    fn test_push_u8() -> SnmpResult<()> {
         let mut b = Buffer::default();
         b.push_u8(1)?;
         assert_eq!(b.len(), 1);
@@ -150,7 +150,7 @@ mod tests {
     }
 
     #[test]
-    fn test_push() -> Result<(), SnmpError> {
+    fn test_push() -> SnmpResult<()> {
         let mut b = Buffer::default();
         let chunk = [1u8, 2, 3];
         b.push(&chunk)?;
@@ -160,7 +160,7 @@ mod tests {
     }
 
     #[test]
-    fn test_push_ber_len_short1() -> Result<(), SnmpError> {
+    fn test_push_ber_len_short1() -> SnmpResult<()> {
         let mut b = Buffer::default();
         b.push_ber_len(1)?;
         assert_eq!(b.len(), 1);
@@ -168,7 +168,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_push_ber_len_short2() -> Result<(), SnmpError> {
+    fn test_push_ber_len_short2() -> SnmpResult<()> {
         let mut b = Buffer::default();
         b.push_ber_len(127)?;
         assert_eq!(b.len(), 1);
@@ -176,7 +176,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_push_ber_len_long1() -> Result<(), SnmpError> {
+    fn test_push_ber_len_long1() -> SnmpResult<()> {
         let mut b = Buffer::default();
         b.push_ber_len(128)?;
         assert_eq!(b.len(), 2);
@@ -184,7 +184,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_push_ber_len_long2() -> Result<(), SnmpError> {
+    fn test_push_ber_len_long2() -> SnmpResult<()> {
         let mut b = Buffer::default();
         b.push_ber_len(255)?;
         assert_eq!(b.len(), 2);
@@ -192,7 +192,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_push_ber_len_long3() -> Result<(), SnmpError> {
+    fn test_push_ber_len_long3() -> SnmpResult<()> {
         let mut b = Buffer::default();
         b.push_ber_len(256)?;
         assert_eq!(b.len(), 3);

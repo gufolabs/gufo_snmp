@@ -7,7 +7,7 @@
 
 use super::{BerDecoder, BerEncoder, BerHeader, Tag, ToPython, TAG_INT};
 use crate::buf::Buffer;
-use crate::error::SnmpError;
+use crate::error::{SnmpResult};
 use pyo3::{IntoPy, Py, PyAny, Python};
 use std::cmp::Ordering;
 
@@ -19,7 +19,7 @@ impl<'a> BerDecoder<'a> for SnmpInt {
     const TAG: Tag = TAG_INT;
 
     // Implement X.690 pp 8.3: Encoding of an integer value
-    fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
+    fn decode(i: &'a [u8], h: &BerHeader) -> SnmpResult<Self> {
         if h.is_empty() {
             return Ok(SnmpInt(0));
         }
@@ -42,7 +42,7 @@ impl<'a> BerDecoder<'a> for SnmpInt {
 const ZERO_BER: [u8; 3] = [TAG_INT, 1, 0];
 
 impl BerEncoder for SnmpInt {
-    fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
+    fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         match self.0.cmp(&0) {
             Ordering::Equal => {
                 buf.push(&ZERO_BER)?;
@@ -135,7 +135,7 @@ impl SnmpInt {
 }
 
 impl ToPython for &SnmpInt {
-    fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError> {
+    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
         Ok(self.0.into_py(py))
     }
 }
@@ -172,7 +172,7 @@ mod tests {
     }
 
     #[test]
-    fn test_encode() -> Result<(), SnmpError> {
+    fn test_encode() -> SnmpResult<()> {
         let mut buf = Buffer::default();
         let data = [0i64, 1, 127, 128, 256, -128, -129, -65535];
         let expected = [

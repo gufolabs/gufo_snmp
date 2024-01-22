@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_REAL};
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
 use core::str::from_utf8;
 use pyo3::{IntoPy, Py, PyAny, Python};
 
@@ -18,7 +18,7 @@ impl<'a> BerDecoder<'a> for SnmpReal {
     const TAG: Tag = TAG_REAL;
 
     // Implement X.690 pp 8.5: Encoding of a real value
-    fn decode(i: &'a [u8], h: &BerHeader) -> Result<Self, SnmpError> {
+    fn decode(i: &'a [u8], h: &BerHeader) -> SnmpResult<Self> {
         // zero-sized is a zero
         // 8.5.2: If the real value is the value plus zero,
         // there shall be no contents octets in the encoding.
@@ -122,7 +122,7 @@ impl SnmpReal {
 }
 
 impl ToPython for &SnmpReal {
-    fn try_to_python(self, py: Python) -> Result<Py<PyAny>, SnmpError> {
+    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
         Ok(self.0.into_py(py))
     }
 }

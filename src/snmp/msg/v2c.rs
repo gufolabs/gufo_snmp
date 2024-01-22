@@ -8,7 +8,7 @@ use crate::ber::{
     BerDecoder, BerEncoder, SnmpInt, SnmpOctetString, SnmpSequence, TAG_INT, TAG_OCTET_STRING,
 };
 use crate::buf::Buffer;
-use crate::error::SnmpError;
+use crate::error::{SnmpError, SnmpResult};
 use crate::snmp::pdu::SnmpPdu;
 use crate::snmp::SNMP_V2C;
 
@@ -22,7 +22,7 @@ const V2C_BER: [u8; 3] = [TAG_INT, 1, SNMP_V2C];
 impl<'a> TryFrom<&'a [u8]> for SnmpV2cMessage<'a> {
     type Error = SnmpError;
 
-    fn try_from(i: &'a [u8]) -> Result<SnmpV2cMessage<'a>, SnmpError> {
+    fn try_from(i: &'a [u8]) -> SnmpResult<SnmpV2cMessage<'a>> {
         // Top-level sequence
         let (tail, envelope) = SnmpSequence::from_ber(i)?;
         if !tail.is_empty() {
@@ -47,7 +47,7 @@ impl<'a> TryFrom<&'a [u8]> for SnmpV2cMessage<'a> {
 }
 
 impl<'a> BerEncoder for SnmpV2cMessage<'a> {
-    fn push_ber(&self, buf: &mut Buffer) -> Result<(), SnmpError> {
+    fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         // Push PDU
         self.pdu.push_ber(buf)?;
         // Push community
@@ -71,7 +71,7 @@ mod tests {
     use crate::snmp::value::SnmpValue;
 
     #[test]
-    fn test_parse_snmp_get() -> Result<(), SnmpError> {
+    fn test_parse_snmp_get() -> SnmpResult<()> {
         let data = [
             0x30u8, 0x35, 0x02, 0x01, 0x01, 0x04, 0x06, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0xa0,
             0x28, 0x02, 0x04, 0x63, 0xcc, 0xac, 0x7d, 0x02, 0x01, 0x00, 0x02, 0x01, 0x00, 0x30,
@@ -97,7 +97,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_snmp_getresponse_exception() -> Result<(), SnmpError> {
+    fn test_parse_snmp_getresponse_exception() -> SnmpResult<()> {
         let data = [
             48u8, 40, // Seq 40 bytes
             2, 1, 1, // INTEGER 1, v2C
@@ -130,7 +130,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_parse_snmp_getresponse() -> Result<(), SnmpError> {
+    fn test_parse_snmp_getresponse() -> SnmpResult<()> {
         let data = [
             48u8, 55, // Seq 55 bytes
             2, 1, 1, // INTEGER, v2c
@@ -168,7 +168,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_parse_snmp_getresponse_many() -> Result<(), SnmpError> {
+    fn test_parse_snmp_getresponse_many() -> SnmpResult<()> {
         let data = [
             48u8, 129, 134, // Sequence, 134 bytes
             2, 1, 1, // ITEGER, v2c
@@ -236,7 +236,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_parse_snmp_getresponse_many_rel() -> Result<(), SnmpError> {
+    fn test_parse_snmp_getresponse_many_rel() -> SnmpResult<()> {
         let data = [
             48u8, 116, // Sequence, 116 bytes
             2, 1, 1, // ITEGER, v2c
@@ -305,7 +305,7 @@ mod tests {
     }
 
     #[test]
-    fn test_encode_snmp_get() -> Result<(), SnmpError> {
+    fn test_encode_snmp_get() -> SnmpResult<()> {
         let expected = [
             0x30u8, 0x35, 0x02, 0x01, 0x01, 0x04, 0x06, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0xa0,
             0x28, 0x02, 0x04, 0x63, 0xcc, 0xac, 0x7d, 0x02, 0x01, 0x00, 0x02, 0x01, 0x00, 0x30,
