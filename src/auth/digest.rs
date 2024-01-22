@@ -57,6 +57,9 @@ impl<D: Digest, const KS: usize, const SS: usize> SnmpAuth for DigestAuth<D, KS,
         let digest = hasher.finalize();
         out.clone_from_slice(&digest[..out.len()]);
     }
+    fn get_key_size(&self) -> usize {
+        KS
+    }
     fn get_key(&self) -> &[u8] {
         &self.key
     }

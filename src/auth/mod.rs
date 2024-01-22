@@ -41,6 +41,8 @@ pub trait SnmpAuth {
     fn localize(&self, key: &[u8], locality: &[u8], out: &mut [u8]);
     // Convert password to master key
     fn password_to_master(&self, password: &[u8], out: &mut [u8]);
+    // Get key size
+    fn get_key_size(&self) -> usize;
     // Get slice with key
     fn get_key(&self) -> &[u8];
     // Check if method provides auth

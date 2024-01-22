@@ -44,3 +44,25 @@ def test_key_padding(
         assert len(k.key) == len(key)
     else:
         assert len(k.key) == k.KEY_LENGTH
+
+
+@pytest.mark.parametrize(
+    ("auth", "passwd", "expected"),
+    [
+        (
+            Md5Key,
+            b"maplesyrup",
+            b"\x9f\xaf\x32\x83\x88\x4e\x92\x83\x4e\xbc\x98\x47\xd8\xed\xd9\x63",
+        ),
+        (
+            Sha1Key,
+            b"maplesyrup",
+            b"\x9f\xb5\xcc\x03\x81\x49\x7b\x37\x93\x52\x89\x39\xff\x78\x8d\x5d\x79\x14\x52\x11",
+        ),
+    ],
+)
+def test_get_master_key(
+    auth: BaseAuthKey, passwd: bytes, expected: bytes
+) -> None:
+    r = auth.get_master_key(passwd)
+    assert r == expected

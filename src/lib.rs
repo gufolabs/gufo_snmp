@@ -1,7 +1,7 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: Module definition
 // ------------------------------------------------------------------------
-// Copyright (C) 2023, Gufo Labs
+// Copyright (C) 2023-24, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
@@ -14,6 +14,7 @@ mod privacy;
 pub mod reqid;
 pub mod snmp;
 mod socket;
+mod util;
 
 /// Module index
 #[pymodule]
@@ -29,5 +30,6 @@ fn gufo_ping(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<socket::SnmpV3ClientSocket>()?;
     m.add_class::<socket::GetNextIter>()?;
     m.add_class::<socket::GetBulkIter>()?;
+    m.add_function(wrap_pyfunction!(util::get_master_key, m)?)?;
     Ok(())
 }

@@ -10,6 +10,9 @@
 from enum import IntEnum
 from typing import List, Optional, Type, TypeVar
 
+# Gufo SNMP modules
+from ._fast import get_master_key
+
 K = TypeVar("K", bound="BaseKey")
 
 
@@ -86,6 +89,19 @@ class BaseKey(object):
     ) -> None:
         self.key = key
         self.key_type = key_type
+
+    @classmethod
+    def get_master_key(cls: Type["BaseKey"], passwd: bytes) -> bytes:
+        """
+        Convert password to master key.
+
+        Args:
+            passwd: Password
+
+        Returns:
+            Master key. Resulting length depends on the algorithm.
+        """
+        return get_master_key(cls.AUTH_ALG, passwd)
 
     def _pad(self: "BaseKey", key_len: int) -> None:
         """
