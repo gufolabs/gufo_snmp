@@ -98,9 +98,6 @@ impl<'a> BerEncoder for UsmParameters<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ber::SnmpOid;
-    use crate::snmp::get::SnmpGet;
-    use crate::snmp::value::SnmpValue;
 
     #[test]
     fn test_parse_usm_plain() -> Result<(), SnmpError> {

@@ -121,7 +121,7 @@ mod tests {
         let master_key = [117u8, 115, 101, 114, 49, 48, 107, 101, 121]; // user10key
         let engine_id = [128, 0, 31, 136, 4, 50, 55, 103, 83, 56, 54, 116, 100];
         let mut auth_key = Md5AuthKey::default();
-        auth_key.from_master(&master_key, &engine_id);
+        auth_key.as_master(&master_key, &engine_id);
         auth_key.sign(&mut whole_msg)?;
         assert_eq!(whole_msg, expected);
         Ok(())
@@ -147,7 +147,7 @@ mod tests {
         let master_key = [117u8, 115, 101, 114, 50, 48, 107, 101, 121]; // user20key
         let engine_id = [128, 0, 31, 136, 4, 50, 55, 103, 83, 56, 54, 116, 100];
         let mut auth_key = Sha1AuthKey::default();
-        auth_key.from_master(&master_key, &engine_id);
+        auth_key.as_master(&master_key, &engine_id);
         auth_key.sign(&mut whole_msg)?;
         assert_eq!(whole_msg, expected);
         Ok(())
