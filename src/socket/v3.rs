@@ -18,6 +18,7 @@ use crate::snmp::msg::v3::{MsgData, ScopedPdu, SnmpV3Message, UsmParameters};
 use crate::snmp::pdu::SnmpPdu;
 use crate::snmp::value::SnmpValue;
 use pyo3::exceptions::PyRuntimeError;
+use pyo3::types::PyBytes;
 use pyo3::{
     exceptions::{PyStopAsyncIteration, PyValueError},
     prelude::*,
@@ -84,9 +85,36 @@ impl SnmpV3ClientSocket {
             request_id: RequestId::default(),
         })
     }
+    /// Change keys
+    fn set_keys(
+        &mut self,
+        auth_alg: u8,
+        auth_key: &[u8],
+        priv_alg: u8,
+        priv_key: &[u8],
+    ) -> PyResult<()> {
+        // Auth key
+        let mut auth = AuthKey::new(auth_alg)?;
+        auth.as_key_type(auth_alg, auth_key, &self.engine_id)?;
+        // Priv key
+        let mut pk = PrivKey::new(priv_alg)?;
+        if pk.has_priv() {
+            // Localize key
+            let mut pk_auth = AuthKey::new(auth_alg)?;
+            pk_auth.as_key_type(priv_alg, priv_key, &self.engine_id)?;
+            pk.as_localized(pk_auth.get_key())?;
+        }
+        self.auth_key = auth;
+        self.priv_key = pk;
+        Ok(())
+    }
     /// Get socket's file descriptor
     fn get_fd(&self) -> PyResult<i32> {
         Ok(self.io.as_raw_fd())
+    }
+    /// Get engine id
+    fn get_engine_id(&self, py: Python) -> PyResult<PyObject> {
+        Ok(PyBytes::new(py, &self.engine_id).into())
     }
     // Prepare and send GET request with single oid
     fn send_get(&mut self, oid: &str) -> PyResult<()> {
@@ -140,7 +168,7 @@ impl SnmpV3ClientSocket {
             false,
         )?)
     }
-    // Send GET+Report
+    // Send GET+Report to adjust boots and time
     fn send_refresh(&mut self) -> PyResult<()> {
         let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(
@@ -372,7 +400,7 @@ impl SnmpV3ClientSocket {
         };
         // Global header check
         if !(self.user_name.as_bytes() == msg.usm.user_name
-            && msg.usm.engine_id == self.engine_id
+            && (self.engine_id.is_empty() || msg.usm.engine_id == self.engine_id)
             && self.msg_id.check(msg.msg_id)
             && data.pdu.check(&self.request_id))
         {
@@ -382,7 +410,7 @@ impl SnmpV3ClientSocket {
         self.engine_time = msg.usm.engine_time;
         if self.engine_id.is_empty() {
             // Auto-detect engine id
-            self.engine_id.clone_from_slice(msg.usm.engine_id);
+            self.engine_id.extend_from_slice(msg.usm.engine_id);
         }
         Ok(Some(data.pdu))
     }

@@ -9,7 +9,7 @@
 import asyncio
 import logging
 import random
-from typing import Any, Dict, Iterator, cast
+from typing import Any, Dict, Iterator, Optional, cast
 
 # Third-party modules
 import pytest
@@ -141,7 +141,7 @@ def test_timeout2(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
 
 
 async def snmp_get(
-    cfg: Dict[str, Any], engine_id: bytes, oid: str
+    cfg: Dict[str, Any], engine_id: Optional[bytes], oid: str
 ) -> ValueType:
     async with SnmpSession(
         addr=SNMPD_ADDRESS,
@@ -155,7 +155,7 @@ async def snmp_get(
 
 # Uncomment for single config check
 # def test_xxx(snmpd: Snmpd):
-#     asyncio.run(snmp_get(V3[2], snmpd.engine_id, "1.3.6.1.2.1.1.6.0"))
+#     asyncio.run(snmp_get(V3[0], None, "1.3.6.1.2.1.1.6.0"))
 
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
@@ -170,6 +170,21 @@ def test_get(
     cfg: Dict[str, Any], oid: str, expected: ValueType, snmpd: Snmpd
 ) -> None:
     r = asyncio.run(snmp_get(cfg, snmpd.engine_id, oid))
+    assert r == expected
+
+
+@pytest.mark.parametrize("cfg", V3, ids=ids)
+@pytest.mark.parametrize(
+    ("oid", "expected"),
+    [
+        ("1.3.6.1.2.1.1.6.0", SNMP_LOCATION.encode()),
+        ("1.3.6.1.2.1.1.4.0", SNMP_CONTACT.encode()),
+    ],
+)
+def test_get_wo_engine_id(
+    cfg: Dict[str, Any], oid: str, expected: ValueType, snmpd: Snmpd
+) -> None:
+    r = asyncio.run(snmp_get(cfg, None, oid))
     assert r == expected
 
 
@@ -452,3 +467,15 @@ def test_fetch_file_not_found(
                     pass
 
     asyncio.run(inner())
+
+
+@pytest.mark.parametrize("cfg", V3, ids=ids)
+def test_get_engine_id(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
+    async def inner() -> bytes:
+        async with SnmpSession(
+            addr=SNMPD_ADDRESS, port=SNMPD_PORT, timeout=1.0, **cfg
+        ) as session:
+            return session.get_engine_id()
+
+    r = asyncio.run(inner())
+    assert r == snmpd.engine_id

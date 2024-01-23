@@ -86,6 +86,7 @@ class SnmpSession(object):
     ) -> None:
         self._sock: SnmpClientSocketProtocol
         self._to_refresh = False
+        self._deferred_user: Optional[User] = None
         if version == SnmpVersion.v1:
             self._sock = SnmpV1ClientSocket(
                 f"{addr}:{port}",
@@ -107,8 +108,8 @@ class SnmpSession(object):
                 msg = "SNMPv3 requires user"
                 raise ValueError(msg)
             if not engine_id:
-                msg = "SNMPv3 requires engine_id"
-                raise ValueError(msg)
+                # Defer authentication until engine id is discovered
+                self._deferred_user = user
             self._sock = SnmpV3ClientSocket(
                 f"{addr}:{port}",
                 engine_id if engine_id else b"",
@@ -306,6 +307,28 @@ class SnmpSession(object):
         ):
             return
 
+        if self._deferred_user:
+            # First check runs engine id discovery
+            await send_and_recv(
+                self._fd,
+                self._sock.send_refresh,
+                self._sock.recv_refresh,
+                self._policer,
+                self._timeout,
+            )
+            # Set and localize actual keys
+            self._sock.set_keys(
+                self._deferred_user.get_auth_alg(),
+                self._deferred_user.get_auth_key(),
+                self._deferred_user.get_priv_alg(),
+                self._deferred_user.get_priv_key(),
+            )
+            # Adjust refresh settings
+            self._to_refresh = self._deferred_user.require_auth()
+            # Forget deferred user
+            self._deferred_user = None
+
+        # Refresh engine boots and time
         await send_and_recv(
             self._fd,
             self._sock.send_refresh,
@@ -313,3 +336,15 @@ class SnmpSession(object):
             self._policer,
             self._timeout,
         )
+
+    def get_engine_id(self: "SnmpSession") -> bytes:
+        """
+        Get effective engine id.
+
+        Returns:
+            Engine id as bytes.
+        """
+        if not isinstance(self._sock, SnmpV3ClientSocket):
+            msg = "Must use SNMPv3"
+            raise NotImplementedError(msg)
+        return self._sock.get_engine_id()

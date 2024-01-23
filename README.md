@@ -84,6 +84,7 @@ async with Snmpd(), SnmpSession(addr="127.0.0.1", port=10161) as session:
 * SNMP v3 User Security Model:
   * Authentication: HMAC-MD5-96, HMAC-SHA-96.
   * Privacy: DES, AES128.
+  * Engine ID discovery.
 * High-performance.
 * Zero-copy BER parsing.
 * Full Python typing support.
