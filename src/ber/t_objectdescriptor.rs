@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_OBJECT_DESCRIPTOR};
-use crate::error::{SnmpResult};
+use crate::error::SnmpResult;
 use pyo3::types::PyBytes;
 use pyo3::{Py, PyAny, Python};
 

@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_APP_GAUGE32};
-use crate::error::{SnmpResult};
+use crate::error::SnmpResult;
 use pyo3::{IntoPy, Py, PyAny, Python};
 
 pub struct SnmpGauge32(pub(crate) u32);

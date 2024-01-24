@@ -10,7 +10,7 @@ use crate::ber::{
     BerDecoder, SnmpInt, SnmpOid, SnmpRelativeOid, SnmpSequence, Tag, TAG_OBJECT_ID,
     TAG_RELATIVE_OID,
 };
-use crate::error::{SnmpError};
+use crate::error::SnmpError;
 
 #[allow(dead_code)]
 pub struct SnmpGetResponse<'a> {

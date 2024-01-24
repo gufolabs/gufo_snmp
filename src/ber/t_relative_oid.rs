@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::{BerDecoder, BerHeader, SnmpOid, Tag, TAG_RELATIVE_OID};
-use crate::error::{SnmpResult};
+use crate::error::SnmpResult;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct SnmpRelativeOid(pub(crate) Vec<u32>);

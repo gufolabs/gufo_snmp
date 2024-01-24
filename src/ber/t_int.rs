@@ -7,7 +7,7 @@
 
 use super::{BerDecoder, BerEncoder, BerHeader, Tag, ToPython, TAG_INT};
 use crate::buf::Buffer;
-use crate::error::{SnmpResult};
+use crate::error::SnmpResult;
 use pyo3::{IntoPy, Py, PyAny, Python};
 use std::cmp::Ordering;
 
