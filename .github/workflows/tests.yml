@@ -78,6 +78,9 @@ jobs:
       - name: Check Rust Format
         run: cargo fmt --check
 
+      - name: Run Clippy on tests
+        run: cargo clippy --tests
+
       - name: Run Rust Tests
         run: cargo test
 

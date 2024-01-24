@@ -157,8 +157,8 @@ mod tests {
         let msg = SnmpV3Message::try_from(data.as_ref())?;
         // Analyze global header
         assert_eq!(msg.msg_id, 37320);
-        assert_eq!(msg.flag_auth, false);
-        assert_eq!(msg.flag_priv, false);
+        assert!(!msg.flag_auth);
+        assert!(!msg.flag_priv);
         // Analyze security parameters
         assert_eq!(msg.usm.user_name, "admin".as_bytes());
         // Analyze scoped pdu

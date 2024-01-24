@@ -157,7 +157,7 @@ mod test {
         let mut buf = Buffer::default();
         let oid = SnmpOid::from(vec![1, 3, 6, 999, 3]);
         oid.push_ber(&mut buf)?;
-        let (_, oid2) = SnmpOid::from_ber(&buf.data())?;
+        let (_, oid2) = SnmpOid::from_ber(buf.data())?;
         assert_eq!(oid, oid2);
         Ok(())
     }
@@ -175,18 +175,18 @@ mod test {
     fn test_contains1() {
         let oid1 = SnmpOid::from(vec![1, 3, 6]);
         let oid2 = SnmpOid::from(vec![1, 3]);
-        assert_eq!(oid1.contains(&oid2), false);
+        assert!(!oid1.contains(&oid2));
     }
     #[test]
     fn test_contains2() {
         let oid1 = SnmpOid::from(vec![1, 3, 6]);
         let oid2 = SnmpOid::from(vec![1, 2, 5]);
-        assert_eq!(oid1.contains(&oid2), false);
+        assert!(!oid1.contains(&oid2));
     }
     #[test]
     fn test_contains3() {
         let oid1 = SnmpOid::from(vec![1, 3, 6]);
         let oid2 = SnmpOid::from(vec![1, 3, 6, 1, 5]);
-        assert_eq!(oid1.contains(&oid2), true);
+        assert!(oid1.contains(&oid2));
     }
 }

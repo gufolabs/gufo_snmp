@@ -136,7 +136,7 @@ mod tests {
         let data = [5u8, 0u8];
         let (tail, hdr) = BerHeader::from_ber(&data)?;
         assert_eq!(hdr.class, BerClass::Universal);
-        assert_eq!(hdr.constructed, false);
+        assert!(!hdr.constructed);
         assert_eq!(hdr.tag, 5);
         assert_eq!(hdr.length, 0);
         assert_eq!(tail.len(), 0);
@@ -149,7 +149,7 @@ mod tests {
         let data = [4u8, 5, 0x74, 0x65, 0x73, 0x74, 0x2e];
         let (tail, hdr) = BerHeader::from_ber(&data)?;
         assert_eq!(hdr.class, BerClass::Universal);
-        assert_eq!(hdr.constructed, false);
+        assert!(!hdr.constructed);
         assert_eq!(hdr.tag, 4);
         assert_eq!(hdr.length, 5);
         assert_eq!(tail.len(), 5);
@@ -164,7 +164,7 @@ mod tests {
         let data = [0x30u8, 6, 5, 0, 5, 0, 5, 0];
         let (tail, hdr) = BerHeader::from_ber(&data)?;
         assert_eq!(hdr.class, BerClass::Universal);
-        assert_eq!(hdr.constructed, true);
+        assert!(hdr.constructed);
         assert_eq!(hdr.tag, 0x10);
         assert_eq!(hdr.length, 6);
         assert_eq!(tail.len(), 6);

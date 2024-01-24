@@ -150,7 +150,7 @@ mod tests {
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
         if let SnmpValue::Bool(x) = value {
-            assert_eq!(bool::from(x), true);
+            assert!(bool::from(x));
             Ok(())
         } else {
             Err(SnmpError::UnexpectedTag)
