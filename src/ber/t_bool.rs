@@ -40,7 +40,6 @@ impl ToPython for &SnmpBool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nom::Err;
 
     #[test]
     fn test_long() {
@@ -50,7 +49,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_ber() -> Result<(), Err<SnmpError>> {
+    fn test_parse_ber() -> SnmpResult<()> {
         let data = [[1u8, 1, 0], [1, 1, 1], [1, 1, 255]];
         let expected = [false, true, true];
         for i in 0..data.len() {

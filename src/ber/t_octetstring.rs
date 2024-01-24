@@ -33,10 +33,9 @@ impl<'a> ToPython for &SnmpOctetString<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nom::Err;
 
     #[test]
-    fn test_parse_ber() -> Result<(), Err<SnmpError>> {
+    fn test_parse_ber() -> SnmpResult<()> {
         let data = [4u8, 5, 0, 1, 2, 3, 4];
         let (tail, s) = SnmpOctetString::from_ber(&data)?;
         assert_eq!(tail.len(), 0);

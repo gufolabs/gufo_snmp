@@ -143,10 +143,9 @@ impl ToPython for &SnmpInt {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nom::Err;
 
     #[test]
-    fn test_parse_ber() -> Result<(), Err<SnmpError>> {
+    fn test_parse_ber() -> SnmpResult<()> {
         let data = [
             vec![2u8, 1, 0],              // 0
             vec![2, 0],                   // 0

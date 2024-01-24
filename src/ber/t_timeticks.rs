@@ -37,10 +37,9 @@ impl ToPython for &SnmpTimeTicks {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nom::Err;
 
     #[test]
-    fn test_parse1() -> Result<(), Err<SnmpError>> {
+    fn test_parse1() -> SnmpResult<()> {
         let data = [0x43, 0x4, 0, 0x89, 0x92, 0xDB];
         let (tail, tt) = SnmpTimeTicks::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -48,7 +47,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_parse2() -> Result<(), Err<SnmpError>> {
+    fn test_parse2() -> SnmpResult<()> {
         let data = [67, 4, 1, 53, 16, 171];
         let (tail, tt) = SnmpTimeTicks::from_ber(&data)?;
         assert_eq!(tail.len(), 0);

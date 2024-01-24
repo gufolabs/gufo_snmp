@@ -136,11 +136,10 @@ impl From<SnmpReal> for f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nom::Err;
 
     const EPSILON: f64 = 1e-10;
     #[test]
-    fn test_parse_ber() -> Result<(), Err<SnmpError>> {
+    fn test_parse_ber() -> SnmpResult<()> {
         let data = [
             vec![9u8, 0],
             // Decimal encoding
@@ -163,7 +162,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_inf() -> Result<(), Err<SnmpError>> {
+    fn test_inf() -> SnmpResult<()> {
         let data = [9u8, 1, 0x40];
         let (tail, v) = SnmpReal::from_ber(&data)?;
         assert_eq!(v.0, f64::INFINITY);
@@ -171,7 +170,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_neg_inf() -> Result<(), Err<SnmpError>> {
+    fn test_neg_inf() -> SnmpResult<()> {
         let data = [9u8, 1, 0x41];
         let (tail, v) = SnmpReal::from_ber(&data)?;
         assert_eq!(v.0, f64::NEG_INFINITY);
@@ -179,7 +178,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_nan() -> Result<(), Err<SnmpError>> {
+    fn test_nan() -> SnmpResult<()> {
         let data = [9u8, 1, 0x42];
         let (tail, v) = SnmpReal::from_ber(&data)?;
         assert!(v.0.is_nan());
@@ -187,7 +186,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_minus_zero() -> Result<(), Err<SnmpError>> {
+    fn test_minus_zero() -> SnmpResult<()> {
         let data = [9u8, 1, 0x43];
         let (tail, v) = SnmpReal::from_ber(&data)?;
         assert_eq!(v.0, -0.0);

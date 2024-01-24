@@ -55,9 +55,9 @@ impl SnmpRelativeOid {
 #[cfg(test)]
 mod test {
     use super::*;
-    use nom::Err;
+
     #[test]
-    fn test_parse_ber() -> Result<(), Err<SnmpError>> {
+    fn test_parse_ber() -> SnmpResult<()> {
         let data = [0xd, 4, 0xc2, 0x7b, 0x03, 0x02];
         let expected = [8571, 3, 2];
         let (tail, v) = SnmpRelativeOid::from_ber(&data)?;

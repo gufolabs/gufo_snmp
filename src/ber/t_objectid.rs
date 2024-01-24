@@ -133,9 +133,9 @@ impl TryFrom<&str> for SnmpOid {
 #[cfg(test)]
 mod test {
     use super::*;
-    use nom::Err;
+
     #[test]
-    fn test_parse_ber() -> Result<(), Err<SnmpError>> {
+    fn test_parse_ber() -> SnmpResult<()> {
         let data = [0x6u8, 0x8, 0x2b, 0x06, 0x01, 0x02, 0x01, 0x01, 0x05, 0x00];
         let expected = [1u32, 3, 6, 1, 2, 1, 1, 5, 0];
         let (tail, v) = SnmpOid::from_ber(&data)?;
@@ -144,7 +144,7 @@ mod test {
         Ok(())
     }
     #[test]
-    fn test_encode() -> Result<(), Err<SnmpError>> {
+    fn test_encode() -> SnmpResult<()> {
         let mut buf = Buffer::default();
         let oid = SnmpOid::from(vec![1, 3, 6, 999, 3]);
         let expected = [6u8, 5, 0x2b, 0x06, 0x87, 0x67, 0x3];
@@ -153,7 +153,7 @@ mod test {
         Ok(())
     }
     #[test]
-    fn test_encode_decode() -> Result<(), Err<SnmpError>> {
+    fn test_encode_decode() -> SnmpResult<()> {
         let mut buf = Buffer::default();
         let oid = SnmpOid::from(vec![1, 3, 6, 999, 3]);
         oid.push_ber(&mut buf)?;
@@ -162,7 +162,7 @@ mod test {
         Ok(())
     }
     #[test]
-    fn test_try_from_str() -> Result<(), Err<SnmpError>> {
+    fn test_try_from_str() -> SnmpResult<()> {
         let data = ["1.3.6.999.3", "1.3.6.1.2.1.1.5.0"];
         let expected = vec![vec![1u32, 3, 6, 999, 3], vec![1u32, 3, 6, 1, 2, 1, 1, 5, 0]];
         for i in 0..data.len() {

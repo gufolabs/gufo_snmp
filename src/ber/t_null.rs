@@ -37,10 +37,9 @@ impl BerEncoder for SnmpNull {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nom::Err;
 
     #[test]
-    fn test_parse() -> Result<(), Err<SnmpError>> {
+    fn test_parse() -> SnmpResult<()> {
         let data = [5u8, 0];
         let (tail, _) = SnmpNull::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
@@ -53,7 +52,7 @@ mod tests {
         assert!(r.is_err());
     }
     #[test]
-    fn test_encode() -> Result<(), Err<SnmpError>> {
+    fn test_encode() -> SnmpResult<()> {
         let mut b = Buffer::default();
         SnmpNull {}.push_ber(&mut b)?;
         let expected = [5u8, 0];
@@ -61,7 +60,7 @@ mod tests {
         Ok(())
     }
     #[test]
-    fn test_encode_decode() -> Result<(), Err<SnmpError>> {
+    fn test_encode_decode() -> SnmpResult<()> {
         let mut b = Buffer::default();
         SnmpNull {}.push_ber(&mut b)?;
         SnmpNull::from_ber(b.data())?;

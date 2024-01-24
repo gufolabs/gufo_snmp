@@ -42,10 +42,9 @@ impl ToPython for &SnmpIpAddress {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nom::Err;
 
     #[test]
-    fn test_parse() -> Result<(), Err<SnmpError>> {
+    fn test_parse() -> SnmpResult<()> {
         let data = [0x40, 0x4, 127, 0, 0, 1];
         let (tail, ip) = SnmpIpAddress::from_ber(&data)?;
         assert_eq!(tail.len(), 0);

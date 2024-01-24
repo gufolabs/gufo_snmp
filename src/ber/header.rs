@@ -120,6 +120,7 @@ impl BerHeader {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::error::SnmpResult;
 
     // Too short header
     #[test]

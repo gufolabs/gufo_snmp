@@ -158,7 +158,7 @@ mod tests {
     fn test_md5_from_password() -> SnmpResult<()> {
         let auth_key = Md5AuthKey::default();
         let password = b"maplesyrup";
-        let engine_id = [00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 02];
+        let engine_id = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2];
         let expected1 = [
             0x9f, 0xaf, 0x32, 0x83, 0x88, 0x4e, 0x92, 0x83, 0x4e, 0xbc, 0x98, 0x47, 0xd8, 0xed,
             0xd9, 0x63,
@@ -180,7 +180,7 @@ mod tests {
     fn test_sha_from_password() -> SnmpResult<()> {
         let auth_key = Sha1AuthKey::default();
         let password = b"maplesyrup";
-        let engine_id = [00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 02];
+        let engine_id = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2];
         let expected1 = [
             0x9f, 0xb5, 0xcc, 0x03, 0x81, 0x49, 0x7b, 0x37, 0x93, 0x52, 0x89, 0x39, 0xff, 0x78,
             0x8d, 0x5d, 0x79, 0x14, 0x52, 0x11,
