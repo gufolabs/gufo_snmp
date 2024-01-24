@@ -223,6 +223,7 @@ class User(object):
     def __init__(
         self: "User",
         name: str,
+        *,
         auth_key: Optional[BaseAuthKey] = None,
         priv_key: Optional[BasePrivKey] = None,
     ) -> None:
