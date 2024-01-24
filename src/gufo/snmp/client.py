@@ -39,7 +39,11 @@ class SnmpSession(object):
         community: SNMP community (v1, v2c).
         engine_id: SNMP Engine id (v3).
         user: User instance (v3).
-        version: Protocol version.
+        version: Protocol version. Autodetect if omitted:
+
+            * v3: if `user` is set.
+            * v2c: otherwise.
+
         timeout: Request timeout in seconds.
         tos: Set ToS/DSCP mark on egress packets.
         send_buffer: Send buffer size for UDP socket.
@@ -74,7 +78,7 @@ class SnmpSession(object):
         community: str = "public",
         engine_id: Optional[bytes] = None,
         user: Optional[User] = None,
-        version: SnmpVersion = SnmpVersion.v2c,
+        version: Optional[SnmpVersion] = None,
         timeout: float = 10.0,
         tos: int = 0,
         send_buffer: int = 0,
@@ -84,6 +88,10 @@ class SnmpSession(object):
         policer: Optional[BasePolicer] = None,
         limit_rps: Optional[Union[int, float]] = None,
     ) -> None:
+        # Detect version
+        if version is None:
+            version = SnmpVersion.v2c if user is None else SnmpVersion.v3
+        #
         self._sock: SnmpClientSocketProtocol
         self._to_refresh = False
         self._deferred_user: Optional[User] = None
