@@ -10,15 +10,13 @@ use gufo_snmp::{
     ber::{BerEncoder, SnmpOid},
     buf::Buffer,
     snmp::get::SnmpGet,
-    snmp::msg::SnmpMessage,
+    snmp::msg::SnmpV2cMessage,
     snmp::pdu::SnmpPdu,
-    snmp::SnmpVersion,
 };
 
 pub fn bench_get(c: &mut Criterion) {
     let community = [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63];
-    let msg = SnmpMessage {
-        version: SnmpVersion::V2C,
+    let msg = SnmpV2cMessage {
         community: &community,
         pdu: SnmpPdu::GetRequest(SnmpGet {
             request_id: 0x63ccac7d,
@@ -35,7 +33,7 @@ pub fn bench_get(c: &mut Criterion) {
     c.bench_function("encode GET", |b| {
         b.iter(|| {
             buf.reset();
-            msg.push_ber(&mut buf);
+            let _ = msg.push_ber(&mut buf);
         })
     });
 }

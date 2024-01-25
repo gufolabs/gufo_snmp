@@ -11,12 +11,12 @@ use gufo_snmp::ber::{
     SnmpNull, SnmpObjectDescriptor, SnmpOctetString, SnmpOid, SnmpOpaque, SnmpReal,
     SnmpRelativeOid, SnmpTimeTicks, SnmpUInteger32,
 };
-use gufo_snmp::snmp::msg::SnmpMessage;
+use gufo_snmp::snmp::msg::SnmpV2cMessage;
 use iai::black_box;
 
 pub fn decode_header() {
     let data = [1u8, 1, 0];
-    BerHeader::from_ber(black_box(&data));
+    let _ = BerHeader::from_ber(black_box(&data));
 }
 
 pub fn decode_getresponse() {
@@ -44,92 +44,92 @@ pub fn decode_getresponse() {
         4, 23, 116, 101, 115, 116, 32, 60, 116, 101, 115, 116, 64, 101, 120, 97, 109, 112, 108,
         101, 46, 99, 111, 109, 62, // OCTET STRING
     ];
-    SnmpMessage::try_from(black_box(data.as_ref()));
+    let _ = SnmpV2cMessage::try_from(black_box(data.as_ref()));
 }
 
 pub fn decode_bool() {
     let data = [1u8, 1, 0];
-    SnmpBool::from_ber(black_box(&data));
+    let _ = SnmpBool::from_ber(black_box(&data));
 }
 
 pub fn decode_counter32() {
     let data = [0x41, 4, 1, 53, 16, 171];
-    SnmpCounter32::from_ber(black_box(&data));
+    let _ = SnmpCounter32::from_ber(black_box(&data));
 }
 
 pub fn decode_counter64() {
     let data = [0x46, 4, 1, 53, 16, 171];
-    SnmpCounter64::from_ber(black_box(&data));
+    let _ = SnmpCounter64::from_ber(black_box(&data));
 }
 
 pub fn decode_gauge32() {
     let data = [0x42, 4, 1, 53, 16, 171];
-    SnmpGauge32::from_ber(black_box(&data));
+    let _ = SnmpGauge32::from_ber(black_box(&data));
 }
 
 pub fn decode_int() {
     let data = [2, 4, 1, 53, 16, 171];
-    SnmpInt::from_ber(black_box(&data));
+    let _ = SnmpInt::from_ber(black_box(&data));
 }
 
 pub fn decode_ipaddress() {
     let data = [0x40, 0x4, 127, 0, 0, 1];
-    SnmpIpAddress::from_ber(black_box(&data));
+    let _ = SnmpIpAddress::from_ber(black_box(&data));
 }
 
 pub fn decode_null() {
     let data = [5, 0];
-    SnmpNull::from_ber(black_box(&data));
+    let _ = SnmpNull::from_ber(black_box(&data));
 }
 
 pub fn decode_objectdescriptor() {
     let data = [7u8, 5, 0, 1, 2, 3, 4];
-    SnmpObjectDescriptor::from_ber(black_box(&data));
+    let _ = SnmpObjectDescriptor::from_ber(black_box(&data));
 }
 
 pub fn decode_oid() {
     let data = [0x6u8, 0x8, 0x2b, 0x06, 0x01, 0x02, 0x01, 0x01, 0x05, 0x00];
-    SnmpOid::from_ber(black_box(&data));
+    let _ = SnmpOid::from_ber(black_box(&data));
 }
 
 pub fn decode_octetstring() {
     let data = [4u8, 5, 0, 1, 2, 3, 4];
-    SnmpOctetString::from_ber(black_box(&data));
+    let _ = SnmpOctetString::from_ber(black_box(&data));
 }
 
 pub fn decode_opaque() {
     let data = [0x44, 5, 0, 1, 2, 3, 4];
-    SnmpOpaque::from_ber(black_box(&data));
+    let _ = SnmpOpaque::from_ber(black_box(&data));
 }
 
 pub fn decode_real_nr1() {
     let data = [9u8, 5, 0x01, 0x2d, 0x34, 0x35, 0x36];
-    SnmpReal::from_ber(black_box(&data));
+    let _ = SnmpReal::from_ber(black_box(&data));
 }
 
 pub fn decode_real_nr2() {
     let data = [9u8, 7, 0x02, 0x2d, 0x34, 0x35, 0x36, 0x2e, 0x37];
-    SnmpReal::from_ber(black_box(&data));
+    let _ = SnmpReal::from_ber(black_box(&data));
 }
 
 pub fn decode_real_nr3() {
     let data = [9u8, 6, 0x03, 0x31, 0x35, 0x45, 0x2d, 0x31];
-    SnmpReal::from_ber(black_box(&data));
+    let _ = SnmpReal::from_ber(black_box(&data));
 }
 
 pub fn decode_relative_oid() {
     let data = [0xd, 4, 0xc2, 0x7b, 0x03, 0x02];
-    SnmpRelativeOid::from_ber(black_box(&data));
+    let _ = SnmpRelativeOid::from_ber(black_box(&data));
 }
 
 pub fn decode_timeticks() {
     let data = [0x43, 0x4, 0, 0x89, 0x92, 0xDB];
-    SnmpTimeTicks::from_ber(black_box(&data));
+    let _ = SnmpTimeTicks::from_ber(black_box(&data));
 }
 
 pub fn decode_uinteger32() {
     let data = [0x47, 0x4, 0, 0x89, 0x92, 0xDB];
-    SnmpUInteger32::from_ber(black_box(&data));
+    let _ = SnmpUInteger32::from_ber(black_box(&data));
 }
 
 iai::main!(

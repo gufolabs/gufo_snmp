@@ -14,23 +14,23 @@ fn buf_default() {
 
 fn buf_push_u8() {
     let mut b = Buffer::default();
-    b.push_u8(black_box(10));
+    let _ = b.push_u8(black_box(10));
 }
 
 fn buf_push() {
     let mut b = Buffer::default();
     let chunk = [1u8, 2, 3];
-    b.push(&chunk);
+    let _ = b.push(&chunk);
 }
 
 fn buf_push_ber_len_short() {
     let mut b = Buffer::default();
-    b.push_ber_len(1);
+    let _ = b.push_ber_len(1);
 }
 
 fn buf_push_ber_len_long() {
     let mut b = Buffer::default();
-    b.push_ber_len(128);
+    let _ = b.push_ber_len(128);
 }
 
 iai::main!(

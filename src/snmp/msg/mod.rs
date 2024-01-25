@@ -10,3 +10,4 @@ mod v2c;
 pub mod v3;
 pub use v1::SnmpV1Message;
 pub use v2c::SnmpV2cMessage;
+pub use v3::SnmpV3Message;

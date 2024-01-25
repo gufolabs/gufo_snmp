@@ -9,16 +9,14 @@ use gufo_snmp::{
     ber::{BerEncoder, SnmpOid},
     buf::Buffer,
     snmp::get::SnmpGet,
-    snmp::msg::SnmpMessage,
+    snmp::msg::SnmpV2cMessage,
     snmp::pdu::SnmpPdu,
-    snmp::SnmpVersion,
 };
 use iai::black_box;
 
 pub fn encode_get() {
     let community = [0x70u8, 0x75, 0x62, 0x6c, 0x69, 0x63];
-    let msg = SnmpMessage {
-        version: SnmpVersion::V2C,
+    let msg = SnmpV2cMessage {
         community: &community,
         pdu: SnmpPdu::GetRequest(SnmpGet {
             request_id: 0x63ccac7d,
@@ -31,7 +29,7 @@ pub fn encode_get() {
         }),
     };
     let mut buf = Buffer::default();
-    msg.push_ber(black_box(&mut buf));
+    let _ = msg.push_ber(black_box(&mut buf));
 }
 
 iai::main!(encode_get);

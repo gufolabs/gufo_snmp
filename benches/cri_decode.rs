@@ -13,7 +13,7 @@ use gufo_snmp::ber::{
     SnmpNull, SnmpObjectDescriptor, SnmpOctetString, SnmpOid, SnmpOpaque, SnmpReal,
     SnmpRelativeOid, SnmpTimeTicks, SnmpUInteger32,
 };
-use gufo_snmp::snmp::msg::SnmpMessage;
+use gufo_snmp::snmp::msg::SnmpV2cMessage;
 
 pub fn bench_header(c: &mut Criterion) {
     let data = [1u8, 1, 0];
@@ -46,7 +46,7 @@ pub fn bench_getresponse(c: &mut Criterion) {
         101, 46, 99, 111, 109, 62, // OCTET STRING
     ];
     c.bench_function("decode GETRESPONSE", |b| {
-        b.iter(|| SnmpMessage::try_from(data.as_ref()))
+        b.iter(|| SnmpV2cMessage::try_from(data.as_ref()))
     });
 }
 
