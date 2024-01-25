@@ -13,7 +13,7 @@ const MAX_SIZE: usize = 65536;
 // SNMP message is build starting from the end,
 // So we use stack-like buffer.
 pub struct Buffer {
-    len: usize,
+    pos: usize,
     data: [u8; MAX_SIZE], // @todo: MaybeUninit<u8>
 }
 
@@ -22,7 +22,7 @@ impl Default for Buffer {
     #[allow(clippy::uninit_assumed_init)]
     fn default() -> Buffer {
         Buffer {
-            len: 0,
+            pos: MAX_SIZE,
             data: unsafe { MaybeUninit::uninit().assume_init() },
         }
     }
@@ -31,34 +31,34 @@ impl Default for Buffer {
 impl Buffer {
     #[inline]
     pub fn free(&self) -> usize {
-        MAX_SIZE - self.len
+        self.pos
     }
     #[inline]
     pub fn len(&self) -> usize {
-        self.len
+        MAX_SIZE - self.pos
     }
     #[inline]
     pub fn is_empty(&self) -> bool {
-        self.len == 0
+        self.pos == MAX_SIZE
     }
     #[inline]
     pub fn is_full(&self) -> bool {
-        self.len == MAX_SIZE
+        self.pos == 0
     }
     #[inline]
     pub fn data(&self) -> &[u8] {
-        &self.data[MAX_SIZE - self.len..]
+        &self.data[self.pos..]
     }
     #[inline]
     pub fn data_mut(&mut self) -> &mut [u8] {
-        &mut self.data[MAX_SIZE - self.len..]
+        &mut self.data[self.pos..]
     }
     #[inline]
     pub fn skip(&mut self, size: usize) {
-        if self.len + size >= MAX_SIZE {
-            self.len = MAX_SIZE
+        if self.pos < size {
+            self.pos = 0
         } else {
-            self.len += size;
+            self.pos -= size
         }
     }
     #[inline]
@@ -66,18 +66,18 @@ impl Buffer {
         if self.is_full() {
             return Err(SnmpError::OutOfBuffer);
         }
-        self.data[MAX_SIZE - self.len - 1] = v;
-        self.len += 1;
+        self.pos -= 1;
+        self.data[self.pos] = v;
         Ok(())
     }
     pub fn push(&mut self, chunk: &[u8]) -> SnmpResult<()> {
         let cs = chunk.len();
-        if self.free() < cs {
+        if self.pos < cs {
             return Err(SnmpError::OutOfBuffer);
         }
-        let i = MAX_SIZE - self.len;
-        self.data[i - cs..i].copy_from_slice(chunk);
-        self.len += cs;
+        let end = self.pos;
+        self.pos -= cs;
+        self.data[self.pos..end].copy_from_slice(chunk);
         Ok(())
     }
     pub fn push_ber_len(&mut self, v: usize) -> SnmpResult<()> {
@@ -87,12 +87,12 @@ impl Buffer {
         } else {
             // Long form, X.690 pp 8.1.3.5
             let mut left = v;
-            let start = self.len();
+            let start = self.pos;
             while left > 0 {
                 self.push_u8((left & 0xff) as u8)?;
                 left >>= 8;
             }
-            let size = self.len() - start;
+            let size = start - self.pos;
             // Push size with high-bit set
             self.push_u8((size | 0x80) as u8)?;
         }
@@ -105,7 +105,7 @@ impl Buffer {
         self.push_u8(tag)
     }
     pub fn reset(&mut self) {
-        self.len = 0;
+        self.pos = MAX_SIZE;
     }
     pub fn as_slice(&self, len: usize) -> &[u8] {
         &self.data[..len]
