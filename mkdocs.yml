@@ -16,6 +16,7 @@ nav:
       - GetNext Request: examples/getnext.md
       - GetBulk Request: examples/getbulk.md
       - Fetch: examples/fetch.md
+      - SNMPv3 Engine ID Discovery: examples/engine-id-discovery.md
       - Rate Limiting: examples/ratelimit.md
       - Debugging: examples/debugging.md
   - Reference: reference/

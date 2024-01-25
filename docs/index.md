@@ -73,19 +73,21 @@ async with Snmpd(), SnmpSession(addr="127.0.0.1", port=10161) as session:
 * Clean async API.
 * SNMP v1/v2c/v3 support.
 * SNMP v3 User Security Model:
-  * Authentication: HMAC-MD5-96, HMAC-SHA-96.
-  * Privacy: DES, AES128.
-  * Engine ID discovery.
+    * Authentication: HMAC-MD5-96, HMAC-SHA-96.
+    * Privacy: DES, AES128.
+    * Engine ID discovery.
 * High-performance.
 * Zero-copy BER parsing.
-* Full Python typing support.
 * Query rate limiting.
+* Full Python typing support.
 * Editor completion.
 * Well-tested, battle-proven code.
+* Thoroughly check compatibility with various network equipment.
 
 ## Further Roadmap
 
-* SNMPv3 support.
+* SHA2 family of hashes.
+* AES256 encryption.
 * SNMP Trap and Inform collector.
 * Incorporation of the [NOC's][NOC] *Compiled MIB* infrastructure.
 
