@@ -12,11 +12,10 @@
 from typing import Optional, Tuple
 
 # Gufo Labs Modules
-from ._fast import GetNextIter as _Iter
-from .policer import BasePolicer
-from .protocol import SnmpClientSocketProtocol
-from .typing import ValueType
-from .util import send_and_recv
+from .._fast import GetNextIter as _Iter
+from ..policer import BasePolicer
+from ..protocol import SnmpClientSocketProtocol
+from ..typing import ValueType
 
 
 class GetNextIter(object):
@@ -43,19 +42,13 @@ class GetNextIter(object):
         self._timeout = timeout
         self._policer = policer
 
-    def __aiter__(self: "GetNextIter") -> "GetNextIter":
-        """Return asynchronous iterator."""
+    def __iter__(self: "GetNextIter") -> "GetNextIter":
+        """Return iterator."""
         return self
 
-    async def __anext__(self: "GetNextIter") -> Tuple[str, ValueType]:
+    def __next__(self: "GetNextIter") -> Tuple[str, ValueType]:
         """Get next value."""
-
-        def sender() -> None:
-            self._sock.send_getnext(self._ctx)
-
-        def receiver() -> Tuple[str, ValueType]:
-            return self._sock.recv_getresponse_next(self._ctx)
-
-        return await send_and_recv(
-            self._fd, sender, receiver, self._policer, self._timeout
-        )
+        try:
+            return self._sock.sync_getnext(self._ctx)
+        except StopAsyncIteration as e:
+            raise StopIteration from e

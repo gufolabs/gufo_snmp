@@ -2,7 +2,7 @@
 hide:
     - navigation
 ---
-Copyright &copy; 2023, Gufo Labs.
+Copyright &copy; 2023-2024, Gufo Labs.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,

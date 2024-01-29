@@ -8,9 +8,11 @@
 use crate::ber::BerEncoder;
 use crate::buf::Buffer;
 use crate::error::{SnmpError, SnmpResult};
+use core::time;
 use socket2::{Domain, Protocol, Socket, Type};
 use std::net::SocketAddr;
 use std::os::fd::{AsRawFd, RawFd};
+use time::Duration;
 
 pub struct SnmpTransport {
     io: Socket,
@@ -23,6 +25,7 @@ impl SnmpTransport {
         tos: u32,
         send_buffer_size: usize,
         recv_buffer_size: usize,
+        timeout_ns: u64,
     ) -> SnmpResult<Self> {
         // Parse address
         let sock_addr = addr
@@ -36,9 +39,15 @@ impl SnmpTransport {
         // Create internal socket
         let io = Socket::new(domain, Type::DGRAM, Some(Protocol::UDP))
             .map_err(|e| SnmpError::SocketError(e.to_string()))?;
-        // Mark socket as non-blocking
-        io.set_nonblocking(true)
-            .map_err(|e| SnmpError::SocketError(e.to_string()))?;
+        if timeout_ns > 0 {
+            // Blocking mode
+            io.set_read_timeout(Some(Duration::from_nanos(timeout_ns)))
+                .map_err(|e| SnmpError::SocketError(e.to_string()))?;
+        } else {
+            // Mark socket as non-blocking
+            io.set_nonblocking(true)
+                .map_err(|e| SnmpError::SocketError(e.to_string()))?;
+        }
         // Set ToS
         if tos > 0 {
             io.set_tos(tos)

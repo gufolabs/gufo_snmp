@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: Python SNMP Library
 # ---------------------------------------------------------------------
-# Copyright (C) 2023, Gufo Labs
+# Copyright (C) 2023-24, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -13,7 +13,7 @@ Attributes:
 
 # Gufo Labs modules
 from ._fast import NoSuchInstance, SnmpDecodeError, SnmpEncodeError, SnmpError
-from .client import SnmpSession
+from .async_client import SnmpSession
 from .typing import ValueType
 from .user import Aes128Key, DesKey, Md5Key, Sha1Key, User
 from .version import SnmpVersion

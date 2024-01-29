@@ -41,9 +41,10 @@ impl SnmpV2cClientSocket {
         tos: u32,
         send_buffer_size: usize,
         recv_buffer_size: usize,
+        timeout_ns: u64,
     ) -> PyResult<Self> {
         // Transport
-        let io = SnmpTransport::new(addr, tos, send_buffer_size, recv_buffer_size)?;
+        let io = SnmpTransport::new(addr, tos, send_buffer_size, recv_buffer_size, timeout_ns)?;
         //
         Ok(Self {
             io,
@@ -275,5 +276,29 @@ impl SnmpV2cClientSocket {
                 _ => continue,
             }
         }
+    }
+    // Prepare send GET request with single oid and receive reply
+    fn sync_get(&mut self, py: Python, oid: &str) -> PyResult<Option<PyObject>> {
+        self.send_get(oid)?;
+        self.recv_getresponse(py)
+    }
+    // Prepare and send GET request with multiple oids and receive reply
+    fn sync_get_many(&mut self, py: Python, oids: Vec<&str>) -> PyResult<PyObject> {
+        self.send_get_many(oids)?;
+        self.recv_getresponse_many(py)
+    }
+    //
+    fn sync_getnext(
+        &mut self,
+        py: Python,
+        iter: &mut GetNextIter,
+    ) -> PyResult<(PyObject, PyObject)> {
+        self.send_getnext(iter)?;
+        self.recv_getresponse_next(iter, py)
+    }
+    //
+    fn sync_getbulk(&mut self, py: Python, iter: &mut GetBulkIter) -> PyResult<PyObject> {
+        self.send_getbulk(iter)?;
+        self.recv_getresponse_bulk(iter, py)
     }
 }

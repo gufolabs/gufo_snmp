@@ -1,107 +1,33 @@
 # ---------------------------------------------------------------------
-# Gufo Labs: Test Gufo SNMP
+# Gufo Labs: Test Gufo SNMP async client
 # ---------------------------------------------------------------------
-# Copyright (C) 2023, Gufo Labs
+# Copyright (C) 2023-24, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
 # Python modules
 import asyncio
-import logging
-import random
-from typing import Any, Dict, Iterator, Optional, cast
+from typing import Any, Dict, Optional, cast
 
 # Third-party modules
 import pytest
 
 # Gufo Labs modules
-from gufo.snmp import NoSuchInstance, SnmpSession, SnmpVersion, ValueType
+from gufo.snmp import NoSuchInstance, ValueType
+from gufo.snmp.async_client import SnmpSession
 from gufo.snmp.snmpd import Snmpd
-from gufo.snmp.user import Aes128Key, DesKey, KeyType, Md5Key, Sha1Key, User
 
-SNMPD_ADDRESS = "127.0.0.1"
-SNMPD_PORT = random.randint(52000, 53999)
-SNMPD_PATH = "/usr/sbin/snmpd"
-SNMP_COMMUNITY = "public"
-SNMP_LOCATION = "Gufo SNMP Test"
-SNMP_CONTACT = "test <test@example.com>"
-SNMP_USERS = [
-    User(name="user00"),
-    # MD5
-    User(
-        name="user10", auth_key=Md5Key(b"user10key", key_type=KeyType.Master)
-    ),
-    User(
-        name="user10p",
-        auth_key=Md5Key(b"user10pass", key_type=KeyType.Password),
-    ),
-    User(
-        name="user11",
-        auth_key=Md5Key(b"user11key", key_type=KeyType.Master),
-        priv_key=DesKey(b"USER11KEY", key_type=KeyType.Master),
-    ),
-    User(
-        name="user11p",
-        auth_key=Md5Key(b"user11pass", key_type=KeyType.Password),
-        priv_key=DesKey(b"USER11PASS", key_type=KeyType.Password),
-    ),
-    User(
-        name="user12",
-        auth_key=Md5Key(b"user11key", key_type=KeyType.Master),
-        priv_key=Aes128Key(b"USER12KEY", key_type=KeyType.Master),
-    ),
-    # SHA1
-    User(
-        name="user20", auth_key=Sha1Key(b"user20key", key_type=KeyType.Master)
-    ),
-    User(
-        name="user21",
-        auth_key=Sha1Key(b"user21key", key_type=KeyType.Master),
-        priv_key=DesKey(b"USER21KEY", key_type=KeyType.Master),
-    ),
-    User(
-        name="user22",
-        auth_key=Sha1Key(b"user22key", key_type=KeyType.Master),
-        priv_key=Aes128Key(b"USER22KEY", key_type=KeyType.Master),
-    ),
-]
-
-V1 = [{"version": SnmpVersion.v1, "community": SNMP_COMMUNITY}]
-V2 = [{"version": SnmpVersion.v2c, "community": SNMP_COMMUNITY}]
-V3 = [{"version": SnmpVersion.v3, "user": u} for u in SNMP_USERS]
-
-ALL = V1 + V2 + V3
-
-
-def ids(x: Any) -> str:
-    if isinstance(x, dict) and "version" in x:
-        r = [x["version"].name]
-        user = x.get("user")
-        if user:
-            r += [user.name]
-            if user.auth_key:
-                r += [user.auth_key.__class__.__name__]
-            if user.priv_key:
-                r += [user.priv_key.__class__.__name__]
-        return "-".join(r)
-    return str(x)
-
-
-@pytest.fixture(scope="module")
-def snmpd() -> Iterator[Snmpd]:
-    logger = logging.getLogger("gufo.snmp.snmpd")
-    logger.setLevel(logging.DEBUG)
-    with Snmpd(
-        path=SNMPD_PATH,
-        address=SNMPD_ADDRESS,
-        port=SNMPD_PORT,
-        community=SNMP_COMMUNITY,
-        location=SNMP_LOCATION,
-        contact=SNMP_CONTACT,
-        users=SNMP_USERS,
-        # log_packets=True,
-    ) as snmpd:
-        yield snmpd
+from .util import (
+    ALL,
+    SNMP_CONTACT,
+    SNMP_LOCATION,
+    SNMPD_ADDRESS,
+    SNMPD_PORT,
+    V1,
+    V2,
+    V3,
+    ids,
+)
 
 
 def test_snmpd_version(snmpd: Snmpd) -> None:
@@ -109,7 +35,7 @@ def test_snmpd_version(snmpd: Snmpd) -> None:
 
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
-def test_timeout1(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_timeout_get(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     async def inner() -> ValueType:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
@@ -125,7 +51,7 @@ def test_timeout1(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
 
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
-def test_timeout2(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_timeout_get_many(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     async def inner() -> Dict[str, ValueType]:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
@@ -272,7 +198,7 @@ def test_get_many_skip(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
 
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
-def test_getmany_long_request(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_get_many_long_request(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     async def inner() -> Dict[str, Any]:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,

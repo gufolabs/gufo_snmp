@@ -160,6 +160,7 @@ max-complexity = 15
   "D100", # Missing docstring in public module
   "D101", # Missing docstring in public class
   "D103", # Missing docstring in public function
+  "D104", # Missing docstring in public package
   "S101", # Use of assert detected
   "PT011", # {exc} is too broad, set the `match` parameter or use a more specific exception.
   "PLR2004", # Magic value used in comparison, consider replacing {value} with a constant variable

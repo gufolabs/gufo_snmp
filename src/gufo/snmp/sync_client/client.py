@@ -1,37 +1,38 @@
 # ---------------------------------------------------------------------
-# Gufo SNMP: SnmpSession
+# Gufo SNMP: SyncSnmpSession
 # ---------------------------------------------------------------------
 # Copyright (C) 2023-24, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
-"""SnmpSession implementation."""
+"""SyncSnmpSession implementation."""
 
 # Python modules
 from types import TracebackType
-from typing import AsyncIterator, Dict, Iterable, Optional, Tuple, Type, Union
+from typing import Dict, Iterable, Iterator, Optional, Tuple, Type, Union
 
 # Gufo Labs modules
-from ._fast import (
+from .._fast import (
     SnmpV1ClientSocket,
     SnmpV2cClientSocket,
     SnmpV3ClientSocket,
 )
+from ..policer import BasePolicer, RPSPolicer
+from ..protocol import SnmpClientSocketProtocol
+from ..typing import ValueType
+from ..user import User
+from ..version import SnmpVersion
 from .getbulk import GetBulkIter
 from .getnext import GetNextIter
-from .policer import BasePolicer, RPSPolicer
-from .protocol import SnmpClientSocketProtocol
-from .typing import ValueType
-from .user import User
-from .util import send_and_recv
-from .version import SnmpVersion
+
+NS = 1_000_000_000.0
 
 
 class SnmpSession(object):
     """
-    SNMP client session.
+    Synchronous SNMP client session.
 
-    Should be used either directly or via asynchronous context manager.
+    Should be used either directly or via context manager.
 
     Args:
         addr: SNMP agent address, either IPv4 or IPv6.
@@ -95,6 +96,7 @@ class SnmpSession(object):
         self._sock: SnmpClientSocketProtocol
         self._to_refresh = False
         self._deferred_user: Optional[User] = None
+        timeout_ns = int(timeout * NS)
         if version == SnmpVersion.v1:
             self._sock = SnmpV1ClientSocket(
                 f"{addr}:{port}",
@@ -102,6 +104,7 @@ class SnmpSession(object):
                 tos,
                 send_buffer,
                 recv_buffer,
+                timeout_ns,
             )
         elif version == SnmpVersion.v2c:
             self._sock = SnmpV2cClientSocket(
@@ -110,6 +113,7 @@ class SnmpSession(object):
                 tos,
                 send_buffer,
                 recv_buffer,
+                timeout_ns,
             )
         elif version == SnmpVersion.v3:
             if not user:
@@ -129,6 +133,7 @@ class SnmpSession(object):
                 tos,
                 send_buffer,
                 recv_buffer,
+                timeout_ns,
             )
             self._to_refresh = not engine_id or user.require_auth()
         else:
@@ -147,12 +152,12 @@ class SnmpSession(object):
         elif limit_rps:
             self._policer = RPSPolicer(float(limit_rps))
 
-    async def __aenter__(self: "SnmpSession") -> "SnmpSession":
+    def __enter__(self: "SnmpSession") -> "SnmpSession":
         """Asynchronous context manager entry."""
-        await self.refresh()
+        self.refresh()
         return self
 
-    async def __aexit__(
+    def __exit__(
         self: "SnmpSession",
         exc_type: Optional[Type[BaseException]],
         exc_val: Optional[BaseException],
@@ -160,7 +165,7 @@ class SnmpSession(object):
     ) -> None:
         """Asynchronous context manager exit."""
 
-    async def get(self: "SnmpSession", oid: str) -> ValueType:
+    def get(self: "SnmpSession", oid: str) -> ValueType:
         """
         Send SNMP GET request and await for response.
 
@@ -177,19 +182,9 @@ class SnmpSession(object):
             NoSuchInstance: When requested key is not found.
             SnmpError: On other SNMP-related errors.
         """
+        return self._sock.sync_get(oid)
 
-        def sender() -> None:
-            self._sock.send_get(oid)
-
-        return await send_and_recv(
-            self._fd,
-            sender,
-            self._sock.recv_getresponse,
-            self._policer,
-            self._timeout,
-        )
-
-    async def get_many(
+    def get_many(
         self: "SnmpSession", oids: Iterable[str]
     ) -> Dict[str, ValueType]:
         """
@@ -213,21 +208,11 @@ class SnmpSession(object):
             RuntimeError: On Python runtime failure.
             SnmpError: On other SNMP-related errors.
         """
-
-        def sender() -> None:
-            self._sock.send_get_many(list(oids))
-
-        return await send_and_recv(
-            self._fd,
-            sender,
-            self._sock.recv_getresponse_many,
-            self._policer,
-            self._timeout,
-        )
+        return self._sock.sync_get_many(list(oids))
 
     def getnext(
         self: "SnmpSession", oid: str
-    ) -> AsyncIterator[Tuple[str, ValueType]]:
+    ) -> Iterator[Tuple[str, ValueType]]:
         """
         Iterate over oids.
 
@@ -247,7 +232,7 @@ class SnmpSession(object):
 
     def getbulk(
         self: "SnmpSession", oid: str, max_repetitions: Optional[int] = None
-    ) -> AsyncIterator[Tuple[str, ValueType]]:
+    ) -> Iterator[Tuple[str, ValueType]]:
         """
         Iterate over oids.
 
@@ -275,7 +260,7 @@ class SnmpSession(object):
 
     def fetch(
         self: "SnmpSession", oid: str
-    ) -> AsyncIterator[Tuple[str, ValueType]]:
+    ) -> Iterator[Tuple[str, ValueType]]:
         """
         Iterate over oids using fastest method available.
 
@@ -299,7 +284,7 @@ class SnmpSession(object):
             return self.getbulk(oid)
         return self.getnext(oid)
 
-    async def refresh(self: "SnmpSession") -> None:
+    def refresh(self: "SnmpSession") -> None:
         """
         Send and receive REPORT to refresh authentication state.
 
@@ -317,13 +302,7 @@ class SnmpSession(object):
 
         if self._deferred_user:
             # First check runs engine id discovery
-            await send_and_recv(
-                self._fd,
-                self._sock.send_refresh,
-                self._sock.recv_refresh,
-                self._policer,
-                self._timeout,
-            )
+            self._sock.sync_refresh()
             # Set and localize actual keys
             self._sock.set_keys(
                 self._deferred_user.get_auth_alg(),
@@ -337,13 +316,7 @@ class SnmpSession(object):
             self._deferred_user = None
 
         # Refresh engine boots and time
-        await send_and_recv(
-            self._fd,
-            self._sock.send_refresh,
-            self._sock.recv_refresh,
-            self._policer,
-            self._timeout,
-        )
+        self._sock.sync_refresh()
 
     def get_engine_id(self: "SnmpSession") -> bytes:
         """

@@ -13,7 +13,7 @@ from asyncio import TimeoutError as AIOTimeoutError
 from typing import Callable, Optional, TypeVar
 
 # Gufo SNMP modules
-from .policer import BasePolicer
+from ..policer import BasePolicer
 
 T = TypeVar("T")
 

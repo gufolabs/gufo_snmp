@@ -12,10 +12,10 @@
 from typing import List, Optional, Tuple
 
 # Gufo Labs Modules
-from ._fast import GetBulkIter as _Iter
-from .policer import BasePolicer
-from .protocol import SnmpClientSocketProtocol
-from .typing import ValueType
+from .._fast import GetBulkIter as _Iter
+from ..policer import BasePolicer
+from ..protocol import SnmpClientSocketProtocol
+from ..typing import ValueType
 from .util import send_and_recv
 
 

@@ -52,3 +52,21 @@ class SnmpClientSocketProtocol(Protocol):
         self: "SnmpClientSocketProtocol", iter_getnext: GetBulkIter
     ) -> List[Tuple[str, ValueType]]:
         ...
+
+    def sync_get(self: "SnmpClientSocketProtocol", oid: str) -> ValueType:
+        ...
+
+    def sync_get_many(
+        self: "SnmpClientSocketProtocol", oids: List[str]
+    ) -> Dict[str, ValueType]:
+        ...
+
+    def sync_getnext(
+        self: "SnmpClientSocketProtocol", iter_getnext: GetNextIter
+    ) -> Tuple[str, ValueType]:
+        ...
+
+    def sync_getbulk(
+        self: "SnmpClientSocketProtocol", iter_getbulk: GetBulkIter
+    ) -> List[Tuple[str, ValueType]]:
+        ...
