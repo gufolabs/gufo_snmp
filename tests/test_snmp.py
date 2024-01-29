@@ -8,7 +8,6 @@
 # Python modules
 import asyncio
 import logging
-import os
 import random
 from typing import Any, Dict, Iterator, Optional, cast
 
