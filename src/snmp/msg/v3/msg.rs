@@ -25,7 +25,7 @@ pub struct SnmpV3Message<'a> {
 }
 
 const V3_BER: [u8; 3] = [TAG_INT, 1, SNMP_V3];
-const MAX_SIZE: i64 = 1500;
+const MAX_SIZE: i64 = 2048;
 const USM: u8 = 3;
 const USM_MODEL_BER: [u8; 3] = [TAG_INT, 1, USM];
 // Flags

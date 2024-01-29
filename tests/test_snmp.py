@@ -100,7 +100,7 @@ def snmpd() -> Iterator[Snmpd]:
         location=SNMP_LOCATION,
         contact=SNMP_CONTACT,
         users=SNMP_USERS,
-        log_packets=not os.getenv("CI"),
+        # log_packets=True,
     ) as snmpd:
         yield snmpd
 
