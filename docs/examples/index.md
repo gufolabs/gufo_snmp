@@ -8,5 +8,6 @@ explanation of the samples from the `examples/` folder.
 * [getnext.py](getnext.md): GetNext Request
 * [getbulk.py](getbulk.md): GetBulk Request
 * [fetch.py](fetch.md): Fetch
+* [get-v3.py](get-v3.md): SNMPv3 Get Request.
 * [engine-id-discovery.py](engine-id-discovery.md): SNMPv3 Engine ID Discovery
 * [debugging.py](debugging.md): Debugging

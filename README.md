@@ -59,6 +59,20 @@ async with SnmpSession(addr="127.0.0.1", community="public") as session:
         ...
 ```
 
+SNMPv3 shares same API and semantics:
+
+``` py
+async with SnmpSession(
+    addr="127.0.0.1",
+    user=User(
+        "user1",
+        auth_key=Sha1Key(b"12345678"),
+        priv_key=Aes128Key(b"87654321")
+    )
+) as session:
+    r = await session.get("1.3.6.1.2.1.1.3.0")
+```
+
 *Gufo SNMP* also allows to limit rate of outgoing requests to protect equipment
 from overloading:
 
@@ -98,6 +112,7 @@ async with Snmpd(), SnmpSession(addr="127.0.0.1", port=10161) as session:
 * SHA2 family of hashes.
 * AES256 encryption.
 * SNMP Trap and Inform collector.
+* Synchronous API.
 * Incorporation of the [NOC's][NOC] *Compiled MIB* infrastructure.
 
 ## On Gufo Stack
