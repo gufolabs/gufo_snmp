@@ -8,6 +8,7 @@
 # Python modules
 import asyncio
 import logging
+import os
 import random
 from typing import Any, Dict, Iterator, Optional, cast
 
@@ -99,7 +100,7 @@ def snmpd() -> Iterator[Snmpd]:
         location=SNMP_LOCATION,
         contact=SNMP_CONTACT,
         users=SNMP_USERS,
-        log_packets=True,
+        log_packets=not os.getenv("CI"),
     ) as snmpd:
         yield snmpd
 
