@@ -49,3 +49,7 @@ name = "iai_encode"
 [[bench]]
 harness = false
 name = "iai_buf"
+
+[[bench]]
+harness = false
+name = "iai_auth"

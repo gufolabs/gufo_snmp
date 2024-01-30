@@ -15,6 +15,9 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 ### Added
 * Synchronous SNMP client.
 
+### Changed
+* Improved password to master key translation performance: ~35%.
+
 ## 0.4.0 - 2024-01-29
 
 ### Added

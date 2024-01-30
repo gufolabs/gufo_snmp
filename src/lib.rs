@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------
 
 use pyo3::prelude::*;
-mod auth;
+pub mod auth;
 pub mod ber;
 pub mod buf;
 pub mod error;
