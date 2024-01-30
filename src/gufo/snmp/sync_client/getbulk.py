@@ -9,6 +9,7 @@
 
 
 # Python modules
+import time
 from typing import List, Optional, Tuple
 
 # Gufo Labs Modules
@@ -58,9 +59,13 @@ class GetBulkIter(object):
         # Policer
         if self._policer:
             self._policer.wait_sync()
+        else:
+            # Kind of ancient dark magic to force
+            # a context switch and prevent EWOULDBLOCK
+            time.sleep(0.0)
         #
         try:
-            self.buffer = self._sock.sync_getbulk(self._ctx)
+            self._buffer = self._sock.sync_getbulk(self._ctx)
         except BlockingIOError as e:
             raise TimeoutError from e
         # End
