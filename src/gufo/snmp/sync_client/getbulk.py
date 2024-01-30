@@ -33,14 +33,11 @@ class GetBulkIter(object):
         self: "GetBulkIter",
         sock: SnmpClientSocketProtocol,
         oid: str,
-        timeout: float,
         max_repetitions: int,
         policer: Optional[BasePolicer] = None,
     ) -> None:
         self._sock = sock
         self._ctx = _Iter(oid, max_repetitions)
-        self._fd = sock.get_fd()
-        self._timeout = timeout
         self._max_repetitions = max_repetitions
         self._buffer: List[Tuple[str, ValueType]] = []
         self._stop = False
@@ -58,11 +55,17 @@ class GetBulkIter(object):
         # Complete
         if self._stop:
             raise StopIteration
+        # Policer
+        if self._policer:
+            self._policer.wait_sync()
         #
-        self.buffer = self._sock.sync_getbulk(self._ctx)
+        try:
+            self.buffer = self._sock.sync_getbulk(self._ctx)
+        except BlockingIOError as e:
+            raise TimeoutError from e
         # End
         if not self._buffer:
-            raise StopAsyncIteration  # End of view
+            raise StopIteration  # End of view
         self._stop = len(self._buffer) < self._max_repetitions
         # Having at least one item
         return self._buffer.pop(0)

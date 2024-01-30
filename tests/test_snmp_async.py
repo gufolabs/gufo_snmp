@@ -224,7 +224,7 @@ def test_get_many_long_request(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
         assert oid in r
 
 
-@pytest.mark.parametrize("cfg", V1 + V2 + V3[:0], ids=ids)
+@pytest.mark.parametrize("cfg", V1 + V2 + V3[:1], ids=ids)
 def test_getnext(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     """Iterate over whole MIB."""
 

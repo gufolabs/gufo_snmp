@@ -70,11 +70,6 @@ def snmp_get(
         return session.get(oid)
 
 
-# Uncomment for single config check
-# def test_xxx(snmpd: Snmpd):
-#     io.run(snmp_get(V3[0], None, "1.3.6.1.2.1.1.6.0"))
-
-
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
 @pytest.mark.parametrize(
     ("oid", "expected"),
@@ -206,7 +201,7 @@ def test_get_many_long_request(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
             assert oid in r
 
 
-@pytest.mark.parametrize("cfg", V1 + V2 + V3[:0], ids=ids)
+@pytest.mark.parametrize("cfg", V1 + V2 + V3[:1], ids=ids)
 def test_getnext(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     """Iterate over whole MIB."""
     n = 0

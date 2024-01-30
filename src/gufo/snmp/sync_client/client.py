@@ -182,6 +182,8 @@ class SnmpSession(object):
             NoSuchInstance: When requested key is not found.
             SnmpError: On other SNMP-related errors.
         """
+        if self._policer:
+            self._policer.wait_sync()
         return self._sock.sync_get(oid)
 
     def get_many(
@@ -208,6 +210,8 @@ class SnmpSession(object):
             RuntimeError: On Python runtime failure.
             SnmpError: On other SNMP-related errors.
         """
+        if self._policer:
+            self._policer.wait_sync()
         return self._sock.sync_get_many(list(oids))
 
     def getnext(
@@ -228,7 +232,7 @@ class SnmpSession(object):
                 print(oid, value)
             ```
         """
-        return GetNextIter(self._sock, oid, self._timeout, self._policer)
+        return GetNextIter(self._sock, oid, self._policer)
 
     def getbulk(
         self: "SnmpSession", oid: str, max_repetitions: Optional[int] = None
@@ -253,7 +257,6 @@ class SnmpSession(object):
         return GetBulkIter(
             self._sock,
             oid,
-            self._timeout,
             max_repetitions or self._max_repetitions,
             self._policer,
         )

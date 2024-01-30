@@ -10,7 +10,7 @@
 # Python modules
 import asyncio
 from abc import ABC, abstractmethod
-from time import perf_counter_ns
+from time import perf_counter_ns, sleep
 from typing import Optional
 
 NS = 1_000_000_000.0
@@ -60,6 +60,19 @@ class BasePolicer(ABC):
         delta = self.get_timeout(perf_counter_ns())
         if delta and delta > 0:
             await asyncio.sleep(float(delta) / NS)
+
+    def wait_sync(self: "BasePolicer") -> None:
+        """
+        Apply policy  (Synchronous version).
+
+        Waits until the sending of the next request
+        will be possible according to the policy.
+
+        May be interrupted by TimeoutError.
+        """
+        delta = self.get_timeout(perf_counter_ns())
+        if delta and delta > 0:
+            sleep(float(delta) / NS)
 
 
 class RPSPolicer(BasePolicer):

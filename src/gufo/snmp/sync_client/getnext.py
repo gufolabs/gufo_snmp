@@ -33,13 +33,10 @@ class GetNextIter(object):
         self: "GetNextIter",
         sock: SnmpClientSocketProtocol,
         oid: str,
-        timeout: float,
         policer: Optional[BasePolicer] = None,
     ) -> None:
         self._sock = sock
         self._ctx = _Iter(oid)
-        self._fd = sock.get_fd()
-        self._timeout = timeout
         self._policer = policer
 
     def __iter__(self: "GetNextIter") -> "GetNextIter":
@@ -48,7 +45,11 @@ class GetNextIter(object):
 
     def __next__(self: "GetNextIter") -> Tuple[str, ValueType]:
         """Get next value."""
+        if self._policer:
+            self._policer.wait_sync()
         try:
             return self._sock.sync_getnext(self._ctx)
         except StopAsyncIteration as e:
             raise StopIteration from e
+        except BlockingIOError as e:
+            raise TimeoutError from e
