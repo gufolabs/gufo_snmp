@@ -6,6 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::SnmpAuth;
+use crate::error::SnmpResult;
 
 #[derive(Default)]
 pub struct NoAuth;
@@ -30,11 +31,7 @@ impl SnmpAuth for NoAuth {
     }
     fn localize(&self, _key: &[u8], _locality: &[u8], _out: &mut [u8]) {}
     fn password_to_master(&self, _password: &[u8], _out: &mut [u8]) {}
-    fn find_placeholder_offset(&self, _whole_msg: &[u8]) -> Option<usize> {
-        None
-    }
-    fn sign_and_update(&self, _whole_msg: &mut [u8], _offset: usize) {}
-    fn sign(&self, _whole_msg: &mut [u8]) -> super::SnmpResult<()> {
+    fn sign(&self, _data: &mut [u8], _offset: usize) -> SnmpResult<()> {
         Ok(())
     }
 }

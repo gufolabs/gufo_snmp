@@ -68,6 +68,8 @@ impl<'a> BerEncoder for UsmParameters<'a> {
             buf.push(&EMPTY_BER)?;
         } else {
             buf.push_tagged(TAG_OCTET_STRING, self.auth_params)?;
+            // Place bookmark for further signing
+            buf.set_bookmark(2);
         }
         // Push user name
         buf.push(self.user_name)?;

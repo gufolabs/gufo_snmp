@@ -14,6 +14,7 @@ const MAX_SIZE: usize = 65536;
 // So we use stack-like buffer.
 pub struct Buffer {
     pos: usize,
+    bookmark: usize,
     data: [u8; MAX_SIZE], // @todo: MaybeUninit<u8>
 }
 
@@ -23,6 +24,7 @@ impl Default for Buffer {
     fn default() -> Buffer {
         Buffer {
             pos: MAX_SIZE,
+            bookmark: 0,
             data: unsafe { MaybeUninit::uninit().assume_init() },
         }
     }
@@ -52,6 +54,14 @@ impl Buffer {
     #[inline]
     pub fn data_mut(&mut self) -> &mut [u8] {
         &mut self.data[self.pos..]
+    }
+    #[inline]
+    pub fn set_bookmark(&mut self, delta: usize) {
+        self.bookmark = self.pos + delta;
+    }
+    #[inline]
+    pub fn get_bookmark(&self) -> usize {
+        self.bookmark - self.pos
     }
     #[inline]
     pub fn skip(&mut self, size: usize) {

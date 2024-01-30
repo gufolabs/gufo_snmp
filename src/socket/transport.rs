@@ -73,6 +73,10 @@ impl SnmpTransport {
     pub fn data_mut(&mut self) -> &mut [u8] {
         self.buf.data_mut()
     }
+    /// Get buffer bookmark
+    pub fn get_bookmark(&self) -> usize {
+        self.buf.get_bookmark()
+    }
     /// Serialize message to buffer
     pub fn push_ber<T>(&mut self, msg: T) -> SnmpResult<()>
     where

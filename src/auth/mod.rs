@@ -49,20 +49,8 @@ pub trait SnmpAuth {
     fn has_auth(&self) -> bool;
     // Returns zero-filled placeholder
     fn placeholder(&self) -> &'static [u8];
-    // Find signature place
-    fn find_placeholder_offset(&self, whole_msg: &[u8]) -> Option<usize>;
-    // Calculate and place signature
-    fn sign_and_update(&self, whole_msg: &mut [u8], offset: usize);
-    //
-    fn sign(&self, whole_msg: &mut [u8]) -> SnmpResult<()> {
-        match self.find_placeholder_offset(whole_msg) {
-            Some(offset) => {
-                self.sign_and_update(whole_msg, offset);
-                Ok(())
-            }
-            None => Err(SnmpError::InvalidData),
-        }
-    }
+    // Sign data in buffer
+    fn sign(&self, data: &mut [u8], offset: usize) -> SnmpResult<()>;
 }
 
 // - - X X    X X X X
@@ -105,13 +93,14 @@ mod tests {
     #[test]
     fn test_md5_sign() -> SnmpResult<()> {
         let mut whole_msg = [
-            48u8, 119, 2, 1, 3, 48, 16, 2, 4, 31, 120, 150, 153, 2, 2, 5, 220, 4, 1, 1, 2, 1, 3, 4,
+            48, 119, 2, 1, 3, 48, 16, 2, 4, 31, 120, 150, 153, 2, 2, 5, 220, 4, 1, 1, 2, 1, 3, 4,
             47, 48, 45, 4, 13, 128, 0, 31, 136, 4, 50, 55, 103, 83, 56, 54, 116, 100, 2, 1, 0, 2,
             1, 0, 4, 6, 117, 115, 101, 114, 49, 48, 4, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
             0, 48, 47, 4, 13, 128, 0, 31, 136, 4, 50, 55, 103, 83, 56, 54, 116, 100, 4, 0, 160, 28,
             2, 4, 80, 85, 225, 64, 2, 1, 0, 2, 1, 0, 48, 14, 48, 12, 6, 8, 43, 6, 1, 2, 1, 1, 4, 0,
             5, 0,
         ];
+        let offset = 58;
         let expected = [
             48u8, 119, 2, 1, 3, 48, 16, 2, 4, 31, 120, 150, 153, 2, 2, 5, 220, 4, 1, 1, 2, 1, 3, 4,
             47, 48, 45, 4, 13, 128, 0, 31, 136, 4, 50, 55, 103, 83, 56, 54, 116, 100, 2, 1, 0, 2,
@@ -124,7 +113,7 @@ mod tests {
         let engine_id = [128, 0, 31, 136, 4, 50, 55, 103, 83, 56, 54, 116, 100];
         let mut auth_key = Md5AuthKey::default();
         auth_key.as_master(&master_key, &engine_id);
-        auth_key.sign(&mut whole_msg)?;
+        auth_key.sign(&mut whole_msg, offset)?;
         assert_eq!(whole_msg, expected);
         Ok(())
     }
@@ -138,6 +127,7 @@ mod tests {
             2, 4, 80, 85, 225, 64, 2, 1, 0, 2, 1, 0, 48, 14, 48, 12, 6, 8, 43, 6, 1, 2, 1, 1, 4, 0,
             5, 0,
         ];
+        let offset = 58;
         let expected = [
             48, 119, 2, 1, 3, 48, 16, 2, 4, 31, 120, 150, 153, 2, 2, 5, 220, 4, 1, 1, 2, 1, 3, 4,
             47, 48, 45, 4, 13, 128, 0, 31, 136, 4, 50, 55, 103, 83, 56, 54, 116, 100, 2, 1, 0, 2,
@@ -150,7 +140,7 @@ mod tests {
         let engine_id = [128, 0, 31, 136, 4, 50, 55, 103, 83, 56, 54, 116, 100];
         let mut auth_key = Sha1AuthKey::default();
         auth_key.as_master(&master_key, &engine_id);
-        auth_key.sign(&mut whole_msg)?;
+        auth_key.sign(&mut whole_msg, offset)?;
         assert_eq!(whole_msg, expected);
         Ok(())
     }

@@ -5,7 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 use super::SnmpAuth;
-use crate::ber::TAG_OCTET_STRING;
+use crate::error::SnmpResult;
 use digest::Digest;
 use std::marker::PhantomData;
 
@@ -82,32 +82,7 @@ impl<D: Digest, const KS: usize, const SS: usize> SnmpAuth for DigestAuth<D, KS,
     fn placeholder(&self) -> &'static [u8] {
         &ZEROES[..SS]
     }
-    fn find_placeholder_offset(&self, whole_msg: &[u8]) -> Option<usize> {
-        let max_offset = whole_msg.len() - 2 - SS;
-        let mut offset = 0;
-        while offset < max_offset {
-            // 4  + len + 0
-            if whole_msg[offset] == TAG_OCTET_STRING
-                && whole_msg[offset + 1] == SS as u8
-                && whole_msg[offset + 2] == 0
-            {
-                let r = offset + 2;
-                offset += 3;
-                let mut zeroes_left = SS - 1;
-                while offset < max_offset && whole_msg[offset] == 0 && zeroes_left > 0 {
-                    offset += 1;
-                    zeroes_left -= 1;
-                }
-                if zeroes_left == 0 {
-                    return Some(r);
-                }
-            } else {
-                offset += 1;
-            }
-        }
-        None
-    }
-    fn sign_and_update(&self, whole_msg: &mut [u8], offset: usize) {
+    fn sign(&self, data: &mut [u8], offset: usize) -> SnmpResult<()> {
         let rest_len = PADDED_LENGTH - KS;
         let mut ctx1 = D::new();
         // RFC-3414, pp. 6.3.1. Processing an outgoing message
@@ -125,7 +100,7 @@ impl<D: Digest, const KS: usize, const SS: usize> SnmpAuth for DigestAuth<D, KS,
         //  * append precalculated rest of IPAD
         ctx1.update(&IPAD_MASK[..rest_len]);
         //  * append whole message
-        ctx1.update(&whole_msg);
+        ctx1.update(&data);
         // get MD5
         let d1 = ctx1.finalize();
         // d) obtain OPAD by replicating the octet 0x5C 64 times;
@@ -144,6 +119,7 @@ impl<D: Digest, const KS: usize, const SS: usize> SnmpAuth for DigestAuth<D, KS,
         // * append previous digest
         ctx2.update(&d1[..KS]);
         let d2 = ctx2.finalize();
-        whole_msg[offset..offset + SS].copy_from_slice(&d2[0..SS]);
+        data[offset..offset + SS].copy_from_slice(&d2[0..SS]);
+        Ok(())
     }
 }

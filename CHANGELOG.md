@@ -17,6 +17,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ### Changed
 * Improved password to master key translation performance: ~35%.
+* Optimized SNMPv3 message signing.
 
 ## 0.4.0 - 2024-01-29
 

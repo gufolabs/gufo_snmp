@@ -11,11 +11,13 @@ bencmark framework to estimate performance of the critical code paths.
 
 | Name                    | Inst.[^1] | L1 Acc.[^2] | L2 Acc.[^3] | RAM Acc.[^4] | Est. Cycles [^5] |
 | ----------------------- | --------: | ----------: | ----------: | -----------: | ---------------: |
-| md5_default             |        36 |          40 |           1 |            1 |               80 |
-| md5_password_to_master  |  14923437 |    17486015 |           5 |           55 |         17487965 |
-| sha1_default            |        36 |          40 |           1 |            1 |               80 |
-| sha1_password_to_master |  26671569 |    31970424 |           4 |          100 |         31973944 |
-| buf_default             |         0 |           0 |           0 |            2 |               70 |
+| md5_default             |        36 |          40 |           2 |            0 |               50 |
+| md5_password_to_master  |  14923437 |    17486016 |           4 |           55 |         17487961 |
+| md5_localize            |       939 |        1092 |           4 |           52 |             2932 |
+| sha1_default            |        36 |          40 |           2 |            0 |               50 |
+| sha1_password_to_master |  26671569 |    31970424 |           3 |          101 |         31973974 |
+| sha1_localize           |      1747 |        2051 |           3 |           97 |             5461 |
+| buf_default             |         0 |           0 |           0 |            2 |               40 |
 | buf_push_u8             |         2 |           3 |           1 |            0 |                8 |
 | buf_push                |       113 |         121 |           6 |           21 |              886 |
 | buf_push_ber_len_short  |        92 |          95 |           5 |           19 |              785 |

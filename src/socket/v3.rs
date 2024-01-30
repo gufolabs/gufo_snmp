@@ -414,7 +414,8 @@ impl SnmpV3ClientSocket {
         // Serialize BER to buffer
         self.io.push_ber(msg)?;
         // Apply auth
-        self.auth_key.sign(self.io.data_mut())?;
+        let offset = self.io.get_bookmark();
+        self.auth_key.sign(self.io.data_mut(), offset)?;
         // Send buffer
         self.io.send_buffer()
     }
