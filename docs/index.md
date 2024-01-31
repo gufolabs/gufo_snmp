@@ -21,6 +21,13 @@ async with SnmpSession(addr="127.0.0.1", community="public") as session:
     r = await session.get("1.3.6.1.2.1.1.3.0")
 ```
 
+And the blocking mode shares virtually the same API:
+
+``` py
+with SnmpSession(addr="127.0.0.1", community="public") as session:
+    r = session.get("1.3.6.1.2.1.1.3.0")
+```
+
 Multiple keys can be queried by one request too:
 
 ``` py
@@ -84,13 +91,14 @@ async with Snmpd(), SnmpSession(addr="127.0.0.1", port=10161) as session:
 
 ## Features
 
-* Clean async API.
+* Clean async and blocking API.
 * SNMP v1/v2c/v3 support.
 * SNMP v3 User Security Model:
     * Authentication: HMAC-MD5-96, HMAC-SHA-96.
     * Privacy: DES, AES128.
     * Engine ID discovery.
 * High-performance.
+* Built with security in mind.
 * Zero-copy BER parsing.
 * Query rate limiting.
 * Full Python typing support.
@@ -103,7 +111,6 @@ async with Snmpd(), SnmpSession(addr="127.0.0.1", port=10161) as session:
 * SHA2 family of hashes.
 * AES256 encryption.
 * SNMP Trap and Inform collector.
-* Synchronous API.
 * Incorporation of the [NOC's][NOC] *Compiled MIB* infrastructure.
 
 ## On Gufo Stack
