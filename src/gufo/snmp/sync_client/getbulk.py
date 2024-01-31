@@ -63,6 +63,8 @@ class GetBulkIter(object):
             self._buffer = self._sock.sync_getbulk(self._ctx)
         except BlockingIOError as e:
             raise TimeoutError from e
+        except StopAsyncIteration as e:
+            raise StopIteration from e
         # End
         if not self._buffer:
             raise StopIteration  # End of view
