@@ -5,6 +5,7 @@ syntax: glob
 !.devcontainer/
 !.github/
 !.requirements/
+!.snyk
 *.pyc
 *.pyo
 *.so

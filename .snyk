@@ -1,0 +1,6 @@
+# Snyk policy file
+exclude:
+    global:
+        - Dockerfile
+        - examples/**
+        - tests/**
