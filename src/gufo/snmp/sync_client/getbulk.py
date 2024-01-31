@@ -59,10 +59,6 @@ class GetBulkIter(object):
         # Policer
         if self._policer:
             self._policer.wait_sync()
-        else:
-            # Kind of ancient dark magic to force
-            # a context switch and prevent EWOULDBLOCK
-            time.sleep(0.0)
         #
         try:
             self._buffer = self._sock.sync_getbulk(self._ctx)

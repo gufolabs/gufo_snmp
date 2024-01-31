@@ -48,10 +48,6 @@ class GetNextIter(object):
         """Get next value."""
         if self._policer:
             self._policer.wait_sync()
-        else:
-            # Kind of ancient dark magic to force
-            # a context switch and prevent EWOULDBLOCK
-            time.sleep(0.0)
         try:
             return self._sock.sync_getnext(self._ctx)
         except StopAsyncIteration as e:

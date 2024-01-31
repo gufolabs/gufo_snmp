@@ -49,7 +49,9 @@ class Snmpd(object):
             Use generated value if not set.
         users: Optional list of SNMPv3 users.
         start_timeout: Maximum time to wait for snmpd to start.
-        log_packets: Log SNMP requests and responses.
+        verbose: Verbose output.
+        log_packets: Log SNMP requests and responses,
+            available only with `verbose` option.
 
     Attributes:
         version: Net-SNMP version.
@@ -83,6 +85,7 @@ class Snmpd(object):
         engine_id: Optional[str] = None,
         users: Optional[List[User]] = None,
         start_timeout: float = 5.0,
+        verbose: bool = False,
         log_packets: bool = False,
     ) -> None:
         self._path = path
@@ -93,7 +96,8 @@ class Snmpd(object):
         self._contact = contact
         self._users = users or [User(name="rouser")]
         self._start_timeout = start_timeout
-        self._log_packets = log_packets
+        self._verbose = verbose
+        self._log_packets = log_packets if verbose else False
         self.version: Optional[str] = None
         self._cfg: Optional[_TemporaryFileWrapper[str]] = None
         self._proc: Optional[subprocess.Popen[str]] = None
@@ -166,8 +170,9 @@ sysServices 72"""
             self._cfg.name,
             "-f",  # No fork
             "-Lo",  # Log to stdout
-            "-V",  # Verbose
         ]
+        if self._verbose:
+            args += ["-V"]
         if self._log_packets:
             args += ["-d"]  # Dump packets
             args += ["-Ddump,usm"]

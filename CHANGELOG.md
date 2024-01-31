@@ -14,6 +14,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ### Added
 * Synchronous SNMP client.
+* `Snmpd``: `verbose`` option.
 
 ### Changed
 * Improved password to master key translation performance: ~35%.
