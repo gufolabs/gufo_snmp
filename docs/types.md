@@ -36,5 +36,5 @@ The currently supported types are:
 [^3]: Handled internally, raises NoSuchInstance or ignored.
 [X-690]: https://www.itu.int/rec/T-REC-X.690
 [BER]: https://en.wikipedia.org/wiki/X.690#BER_encoding
-[RFC-1442]: https://datatracker.ietf.org/doc/html/rfc1442
-[RFC-1905]: https://datatracker.ietf.org/doc/html/rfc1905
+[RFC-1442]: https://www.rfc-editor.org/rfc/rfc1442.html
+[RFC-1905]: https://www.rfc-editor.org/rfc/rfc1905.html
