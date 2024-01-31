@@ -20,6 +20,9 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 * Improved password to master key translation performance: ~35%.
 * Optimized SNMPv3 message signing.
 
+## Fixed
+* Default key type for auth keys set to Password.
+
 ## 0.4.0 - 2024-01-29
 
 ### Added

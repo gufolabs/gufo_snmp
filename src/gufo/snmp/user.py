@@ -167,7 +167,10 @@ class BaseAuthKey(BaseKey):
     KEY_LENGTH: int
 
     def __init__(
-        self: "BaseAuthKey", key: bytes, /, key_type: KeyType = KeyType.Master
+        self: "BaseAuthKey",
+        key: bytes,
+        /,
+        key_type: KeyType = KeyType.Password,
     ) -> None:
         if key_type._is_aligned:
             key = self._padded(key, self.KEY_LENGTH)
