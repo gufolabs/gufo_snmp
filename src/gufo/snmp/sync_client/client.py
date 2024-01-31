@@ -184,7 +184,10 @@ class SnmpSession(object):
         """
         if self._policer:
             self._policer.wait_sync()
-        return self._sock.sync_get(oid)
+        try:
+            return self._sock.sync_get(oid)
+        except BlockingIOError as e:
+            raise TimeoutError from e
 
     def get_many(
         self: "SnmpSession", oids: Iterable[str]
@@ -212,7 +215,10 @@ class SnmpSession(object):
         """
         if self._policer:
             self._policer.wait_sync()
-        return self._sock.sync_get_many(list(oids))
+        try:
+            return self._sock.sync_get_many(list(oids))
+        except BlockingIOError as e:
+            raise TimeoutError from e
 
     def getnext(
         self: "SnmpSession", oid: str
