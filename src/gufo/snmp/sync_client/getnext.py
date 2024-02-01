@@ -24,7 +24,6 @@ class GetNextIter(object):
     Args:
         sock: Requsting SnmpClientSocket instance.
         oid: Base oid.
-        timeout: Request timeout.
         policer: Optional BasePolicer instance to limit
             outgoing requests.
     """

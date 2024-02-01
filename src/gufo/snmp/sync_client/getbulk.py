@@ -24,7 +24,6 @@ class GetBulkIter(object):
     Args:
         sock: Parent SnmpClientSocket.
         oid: Base oid.
-        timeout: Request timeout.
         max_repetitions: Max amount of iterms per response.
         policer: Optional BasePolicer instance to limit requests.
     """

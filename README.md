@@ -18,7 +18,7 @@
 
 ---
 
-*Gufo SNMP* is the accelerated Python SNMP client library supporting both async and blocking mode.
+*Gufo SNMP* is the accelerated Python SNMP client library supporting both async and synchronous mode.
 It consists of a clean Python API for high-efficient BER parser
 and socket IO, implemented in the 
 [Rust][Rust] language with [PyO3][PyO3] wrapper.
