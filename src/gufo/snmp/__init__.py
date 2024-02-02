@@ -5,7 +5,7 @@
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
-"""Gufo SNMP: The accelerated Python asyncio SNMP client library.
+"""Gufo SNMP: The accelerated Python SNMP client library.
 
 Attributes:
     __version__: Current version
@@ -18,7 +18,7 @@ from .typing import ValueType
 from .user import Aes128Key, DesKey, Md5Key, Sha1Key, User
 from .version import SnmpVersion
 
-__version__: str = "0.4.0"
+__version__: str = "0.5.0"
 __all__ = [
     "__version__",
     "Aes128Key",
