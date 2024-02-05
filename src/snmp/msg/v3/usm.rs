@@ -72,9 +72,7 @@ impl<'a> BerEncoder for UsmParameters<'a> {
             buf.set_bookmark(2);
         }
         // Push user name
-        buf.push(self.user_name)?;
-        buf.push_ber_len(self.user_name.len())?;
-        buf.push_u8(TAG_OCTET_STRING)?;
+        buf.push_tagged(TAG_OCTET_STRING, self.user_name)?;
         // Push engine time
         let engine_time: SnmpInt = self.engine_time.into();
         engine_time.push_ber(buf)?;
@@ -82,18 +80,13 @@ impl<'a> BerEncoder for UsmParameters<'a> {
         let engine_boots: SnmpInt = self.engine_boots.into();
         engine_boots.push_ber(buf)?;
         // Push engine id
-        let ln = self.engine_id.len();
-        if ln > 0 {
-            buf.push(self.engine_id)?;
-            buf.push_ber_len(ln)?;
-            buf.push_u8(TAG_OCTET_STRING)?;
-        } else {
+        if self.engine_id.is_empty() {
             buf.push(&EMPTY_BER)?;
+        } else {
+            buf.push_tagged(TAG_OCTET_STRING, self.engine_id)?;
         }
         // Push top-level sequence
-        buf.push_ber_len(buf.len() - l0)?;
-        buf.push_u8(0x30)?;
-        Ok(())
+        buf.push_tag_len(0x30, buf.len() - l0)
     }
 }
 

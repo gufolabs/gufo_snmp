@@ -57,10 +57,7 @@ impl BerEncoder for SnmpOid {
         // First two elements are pushed in one octet
         SnmpOid::push_subelement(buf, self.0[0] * 40 + self.0[1])?;
         // Push length
-        buf.push_ber_len(buf.len() - start_len)?;
-        // Push tag
-        buf.push_u8(TAG_OBJECT_ID)?;
-        Ok(())
+        buf.push_tag_len(TAG_OBJECT_ID, buf.len() - start_len)
     }
 }
 

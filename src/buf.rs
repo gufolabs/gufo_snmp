@@ -1,21 +1,23 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: Buffer implementation
 // ------------------------------------------------------------------------
-// Copyright (C) 2023, Gufo Labs
+// Copyright (C) 2023-24, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
 use crate::error::{SnmpError, SnmpResult};
 use std::mem::MaybeUninit;
+use std::ptr;
+use std::slice;
 
-const MAX_SIZE: usize = 65536;
+const MAX_SIZE: usize = 4080;
 
 // SNMP message is build starting from the end,
 // So we use stack-like buffer.
 pub struct Buffer {
     pos: usize,
     bookmark: usize,
-    data: [u8; MAX_SIZE], // @todo: MaybeUninit<u8>
+    data: [MaybeUninit<u8>; MAX_SIZE],
 }
 
 impl Default for Buffer {
@@ -44,16 +46,33 @@ impl Buffer {
         self.pos == MAX_SIZE
     }
     #[inline]
+    pub fn ensure_size(&self, v: usize) -> SnmpResult<()> {
+        if self.pos < v {
+            return Err(SnmpError::OutOfBuffer);
+        }
+        Ok(())
+    }
+    #[inline]
     pub fn is_full(&self) -> bool {
         self.pos == 0
     }
     #[inline]
     pub fn data(&self) -> &[u8] {
-        &self.data[self.pos..]
+        unsafe {
+            slice::from_raw_parts(
+                self.data.as_ptr().add(self.pos) as *const u8,
+                MAX_SIZE - self.pos,
+            )
+        }
     }
     #[inline]
     pub fn data_mut(&mut self) -> &mut [u8] {
-        &mut self.data[self.pos..]
+        unsafe {
+            slice::from_raw_parts_mut(
+                self.data.as_mut_ptr().add(self.pos) as *mut u8,
+                MAX_SIZE - self.pos,
+            )
+        }
     }
     #[inline]
     pub fn set_bookmark(&mut self, delta: usize) {
@@ -72,65 +91,91 @@ impl Buffer {
         }
     }
     #[inline]
+    fn push_u8_unchecked(&mut self, v: u8) {
+        self.pos -= 1;
+        unsafe {
+            self.data[self.pos].as_mut_ptr().write(v);
+        }
+    }
+    #[inline]
     pub fn push_u8(&mut self, v: u8) -> SnmpResult<()> {
         if self.is_full() {
             return Err(SnmpError::OutOfBuffer);
         }
-        self.pos -= 1;
-        self.data[self.pos] = v;
+        self.push_u8_unchecked(v);
         Ok(())
     }
+    #[inline]
     pub fn push(&mut self, chunk: &[u8]) -> SnmpResult<()> {
         let cs = chunk.len();
-        if self.pos < cs {
-            return Err(SnmpError::OutOfBuffer);
-        }
-        let end = self.pos;
+        self.ensure_size(cs)?;
         self.pos -= cs;
-        self.data[self.pos..end].copy_from_slice(chunk);
+        unsafe {
+            ptr::copy_nonoverlapping(
+                chunk.as_ptr(),
+                self.data[self.pos..].as_mut_ptr() as *mut u8,
+                cs,
+            );
+        }
         Ok(())
     }
-    pub fn push_ber_len(&mut self, v: usize) -> SnmpResult<()> {
+    #[inline]
+    pub fn push_tag_len(&mut self, tag: u8, v: usize) -> SnmpResult<()> {
         if v < 128 {
             // Short form, X.690 pp 8.3.1.4
-            self.push_u8(v as u8)?;
+            // <tag>, <v>
+            self.ensure_size(2)?;
+            self.push_u8_unchecked(v as u8);
+            self.push_u8_unchecked(tag);
+            return Ok(());
+        }
+        if v < 256 {
+            // Long form, X.690 pp 8.1.3.5
+            // <tag>, 0x81, <v>
+            self.ensure_size(3)?;
+            self.push_u8_unchecked(v as u8);
+            self.push_u8_unchecked(0x81);
+            self.push_u8_unchecked(tag);
         } else {
             // Long form, X.690 pp 8.1.3.5
-            let mut left = v;
-            let start = self.pos;
-            while left > 0 {
-                self.push_u8((left & 0xff) as u8)?;
-                left >>= 8;
-            }
-            let size = start - self.pos;
-            // Push size with high-bit set
-            self.push_u8((size | 0x80) as u8)?;
+            // <tag>, 0x82, <vh>, <vl>
+            self.ensure_size(4)?;
+            self.push_u8_unchecked(v as u8);
+            self.push_u8_unchecked((v >> 8) as u8);
+            self.push_u8_unchecked(0x82);
+            self.push_u8_unchecked(tag);
         }
         Ok(())
     }
     // Push tag, len, data
+    #[inline]
     pub fn push_tagged(&mut self, tag: u8, data: &[u8]) -> SnmpResult<()> {
         self.push(data)?;
-        self.push_ber_len(data.len())?;
-        self.push_u8(tag)
+        self.push_tag_len(tag, data.len())
     }
+    #[inline]
     pub fn reset(&mut self) {
         self.pos = MAX_SIZE;
     }
     pub fn as_slice(&self, len: usize) -> &[u8] {
-        &self.data[..len]
+        unsafe { slice::from_raw_parts(self.data.as_ptr() as *const u8, len) }
     }
 }
 
 impl AsMut<[u8]> for Buffer {
     fn as_mut(&mut self) -> &mut [u8] {
-        &mut self.data
+        unsafe {
+            slice::from_raw_parts_mut(
+                self.data[self.pos..].as_mut_ptr() as *mut u8,
+                MAX_SIZE - self.pos,
+            )
+        }
     }
 }
 
 impl AsMut<[MaybeUninit<u8>]> for Buffer {
     fn as_mut(&mut self) -> &mut [MaybeUninit<u8>] {
-        unsafe { &mut *(&mut self.data as *mut [u8] as *mut [MaybeUninit<u8>]) }
+        &mut self.data
     }
 }
 
@@ -170,43 +215,43 @@ mod tests {
     }
 
     #[test]
-    fn test_push_ber_len_short1() -> SnmpResult<()> {
+    fn test_push_tag_len_short1() -> SnmpResult<()> {
         let mut b = Buffer::default();
-        b.push_ber_len(1)?;
-        assert_eq!(b.len(), 1);
-        assert_eq!(b.data(), &[1]);
-        Ok(())
-    }
-    #[test]
-    fn test_push_ber_len_short2() -> SnmpResult<()> {
-        let mut b = Buffer::default();
-        b.push_ber_len(127)?;
-        assert_eq!(b.len(), 1);
-        assert_eq!(b.data(), &[127]);
-        Ok(())
-    }
-    #[test]
-    fn test_push_ber_len_long1() -> SnmpResult<()> {
-        let mut b = Buffer::default();
-        b.push_ber_len(128)?;
+        b.push_tag_len(4, 1)?;
         assert_eq!(b.len(), 2);
-        assert_eq!(b.data(), &[0x81, 128]);
+        assert_eq!(b.data(), &[4, 1]);
         Ok(())
     }
     #[test]
-    fn test_push_ber_len_long2() -> SnmpResult<()> {
+    fn test_push_tag_len_short2() -> SnmpResult<()> {
         let mut b = Buffer::default();
-        b.push_ber_len(255)?;
+        b.push_tag_len(4, 127)?;
         assert_eq!(b.len(), 2);
-        assert_eq!(b.data(), &[0x81, 255]);
+        assert_eq!(b.data(), &[4, 127]);
         Ok(())
     }
     #[test]
-    fn test_push_ber_len_long3() -> SnmpResult<()> {
+    fn test_push_tag_len_long1() -> SnmpResult<()> {
         let mut b = Buffer::default();
-        b.push_ber_len(256)?;
+        b.push_tag_len(4, 128)?;
         assert_eq!(b.len(), 3);
-        assert_eq!(b.data(), &[0x82, 1, 0]);
+        assert_eq!(b.data(), &[4, 0x81, 128]);
+        Ok(())
+    }
+    #[test]
+    fn test_push_tag_len_long2() -> SnmpResult<()> {
+        let mut b = Buffer::default();
+        b.push_tag_len(4, 255)?;
+        assert_eq!(b.len(), 3);
+        assert_eq!(b.data(), &[4, 0x81, 255]);
+        Ok(())
+    }
+    #[test]
+    fn test_push_tag_len_long3() -> SnmpResult<()> {
+        let mut b = Buffer::default();
+        b.push_tag_len(4, 256)?;
+        assert_eq!(b.len(), 4);
+        assert_eq!(b.data(), &[4, 0x82, 1, 0]);
         Ok(())
     }
 }

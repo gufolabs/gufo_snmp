@@ -51,15 +51,11 @@ impl<'a> BerEncoder for SnmpV2cMessage<'a> {
         // Push PDU
         self.pdu.push_ber(buf)?;
         // Push community
-        buf.push(self.community)?;
-        buf.push_ber_len(self.community.len())?;
-        buf.push_u8(TAG_OCTET_STRING)?;
+        buf.push_tagged(TAG_OCTET_STRING, self.community)?;
         // Push version
         buf.push(&V2C_BER)?;
         // Push top-level sequence
-        buf.push_ber_len(buf.len())?;
-        buf.push_u8(0x30)?;
-        Ok(())
+        buf.push_tag_len(0x30, buf.len())
     }
 }
 

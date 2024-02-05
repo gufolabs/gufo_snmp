@@ -44,10 +44,7 @@ const ZERO_BER: [u8; 3] = [TAG_INT, 1, 0];
 impl BerEncoder for SnmpInt {
     fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         match self.0.cmp(&0) {
-            Ordering::Equal => {
-                buf.push(&ZERO_BER)?;
-                Ok(())
-            }
+            Ordering::Equal => buf.push(&ZERO_BER),
             Ordering::Greater => {
                 let start = buf.len();
                 // Write body
@@ -65,10 +62,7 @@ impl BerEncoder for SnmpInt {
                     left >>= 8;
                 }
                 // Write length
-                buf.push_ber_len(buf.len() - start)?;
-                // Write tag
-                buf.push_u8(TAG_INT)?;
-                Ok(())
+                buf.push_tag_len(TAG_INT, buf.len() - start)
             }
             Ordering::Less => {
                 let start = buf.len();
@@ -100,11 +94,8 @@ impl BerEncoder for SnmpInt {
                         left >>= 8;
                     }
                 }
-                // Write length
-                buf.push_ber_len(buf.len() - start)?;
-                // Write tag
-                buf.push_u8(TAG_INT)?;
-                Ok(())
+                // Write tag and length
+                buf.push_tag_len(TAG_INT, buf.len() - start)
             }
         }
     }

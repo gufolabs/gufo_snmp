@@ -96,8 +96,7 @@ impl<'a> BerEncoder for SnmpV3Message<'a> {
         let ln = buf.len();
         self.usm.push_ber(buf)?;
         // Wrap in octet-stream
-        buf.push_ber_len(buf.len() - ln)?;
-        buf.push_u8(TAG_OCTET_STRING)?;
+        buf.push_tag_len(TAG_OCTET_STRING, buf.len() - ln)?;
         //
         // Push global header
         //
@@ -116,8 +115,7 @@ impl<'a> BerEncoder for SnmpV3Message<'a> {
             flag |= FLAG_REPORT;
         }
         buf.push_u8(flag)?;
-        buf.push_ber_len(1)?;
-        buf.push_u8(TAG_OCTET_STRING)?;
+        buf.push_tag_len(TAG_OCTET_STRING, 1)?;
         // Push msg max size
         let ms: SnmpInt = MAX_SIZE.into();
         ms.push_ber(buf)?;
@@ -125,14 +123,11 @@ impl<'a> BerEncoder for SnmpV3Message<'a> {
         let msg_id: SnmpInt = self.msg_id.into();
         msg_id.push_ber(buf)?;
         // Push sequece header
-        buf.push_ber_len(buf.len() - ln)?;
-        buf.push_u8(0x30)?;
+        buf.push_tag_len(0x30, buf.len() - ln)?;
         // Push version
         buf.push(&V3_BER)?;
         // Push top-level sequence
-        buf.push_ber_len(buf.len())?;
-        buf.push_u8(0x30)?;
-        Ok(())
+        buf.push_tag_len(0x30, buf.len())
     }
 }
 

@@ -42,15 +42,13 @@ impl<'a> BerEncoder for ScopedPdu<'a> {
         // Push context engine name
         buf.push(&EMPTY_BER)?;
         // Push context engine id
-        let ln = self.engine_id.len();
-        if ln > 0 {
-            buf.push_tagged(TAG_OCTET_STRING, self.engine_id)?;
-        } else {
+        if self.engine_id.is_empty() {
             buf.push(&EMPTY_BER)?;
+        } else {
+            buf.push_tagged(TAG_OCTET_STRING, self.engine_id)?;
         }
         // Push option header
-        buf.push_ber_len(buf.len() - rest)?;
-        buf.push_u8(0x30)?;
+        buf.push_tag_len(0x30, buf.len() - rest)?;
         Ok(())
     }
 }

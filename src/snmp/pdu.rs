@@ -48,21 +48,15 @@ impl<'a> BerEncoder for SnmpPdu<'a> {
         match self {
             SnmpPdu::GetRequest(req) => {
                 req.push_ber(buf)?;
-                buf.push_ber_len(buf.len() - rest)?;
-                buf.push_u8(160)?; // Context + Constructed + PDU_GET_REQUEST(0)
-                Ok(())
+                buf.push_tag_len(160, buf.len() - rest) // Context + Constructed + PDU_GET_REQUEST(0)
             }
             SnmpPdu::GetNextRequest(req) => {
                 req.push_ber(buf)?;
-                buf.push_ber_len(buf.len() - rest)?;
-                buf.push_u8(161)?; // Context + Constructed + PDU_GETNEXT_REQUEST(1)
-                Ok(())
+                buf.push_tag_len(161, buf.len() - rest) // Context + Constructed + PDU_GETNEXT_REQUEST(1)
             }
             SnmpPdu::GetBulkRequest(req) => {
                 req.push_ber(buf)?;
-                buf.push_ber_len(buf.len() - rest)?;
-                buf.push_u8(165)?; // Context + Constructed + PDU_GETBULK_REQUEST(5)
-                Ok(())
+                buf.push_tag_len(165, buf.len() - rest) // Context + Constructed + PDU_GETBULK_REQUEST(5)
             }
             _ => Err(SnmpError::NotImplemented),
         }

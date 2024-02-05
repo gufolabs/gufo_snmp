@@ -21,7 +21,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 * Optimized SNMPv3 message signing.
 * Examples split to sync and async versions.
 
-## Fixed
+### Fixed
 * Default key type for auth keys set to Password.
 
 ## 0.4.0 - 2024-01-29

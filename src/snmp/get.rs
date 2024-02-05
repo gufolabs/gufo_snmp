@@ -64,14 +64,11 @@ impl BerEncoder for SnmpGet {
             // OID
             oid.push_ber(buf)?;
             // Enclosing sequence
-            buf.push_ber_len(buf.len() - start)?;
-            // Sequence tag
-            buf.push_u8(0x30)?;
+            buf.push_tag_len(0x30, buf.len() - start)?;
         }
         // Enclosing sequence for varbinds
         // Spans for the end
-        buf.push_ber_len(buf.len() - rest)?;
-        buf.push_u8(0x30)?;
+        buf.push_tag_len(0x30, buf.len() - rest)?;
         // Error index + error status, both zeroes
         buf.push(&DOUBLE_ZEROES)?;
         // Request id
