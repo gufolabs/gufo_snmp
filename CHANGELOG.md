@@ -14,6 +14,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ### Indrastructure
 * Rust 1.76.0
+* Remove `setup.py` file.
 
 ## 0.5.0 - 2024-02-02
 
