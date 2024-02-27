@@ -19,7 +19,7 @@ mod util;
 /// Module index
 #[pymodule]
 #[pyo3(name = "_fast")]
-fn gufo_ping(py: Python, m: &PyModule) -> PyResult<()> {
+fn gufo_snmp(py: Python, m: &PyModule) -> PyResult<()> {
     m.add("SnmpError", py.get_type::<error::PySnmpError>())?;
     m.add("SnmpEncodeError", py.get_type::<error::PySnmpEncodeError>())?;
     m.add("SnmpDecodeError", py.get_type::<error::PySnmpDecodeError>())?;

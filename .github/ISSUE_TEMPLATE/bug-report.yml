@@ -49,7 +49,7 @@ body:
 
   - type: textarea
     attributes:
-      label: "Gufo Ping version information"
+      label: "Gufo SNMP version information"
       description: Output from `import gufo.snmp;print(gufo.snmp.__version__)`
     validations:
       required: true
