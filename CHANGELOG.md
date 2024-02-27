@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 To see unreleased changes, please see the [CHANGELOG on the main branch guide](https://github.com/gufolabs/gufo_snmp/blob/main/CHANGELOG.md).
 
+## [Upcoming]
+
+### Indrastructure
+* Rust 1.76.0
+
 ## 0.5.0 - 2024-02-02
 
 ### Added
