@@ -12,6 +12,9 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ## [Upcoming]
 
+### Added
+* Pack rust benchmarks into sdist.
+
 ### Infrastructure
 * Rust 1.76.0
 * Remove `setup.py` file.

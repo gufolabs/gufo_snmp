@@ -1,4 +1,5 @@
 include Cargo.toml
 include src/*.rs
+include benches/*.rs
 prune __pycache__
 global-exclude *.py[cod]
