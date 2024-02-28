@@ -1,11 +1,11 @@
 [package]
 edition = "2021"
 name = "gufo_snmp"
-version = "0.5.0"
+version = "0.5.1"
 
 [lib]
-# crate-type = ["cdylib"] # Comment for bench
-crate-type = ["cdylib", "rlib"] # Uncomment for bench
+crate-type = ["cdylib"] # Comment for bench
+# crate-type = ["cdylib", "rlib"] # Uncomment for bench
 name = "gufo_snmp"
 
 [profile.release]
