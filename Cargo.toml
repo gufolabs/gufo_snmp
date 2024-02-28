@@ -4,8 +4,8 @@ name = "gufo_snmp"
 version = "0.5.0"
 
 [lib]
-crate-type = ["cdylib"] # Comment for bench
-# crate-type = ["cdylib", "rlib"] # Uncomment for bench
+# crate-type = ["cdylib"] # Comment for bench
+crate-type = ["cdylib", "rlib"] # Uncomment for bench
 name = "gufo_snmp"
 
 [profile.release]
@@ -30,13 +30,13 @@ socket2 = {version = "0.5", features = ["all"]}
 criterion = "0.4"
 iai = "0.1"
 
-[[bench]]
-harness = false
-name = "cri_decode"
+# [[bench]]
+# harness = false
+# name = "cri_decode"
 
-[[bench]]
-harness = false
-name = "cri_encode"
+# [[bench]]
+# harness = false
+# name = "cri_encode"
 
 [[bench]]
 harness = false

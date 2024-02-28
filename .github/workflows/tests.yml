@@ -10,7 +10,6 @@ on:
       - "tools/build/setup-rust.sh"
       - "src/**"
       - "tests/**"
-      - "setup.py"
       - "pyproject.toml"
     branches:
       - master
@@ -129,7 +128,7 @@ jobs:
         run: ./tools/build/setup-rust.sh
 
       - name: Build Rust module
-        run: python setup.py develop
+        run: python -m pip install --editable .
 
       - name: Install snmpd
         run: ./tools/build/setup-snmpd.sh
