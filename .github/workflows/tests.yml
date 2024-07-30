@@ -23,16 +23,16 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set Up Python {{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
       # Cache dependencies
       - name: Cache Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./.pip
           key: ${{ runner.os }}-tests-3.10-${{ hashFiles('./.requirements/lint.txt') }}
@@ -64,7 +64,7 @@ jobs:
           echo "${HOME}/.cargo/bin" >> $GITHUB_PATH
 
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Rust
         run: ./tools/build/setup-rust.sh
@@ -104,16 +104,16 @@ jobs:
           echo "${HOME}/.cargo/bin" >> $GITHUB_PATH
 
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set Up Python {{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
       # Cache dependencies
       - name: Cache Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./.pip
           key: ${{ runner.os }}-tests-{{ matrix.python-version }}-${{ hashFiles('./.requirements/build.txt') }}-${{ hashFiles('./.requirements/test.txt') }}

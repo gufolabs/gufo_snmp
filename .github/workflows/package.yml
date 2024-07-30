@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set Up Python 3.10
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
@@ -48,7 +48,7 @@ jobs:
             target: x86_64-unknown-linux-gnu
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build wheels
         run: >
@@ -82,7 +82,7 @@ jobs:
           #   platform: linux/arm64
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up QEMU
         if: matrix.arch != 'x86_64'
@@ -125,7 +125,7 @@ jobs:
   #         #   platform: linux/arm64
   #   steps:
   #     - name: Checkout Repo
-  #       uses: actions/checkout@v3
+  #       uses: actions/checkout@v4
 
   #     - name: Set up QEMU
   #       if: matrix.arch != 'x86_64'
@@ -167,7 +167,7 @@ jobs:
   #         #   platform: macosx
   #   steps:
   #     - name: Checkout Repo
-  #       uses: actions/checkout@v3
+  #       uses: actions/checkout@v4
 
   #     - name: Build Packages
   #       uses: pypa/cibuildwheel@v2.11.2
