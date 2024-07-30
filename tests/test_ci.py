@@ -24,9 +24,9 @@ def _get_root() -> str:
 
 
 VERSIONS = [
-    "actions/cache@v3",
-    "actions/checkout@v3",
-    "actions/setup-python@v4",
+    "actions/cache@v4",
+    "actions/checkout@v4",
+    "actions/setup-python@v5",
     "pypa/gh-action-pypi-publish@release/v1",
 ]
 
