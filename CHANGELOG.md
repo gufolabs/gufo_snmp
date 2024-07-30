@@ -12,6 +12,9 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ## [Unreleased]
 
+### Added
+* `SnmpAuthError` is exposed to `gufo.snmp` root module.
+
 ### Infrastructure
 
 * Rust 1.80.0

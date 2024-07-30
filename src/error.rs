@@ -22,7 +22,7 @@ pub enum SnmpError {
     Incomplete,
     /// Other tag is expected
     UnexpectedTag, // @todo: Expand
-    ///
+    /// Unexpecetd tag format
     InvalidTagFormat,
     /// Unknown PDU type
     UnknownPdu,

@@ -12,7 +12,13 @@ Attributes:
 """
 
 # Gufo Labs modules
-from ._fast import NoSuchInstance, SnmpDecodeError, SnmpEncodeError, SnmpError
+from ._fast import (
+    NoSuchInstance,
+    SnmpAuthError,
+    SnmpDecodeError,
+    SnmpEncodeError,
+    SnmpError,
+)
 from .async_client import SnmpSession
 from .typing import ValueType
 from .user import Aes128Key, DesKey, Md5Key, Sha1Key, User
@@ -25,6 +31,7 @@ __all__ = [
     "DesKey",
     "Md5Key",
     "Sha1Key",
+    "SnmpAuthError",
     "SnmpSession",
     "SnmpVersion",
     "SnmpError",
