@@ -57,7 +57,7 @@ impl SnmpV1ClientSocket {
         Ok(self.io.as_raw_fd())
     }
     // Prepare and send GET request with single oid
-    fn send_get(&mut self, oid: &str) -> PyResult<()> {
+    fn async_send_get(&mut self, oid: &str) -> PyResult<()> {
         Ok(self.io.send(SnmpV1Message {
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetRequest(SnmpGet {
@@ -69,7 +69,7 @@ impl SnmpV1ClientSocket {
         })?)
     }
     // Prepare and send GET request with multiple oids
-    fn send_get_many(&mut self, oids: Vec<&str>) -> PyResult<()> {
+    fn async_send_get_many(&mut self, oids: Vec<&str>) -> PyResult<()> {
         Ok(self.io.send(SnmpV1Message {
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetRequest(SnmpGet {
@@ -83,7 +83,7 @@ impl SnmpV1ClientSocket {
         })?)
     }
     // Send GetNext request according to iter
-    fn send_getnext(&mut self, iter: &GetNextIter) -> PyResult<()> {
+    fn async_send_getnext(&mut self, iter: &GetNextIter) -> PyResult<()> {
         Ok(self.io.send(SnmpV1Message {
             community: self.community.as_ref(),
             pdu: SnmpPdu::GetNextRequest(SnmpGet {
@@ -93,7 +93,7 @@ impl SnmpV1ClientSocket {
         })?)
     }
     // Send GetBulk request according to iter
-    fn send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
+    fn async_send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
         // Encode message
         Ok(self.io.send(SnmpV1Message {
             community: self.community.as_ref(),
@@ -106,7 +106,7 @@ impl SnmpV1ClientSocket {
         })?)
     }
     // Try to receive GETRESPONSE
-    fn recv_getresponse(&mut self, py: Python) -> PyResult<Option<PyObject>> {
+    fn async_recv_getresponse(&mut self, py: Python) -> PyResult<Option<PyObject>> {
         loop {
             // Receive and decode message
             let msg = self.io.recv::<SnmpV1Message>()?;
@@ -147,7 +147,7 @@ impl SnmpV1ClientSocket {
             }
         }
     }
-    fn recv_getresponse_many(&mut self, py: Python) -> PyResult<PyObject> {
+    fn async_recv_getresponse_many(&mut self, py: Python) -> PyResult<PyObject> {
         loop {
             // Receive and decode message
             let msg = self.io.recv::<SnmpV1Message>()?;
@@ -182,7 +182,7 @@ impl SnmpV1ClientSocket {
         }
     }
     // Try to receive GETRESPONSE for GETNEXT
-    fn recv_getresponse_next(
+    fn async_recv_getresponse_next(
         &mut self,
         iter: &mut GetNextIter,
         py: Python,
@@ -229,7 +229,7 @@ impl SnmpV1ClientSocket {
         }
     }
     // Try to receive GETRESPONSE for GETBULK
-    fn recv_getresponse_bulk(&mut self, iter: &mut GetBulkIter, py: Python) -> PyResult<PyObject> {
+    fn async_recv_getresponse_bulk(&mut self, iter: &mut GetBulkIter, py: Python) -> PyResult<PyObject> {
         loop {
             // Receive and decode message
             let msg = self.io.recv::<SnmpV1Message>()?;
@@ -280,13 +280,13 @@ impl SnmpV1ClientSocket {
     }
     // Prepare send GET request with single oid and receive reply
     fn sync_get(&mut self, py: Python, oid: &str) -> PyResult<Option<PyObject>> {
-        self.send_get(oid)?;
-        self.recv_getresponse(py)
+        self.async_send_get(oid)?;
+        self.async_recv_getresponse(py)
     }
     // Prepare and send GET request with multiple oids and receive reply
     fn sync_get_many(&mut self, py: Python, oids: Vec<&str>) -> PyResult<PyObject> {
-        self.send_get_many(oids)?;
-        self.recv_getresponse_many(py)
+        self.async_send_get_many(oids)?;
+        self.async_recv_getresponse_many(py)
     }
     //
     fn sync_getnext(
@@ -294,12 +294,12 @@ impl SnmpV1ClientSocket {
         py: Python,
         iter: &mut GetNextIter,
     ) -> PyResult<(PyObject, PyObject)> {
-        self.send_getnext(iter)?;
-        self.recv_getresponse_next(iter, py)
+        self.async_send_getnext(iter)?;
+        self.async_recv_getresponse_next(iter, py)
     }
     //
     fn sync_getbulk(&mut self, py: Python, iter: &mut GetBulkIter) -> PyResult<PyObject> {
-        self.send_getbulk(iter)?;
-        self.recv_getresponse_bulk(iter, py)
+        self.async_send_getbulk(iter)?;
+        self.async_recv_getresponse_bulk(iter, py)
     }
 }

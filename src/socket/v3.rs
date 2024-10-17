@@ -118,7 +118,7 @@ impl SnmpV3ClientSocket {
         Ok(PyBytes::new_bound(py, &self.engine_id).into())
     }
     // Prepare and send GET request with single oid
-    fn send_get(&mut self, oid: &str) -> PyResult<()> {
+    fn async_send_get(&mut self, oid: &str) -> PyResult<()> {
         let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(
             SnmpPdu::GetRequest(SnmpGet {
@@ -131,7 +131,7 @@ impl SnmpV3ClientSocket {
         )?)
     }
     // Prepare and send GET request with multiple oids
-    fn send_get_many(&mut self, oids: Vec<&str>) -> PyResult<()> {
+    fn async_send_get_many(&mut self, oids: Vec<&str>) -> PyResult<()> {
         let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(
             SnmpPdu::GetRequest(SnmpGet {
@@ -146,7 +146,7 @@ impl SnmpV3ClientSocket {
         )?)
     }
     // Send GetNext request according to iter
-    fn send_getnext(&mut self, iter: &GetNextIter) -> PyResult<()> {
+    fn async_send_getnext(&mut self, iter: &GetNextIter) -> PyResult<()> {
         let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(
             SnmpPdu::GetNextRequest(SnmpGet {
@@ -157,7 +157,7 @@ impl SnmpV3ClientSocket {
         )?)
     }
     // Send GetBulk request according to iter
-    fn send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
+    fn async_send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
         let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(
             SnmpPdu::GetBulkRequest(SnmpGetBulk {
@@ -170,7 +170,7 @@ impl SnmpV3ClientSocket {
         )?)
     }
     // Send GET+Report to adjust boots and time
-    fn send_refresh(&mut self) -> PyResult<()> {
+    fn async_send_refresh(&mut self) -> PyResult<()> {
         let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(
             SnmpPdu::GetRequest(SnmpGet {
@@ -181,7 +181,7 @@ impl SnmpV3ClientSocket {
         )?)
     }
     // Try to receive GETRESPONSE
-    fn recv_getresponse(&mut self, py: Python) -> PyResult<Option<PyObject>> {
+    fn async_recv_getresponse(&mut self, py: Python) -> PyResult<Option<PyObject>> {
         loop {
             match self.recv_and_unwrap()? {
                 Some(pdu) => match pdu {
@@ -216,7 +216,7 @@ impl SnmpV3ClientSocket {
             }
         }
     }
-    fn recv_getresponse_many(&mut self, py: Python) -> PyResult<PyObject> {
+    fn async_recv_getresponse_many(&mut self, py: Python) -> PyResult<PyObject> {
         loop {
             match self.recv_and_unwrap()? {
                 Some(pdu) => match pdu {
@@ -248,7 +248,7 @@ impl SnmpV3ClientSocket {
         }
     }
     // Try to receive GETRESPONSE for GETNEXT
-    fn recv_getresponse_next(
+    fn async_recv_getresponse_next(
         &mut self,
         iter: &mut GetNextIter,
         py: Python,
@@ -288,7 +288,7 @@ impl SnmpV3ClientSocket {
         }
     }
     // Try to receive GETRESPONSE for GETBULK
-    fn recv_getresponse_bulk(&mut self, iter: &mut GetBulkIter, py: Python) -> PyResult<PyObject> {
+    fn async_recv_getresponse_bulk(&mut self, iter: &mut GetBulkIter, py: Python) -> PyResult<PyObject> {
         loop {
             match self.recv_and_unwrap()? {
                 Some(pdu) => match pdu {
@@ -335,7 +335,7 @@ impl SnmpV3ClientSocket {
         }
     }
     // Receive refresh report
-    fn recv_refresh(&mut self) -> PyResult<()> {
+    fn async_recv_refresh(&mut self) -> PyResult<()> {
         loop {
             match self.recv_and_unwrap()? {
                 Some(_) => {
@@ -347,13 +347,13 @@ impl SnmpV3ClientSocket {
     }
     // Prepare send GET request with single oid and receive reply
     fn sync_get(&mut self, py: Python, oid: &str) -> PyResult<Option<PyObject>> {
-        self.send_get(oid)?;
-        self.recv_getresponse(py)
+        self.async_send_get(oid)?;
+        self.async_recv_getresponse(py)
     }
     // Prepare and send GET request with multiple oids and receive reply
     fn sync_get_many(&mut self, py: Python, oids: Vec<&str>) -> PyResult<PyObject> {
-        self.send_get_many(oids)?;
-        self.recv_getresponse_many(py)
+        self.async_send_get_many(oids)?;
+        self.async_recv_getresponse_many(py)
     }
     //
     fn sync_getnext(
@@ -361,18 +361,18 @@ impl SnmpV3ClientSocket {
         py: Python,
         iter: &mut GetNextIter,
     ) -> PyResult<(PyObject, PyObject)> {
-        self.send_getnext(iter)?;
-        self.recv_getresponse_next(iter, py)
+        self.async_send_getnext(iter)?;
+        self.async_recv_getresponse_next(iter, py)
     }
     //
     fn sync_getbulk(&mut self, py: Python, iter: &mut GetBulkIter) -> PyResult<PyObject> {
-        self.send_getbulk(iter)?;
-        self.recv_getresponse_bulk(iter, py)
+        self.async_send_getbulk(iter)?;
+        self.async_recv_getresponse_bulk(iter, py)
     }
     // Send and receive refresh report
     fn sync_refresh(&mut self) -> PyResult<()> {
-        self.send_refresh()?;
-        self.recv_refresh()
+        self.async_send_refresh()?;
+        self.async_recv_refresh()
     }
 }
 impl SnmpV3ClientSocket {

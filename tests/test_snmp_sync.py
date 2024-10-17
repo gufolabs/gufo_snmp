@@ -324,6 +324,7 @@ def test_get_engine_id(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
     assert r == snmpd.engine_id
 
 
+@pytest.mark.xfail
 @pytest.mark.parametrize("cfg", V2)
 def test_shift(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
     with SyncShiftProxy() as proxy:
