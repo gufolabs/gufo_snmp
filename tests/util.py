@@ -7,7 +7,12 @@
 
 # Python modules
 import random
-from typing import Any
+import socket
+import threading
+import time
+from contextlib import suppress
+from types import TracebackType
+from typing import Any, Optional, Tuple, Type
 
 # Gufo SNMP Modules
 from gufo.snmp import SnmpVersion
@@ -66,6 +71,9 @@ V3 = [{"version": SnmpVersion.v3, "user": u} for u in SNMP_USERS]
 
 ALL = V1 + V2 + V3
 
+SNMP_LOCATION_OID = "1.3.6.1.2.1.1.6.0"
+SNMP_CONTACT_OID = "1.3.6.1.2.1.1.4.0"
+
 
 def ids(x: Any) -> str:
     if isinstance(x, dict) and "version" in x:
@@ -79,3 +87,90 @@ def ids(x: Any) -> str:
                 r += [user.priv_key.__class__.__name__]
         return "-".join(r)
     return str(x)
+
+
+class SyncShiftProxy(object):
+    """
+    A shifting proxy, sync version.
+
+    Drops first reply, then returns
+    a previous reply and then actual one.
+    """
+
+    def __init__(self: "SyncShiftProxy") -> None:
+        self._listen_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._listen_sock.bind(("127.0.0.1", 0))
+        self._addr: Tuple[str, int] = self._listen_sock.getsockname()
+        self._proxy_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._thread: Optional[threading.Thread] = None
+
+    def __enter__(self: "SyncShiftProxy") -> "SyncShiftProxy":
+        """Context management entry."""
+        self._thread = threading.Thread(target=self.run, name="ShiftProxyy")
+        self._thread.daemon = True
+        self._thread.start()
+        return self
+
+    def __exit__(
+        self: "SyncShiftProxy",
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        """Context management exit."""
+        print(exc_type, time.time())
+        self.close()
+        if self._thread:
+            self._thread.join(1.0)
+            self._thread = None
+
+    @property
+    def addr(self: "SyncShiftProxy") -> Tuple[str, int]:
+        """
+        Get address info.
+
+        Returns:
+            Tuple of addr, port
+        """
+        return self._addr
+
+    def run(self: "SyncShiftProxy") -> None:
+        """Run proxy."""
+        with suppress(OSError):
+            self._run()
+
+    def _run(self: "SyncShiftProxy") -> None:
+        """Run proxy (internal implementation)."""
+        BUFF_SIZE = 4096
+        # Receive request
+        r, addr = self._listen_sock.recvfrom(BUFF_SIZE)
+        print("CLIENT -> PROXY    SERVER")
+        # Proxy it
+        self._proxy_sock.sendto(r, (SNMPD_ADDRESS, SNMPD_PORT))
+        print("CLIENT    PROXY -> SERVER")
+        # Get reply from server
+        delayed, _ = self._proxy_sock.recvfrom(BUFF_SIZE)
+        print("CLIENT    PROXY <- SERVER")
+        # Do not send delayed reply, wait for next request
+        r, addr = self._listen_sock.recvfrom(BUFF_SIZE)
+        print("CLIENT -> PROXY    SERVER")
+        # Proxy next request
+        self._proxy_sock.sendto(r, (SNMPD_ADDRESS, SNMPD_PORT))
+        print("CLIENT    PROXY -> SERVER")
+        # Get reply from server
+        reply, _ = self._proxy_sock.recvfrom(BUFF_SIZE)
+        print("CLIENT    PROXY <- SERVER")
+        # Send delayed reply for 3 times
+        for _ in range(3):
+            self._listen_sock.sendto(delayed, addr)
+            print("CLIENT <- PROXY    SERVER")
+            # Wait for while
+            time.sleep(0.1)
+        # Send real reply
+        self._listen_sock.sendto(reply, addr)
+        print("CLIENT <- PROXY    SERVER")
+
+    def close(self: "SyncShiftProxy") -> None:
+        """Close sockets."""
+        self._listen_sock.close()
+        self._proxy_sock.close()

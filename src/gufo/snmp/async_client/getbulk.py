@@ -66,7 +66,6 @@ class GetBulkIter(object):
         # Complete
         if self._stop:
             raise StopAsyncIteration
-        #
         self._buffer = await send_and_recv(
             self._fd, sender, receiver, self._policer, self._timeout
         )

@@ -163,7 +163,7 @@ impl SnmpV1ClientSocket {
                     }
                     // Check error_index
                     // Build resulting dict
-                    let dict = PyDict::new(py);
+                    let dict = PyDict::new_bound(py);
                     for var in resp.vars.iter() {
                         match &var.value {
                             SnmpValue::Null
@@ -248,7 +248,7 @@ impl SnmpV1ClientSocket {
                     if resp.vars.is_empty() {
                         return Err(PyStopAsyncIteration::new_err("stop"));
                     }
-                    let list = PyList::empty(py);
+                    let list = PyList::empty_bound(py);
                     for var in resp.vars.iter() {
                         match &var.value {
                             SnmpValue::Null
@@ -261,7 +261,7 @@ impl SnmpV1ClientSocket {
                                     break;
                                 }
                                 // Append to list
-                                list.append(PyTuple::new(
+                                list.append(PyTuple::new_bound(
                                     py,
                                     vec![var.oid.try_to_python(py)?, var.value.try_to_python(py)?],
                                 ))

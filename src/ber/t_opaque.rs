@@ -1,7 +1,7 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: SNMP Application Class Opaque
 // ------------------------------------------------------------------------
-// Copyright (C) 2023, Gufo Labs
+// Copyright (C) 2023-24, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
@@ -25,7 +25,7 @@ impl<'a> BerDecoder<'a> for SnmpOpaque<'a> {
 
 impl<'a> ToPython for &SnmpOpaque<'a> {
     fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
-        let v = PyBytes::new(py, self.0);
+        let v = PyBytes::new_bound(py, self.0);
         Ok(v.into())
     }
 }

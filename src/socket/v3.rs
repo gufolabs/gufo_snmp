@@ -115,7 +115,7 @@ impl SnmpV3ClientSocket {
     }
     /// Get engine id
     fn get_engine_id(&self, py: Python) -> PyResult<PyObject> {
-        Ok(PyBytes::new(py, &self.engine_id).into())
+        Ok(PyBytes::new_bound(py, &self.engine_id).into())
     }
     // Prepare and send GET request with single oid
     fn send_get(&mut self, oid: &str) -> PyResult<()> {
@@ -223,7 +223,7 @@ impl SnmpV3ClientSocket {
                     SnmpPdu::GetResponse(resp) => {
                         // Check error_index
                         // Build resulting dict
-                        let dict = PyDict::new(py);
+                        let dict = PyDict::new_bound(py);
                         for var in resp.vars.iter() {
                             match &var.value {
                                 SnmpValue::Null
@@ -298,7 +298,7 @@ impl SnmpV3ClientSocket {
                         if resp.vars.is_empty() {
                             return Err(PyStopAsyncIteration::new_err("stop"));
                         }
-                        let list = PyList::empty(py);
+                        let list = PyList::empty_bound(py);
                         for var in resp.vars.iter() {
                             match &var.value {
                                 SnmpValue::Null
@@ -311,7 +311,7 @@ impl SnmpV3ClientSocket {
                                         break;
                                     }
                                     // Append to list
-                                    list.append(PyTuple::new(
+                                    list.append(PyTuple::new_bound(
                                         py,
                                         vec![
                                             var.oid.try_to_python(py)?,

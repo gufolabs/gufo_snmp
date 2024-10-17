@@ -38,6 +38,7 @@ def snmpd() -> Iterator[Snmpd]:
         location=SNMP_LOCATION,
         contact=SNMP_CONTACT,
         users=SNMP_USERS,
+        # Uncomment for debugging
         # verbose=True,
         # log_packets=True,
     ) as snmpd:

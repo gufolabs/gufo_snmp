@@ -6,6 +6,7 @@
 # ---------------------------------------------------------------------
 
 # Python modules
+from contextlib import suppress
 from typing import Any, Dict, Optional, cast
 
 # Third-party modules
@@ -19,12 +20,15 @@ from gufo.snmp.sync_client import SnmpSession
 from .util import (
     ALL,
     SNMP_CONTACT,
+    SNMP_CONTACT_OID,
     SNMP_LOCATION,
+    SNMP_LOCATION_OID,
     SNMPD_ADDRESS,
     SNMPD_PORT,
     V1,
     V2,
     V3,
+    SyncShiftProxy,
     ids,
 )
 
@@ -35,25 +39,31 @@ def test_snmpd_version(snmpd: Snmpd) -> None:
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
 def test_timeout_get(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
-    with pytest.raises(TimeoutError), SnmpSession(
-        addr=SNMPD_ADDRESS,
-        port=SNMPD_PORT + 1,
-        timeout=1.0,
-        engine_id=snmpd.engine_id,
-        **cfg,
-    ) as session:
+    with (
+        pytest.raises(TimeoutError),
+        SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT + 1,
+            timeout=1.0,
+            engine_id=snmpd.engine_id,
+            **cfg,
+        ) as session,
+    ):
         session.get("1.3.6.1.2.1.1")
 
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
 def test_timeout_get_many(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
-    with pytest.raises(TimeoutError), SnmpSession(
-        addr=SNMPD_ADDRESS,
-        port=SNMPD_PORT + 1,
-        timeout=1.0,
-        engine_id=snmpd.engine_id,
-        **cfg,
-    ) as session:
+    with (
+        pytest.raises(TimeoutError),
+        SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT + 1,
+            timeout=1.0,
+            engine_id=snmpd.engine_id,
+            **cfg,
+        ) as session,
+    ):
         session.get_many(["1.3.6.1.2.1.1"])
 
 
@@ -74,8 +84,8 @@ def snmp_get(
 @pytest.mark.parametrize(
     ("oid", "expected"),
     [
-        ("1.3.6.1.2.1.1.6.0", SNMP_LOCATION.encode()),
-        ("1.3.6.1.2.1.1.4.0", SNMP_CONTACT.encode()),
+        (SNMP_LOCATION_OID, SNMP_LOCATION.encode()),
+        (SNMP_CONTACT_OID, SNMP_CONTACT.encode()),
     ],
 )
 def test_get(
@@ -312,3 +322,16 @@ def test_get_engine_id(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
         r = session.get_engine_id()
 
     assert r == snmpd.engine_id
+
+
+@pytest.mark.parametrize("cfg", V2)
+def test_shift(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
+    with SyncShiftProxy() as proxy:
+        addr, port = proxy.addr
+        with SnmpSession(addr=addr, port=port, timeout=2.0, **cfg) as session:
+            print("GET CONTACT")
+            with pytest.raises(TimeoutError):
+                session.get(SNMP_CONTACT_OID)
+            print("GET LOCATION")
+            y = session.get(SNMP_LOCATION_OID)
+            assert y == SNMP_LOCATION

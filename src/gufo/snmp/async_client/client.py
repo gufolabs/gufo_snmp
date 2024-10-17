@@ -91,7 +91,6 @@ class SnmpSession(object):
         # Detect version
         if version is None:
             version = SnmpVersion.v2c if user is None else SnmpVersion.v3
-        #
         self._sock: SnmpClientSocketProtocol
         self._to_refresh = False
         self._deferred_user: Optional[User] = None
