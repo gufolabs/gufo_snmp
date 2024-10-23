@@ -6,7 +6,6 @@
 # ---------------------------------------------------------------------
 
 # Python modules
-from contextlib import suppress
 from typing import Any, Dict, Optional, cast
 
 # Third-party modules
