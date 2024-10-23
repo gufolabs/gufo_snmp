@@ -25,10 +25,7 @@ where
     fn get_transport_mut(&self) -> *mut SnmpTransport {
         self.get_transport() as *const SnmpTransport as *mut SnmpTransport
     }
-    fn get_request_id(&self) -> &RequestId;
-    fn get_request_id_mut(&self) -> *mut RequestId {
-        self.get_request_id() as *const RequestId as *mut RequestId
-    }
+    fn get_request_id(&mut self) -> &mut RequestId;
 
     fn send(&self, msg: Self::Message<'_>) -> SnmpResult<()> {
         unsafe {
@@ -48,9 +45,6 @@ where
         }
     }
     fn authenticate(&self, msg: &Self::Message<'_>) -> bool;
-    fn next_request_id(&self) -> i64 {
-        unsafe { (*self.get_request_id_mut()).get_next() }
-    }
 }
 
 pub(crate) trait SupportsGet: SnmpSocket {
@@ -61,7 +55,8 @@ pub(crate) trait SupportsGet: SnmpSocket {
         // Release GIL
         let reply = py.allow_threads(|| -> SnmpResult<Self::Message<'_>> {
             // Send request
-            self.send(self.request(oid, self.next_request_id())?)?;
+            let req_id = self.get_request_id().get_next();
+            self.send(self.request(oid, req_id)?)?;
             // Check until our reply is received
             loop {
                 if let Some(reply) = self.try_recv()? {
@@ -78,7 +73,10 @@ pub(crate) trait SupportsGet: SnmpSocket {
     }
     // Send get request (for async)
     fn send_get(&mut self, py: Python, oid: &str) -> SnmpResult<()> {
-        py.allow_threads(|| self.send(self.request(oid, self.next_request_id())?))
+        py.allow_threads(|| {
+            let req_id = self.get_request_id().get_next();
+            self.send(self.request(oid, req_id)?)
+        })
     }
     // Receiver and parse getresponse (for async)
     fn recv_get(&mut self, py: Python) -> PyResult<Option<PyObject>> {
@@ -108,7 +106,8 @@ pub(crate) trait SupportsGetMany: SnmpSocket {
         // Release GIL
         let reply = py.allow_threads(|| -> SnmpResult<Self::Message<'_>> {
             // Send request
-            self.send(self.request(oids, self.next_request_id())?)?;
+            let req_id = self.get_request_id().get_next();
+            self.send(self.request(oids, req_id)?)?;
             // Check until our reply is received
             loop {
                 if let Some(reply) = self.try_recv()? {
@@ -125,7 +124,10 @@ pub(crate) trait SupportsGetMany: SnmpSocket {
     }
     // Send get request (for async)
     fn send_get_many(&mut self, py: Python, oids: Vec<&str>) -> SnmpResult<()> {
-        py.allow_threads(|| self.send(self.request(oids, self.next_request_id())?))
+        py.allow_threads(|| {
+            let req_id = self.get_request_id().get_next();
+            self.send(self.request(oids, req_id)?)
+        })
     }
     // Receiver and parse getresponse (for async)
     fn recv_get_many(&mut self, py: Python) -> PyResult<PyObject> {

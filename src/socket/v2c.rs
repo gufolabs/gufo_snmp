@@ -227,8 +227,8 @@ impl SnmpSocket for SnmpV2cClientSocket {
         &self.io
     }
 
-    fn get_request_id(&self) -> &RequestId {
-        &self.request_id
+    fn get_request_id(&mut self) -> &mut RequestId {
+        &mut self.request_id
     }
 
     fn authenticate(&self, msg: &Self::Message<'_>) -> bool {

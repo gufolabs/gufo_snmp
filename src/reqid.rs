@@ -7,6 +7,8 @@
 
 use rand::Rng;
 
+const MAX_REQUEST_ID: i64 = 0x7fffffff;
+
 #[derive(Default)]
 pub struct RequestId(i64);
 
@@ -15,7 +17,7 @@ impl RequestId {
     pub fn get_next(&mut self) -> i64 {
         let mut rng = rand::thread_rng();
         let x: i64 = rng.gen();
-        self.0 = x & 0x7fffffff;
+        self.0 = x & MAX_REQUEST_ID;
         self.0
     }
     /// Check values for match
