@@ -117,8 +117,14 @@ impl SnmpV3ClientSocket {
     fn get_engine_id(&self, py: Python) -> PyResult<PyObject> {
         Ok(PyBytes::new_bound(py, &self.engine_id).into())
     }
+    // .get()
+    // Prepare send GET request with single oid and receive reply
+    fn get(&mut self, py: Python, oid: &str) -> PyResult<Option<PyObject>> {
+        self.send_get(oid)?;
+        self.recv_get(py)
+    }
     // Prepare and send GET request with single oid
-    fn async_send_get(&mut self, oid: &str) -> PyResult<()> {
+    fn send_get(&mut self, oid: &str) -> PyResult<()> {
         let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(
             SnmpPdu::GetRequest(SnmpGet {
@@ -130,8 +136,50 @@ impl SnmpV3ClientSocket {
             false,
         )?)
     }
+    // Try to receive GETRESPONSE
+    fn recv_get(&mut self, py: Python) -> PyResult<Option<PyObject>> {
+        loop {
+            match self.recv_and_unwrap()? {
+                Some(pdu) => match pdu {
+                    SnmpPdu::GetResponse(resp) => {
+                        // Check error_index
+                        // Check varbinds size
+                        match resp.vars.len() {
+                            // Empty response, return None
+                            0 => return Ok(None),
+                            // Return value
+                            1 => {
+                                let var = &resp.vars[0];
+                                let value = &var.value;
+                                match value {
+                                    SnmpValue::NoSuchObject
+                                    | SnmpValue::NoSuchInstance
+                                    | SnmpValue::EndOfMibView => {
+                                        return Err(SnmpError::NoSuchInstance.into())
+                                    }
+                                    SnmpValue::Null => return Ok(None),
+                                    _ => return Ok(Some(value.try_to_python(py)?)),
+                                }
+                            }
+                            // Multiple response, surely an error
+                            _ => return Err(SnmpError::InvalidPdu.into()),
+                        }
+                    }
+                    SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
+                    _ => continue,
+                },
+                None => continue,
+            }
+        }
+    }
+    // .get_many()
+    // Prepare and send GET request with multiple oids and receive reply
+    fn get_many(&mut self, py: Python, oids: Vec<&str>) -> PyResult<PyObject> {
+        self.send_get_many(oids)?;
+        self.recv_get_many(py)
+    }
     // Prepare and send GET request with multiple oids
-    fn async_send_get_many(&mut self, oids: Vec<&str>) -> PyResult<()> {
+    fn send_get_many(&mut self, oids: Vec<&str>) -> PyResult<()> {
         let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(
             SnmpPdu::GetRequest(SnmpGet {
@@ -144,6 +192,37 @@ impl SnmpV3ClientSocket {
             }),
             false,
         )?)
+    }
+    fn recv_get_many(&mut self, py: Python) -> PyResult<PyObject> {
+        loop {
+            match self.recv_and_unwrap()? {
+                Some(pdu) => match pdu {
+                    SnmpPdu::GetResponse(resp) => {
+                        // Check error_index
+                        // Build resulting dict
+                        let dict = PyDict::new_bound(py);
+                        for var in resp.vars.iter() {
+                            match &var.value {
+                                SnmpValue::Null
+                                | SnmpValue::NoSuchObject
+                                | SnmpValue::NoSuchInstance
+                                | SnmpValue::EndOfMibView => continue,
+                                _ => dict
+                                    .set_item(
+                                        var.oid.try_to_python(py)?,
+                                        var.value.try_to_python(py)?,
+                                    )
+                                    .map_err(|e| PyRuntimeError::new_err(e.to_string()))?,
+                            }
+                        }
+                        return Ok(dict.into());
+                    }
+                    SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
+                    _ => continue,
+                },
+                None => continue,
+            }
+        }
     }
     // Send GetNext request according to iter
     fn async_send_getnext(&mut self, iter: &GetNextIter) -> PyResult<()> {
@@ -179,73 +258,6 @@ impl SnmpV3ClientSocket {
             }),
             true,
         )?)
-    }
-    // Try to receive GETRESPONSE
-    fn async_recv_getresponse(&mut self, py: Python) -> PyResult<Option<PyObject>> {
-        loop {
-            match self.recv_and_unwrap()? {
-                Some(pdu) => match pdu {
-                    SnmpPdu::GetResponse(resp) => {
-                        // Check error_index
-                        // Check varbinds size
-                        match resp.vars.len() {
-                            // Empty response, return None
-                            0 => return Ok(None),
-                            // Return value
-                            1 => {
-                                let var = &resp.vars[0];
-                                let value = &var.value;
-                                match value {
-                                    SnmpValue::NoSuchObject
-                                    | SnmpValue::NoSuchInstance
-                                    | SnmpValue::EndOfMibView => {
-                                        return Err(SnmpError::NoSuchInstance.into())
-                                    }
-                                    SnmpValue::Null => return Ok(None),
-                                    _ => return Ok(Some(value.try_to_python(py)?)),
-                                }
-                            }
-                            // Multiple response, surely an error
-                            _ => return Err(SnmpError::InvalidPdu.into()),
-                        }
-                    }
-                    SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
-                    _ => continue,
-                },
-                None => continue,
-            }
-        }
-    }
-    fn async_recv_getresponse_many(&mut self, py: Python) -> PyResult<PyObject> {
-        loop {
-            match self.recv_and_unwrap()? {
-                Some(pdu) => match pdu {
-                    SnmpPdu::GetResponse(resp) => {
-                        // Check error_index
-                        // Build resulting dict
-                        let dict = PyDict::new_bound(py);
-                        for var in resp.vars.iter() {
-                            match &var.value {
-                                SnmpValue::Null
-                                | SnmpValue::NoSuchObject
-                                | SnmpValue::NoSuchInstance
-                                | SnmpValue::EndOfMibView => continue,
-                                _ => dict
-                                    .set_item(
-                                        var.oid.try_to_python(py)?,
-                                        var.value.try_to_python(py)?,
-                                    )
-                                    .map_err(|e| PyRuntimeError::new_err(e.to_string()))?,
-                            }
-                        }
-                        return Ok(dict.into());
-                    }
-                    SnmpPdu::Report(_) => return Err(SnmpError::AuthenticationFailed.into()),
-                    _ => continue,
-                },
-                None => continue,
-            }
-        }
     }
     // Try to receive GETRESPONSE for GETNEXT
     fn async_recv_getresponse_next(
@@ -288,7 +300,11 @@ impl SnmpV3ClientSocket {
         }
     }
     // Try to receive GETRESPONSE for GETBULK
-    fn async_recv_getresponse_bulk(&mut self, iter: &mut GetBulkIter, py: Python) -> PyResult<PyObject> {
+    fn async_recv_getresponse_bulk(
+        &mut self,
+        iter: &mut GetBulkIter,
+        py: Python,
+    ) -> PyResult<PyObject> {
         loop {
             match self.recv_and_unwrap()? {
                 Some(pdu) => match pdu {
@@ -344,16 +360,6 @@ impl SnmpV3ClientSocket {
                 None => continue,
             }
         }
-    }
-    // Prepare send GET request with single oid and receive reply
-    fn sync_get(&mut self, py: Python, oid: &str) -> PyResult<Option<PyObject>> {
-        self.async_send_get(oid)?;
-        self.async_recv_getresponse(py)
-    }
-    // Prepare and send GET request with multiple oids and receive reply
-    fn sync_get_many(&mut self, py: Python, oids: Vec<&str>) -> PyResult<PyObject> {
-        self.async_send_get_many(oids)?;
-        self.async_recv_getresponse_many(py)
     }
     //
     fn sync_getnext(

@@ -114,6 +114,10 @@ impl<'a> SnmpValue<'a> {
         };
         Ok((&tail[hdr.length..], value))
     }
+
+    pub fn is_end_of_mib_view(&self) -> bool {
+        matches!(self, SnmpValue::EndOfMibView)
+    }
 }
 
 impl<'a> ToPython for &SnmpValue<'a> {

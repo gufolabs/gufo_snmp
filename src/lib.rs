@@ -19,12 +19,24 @@ mod util;
 /// Module index
 #[pymodule]
 #[pyo3(name = "_fast")]
-fn gufo_snmp(py: Python, m: &Bound<'_,PyModule>) -> PyResult<()> {
+fn gufo_snmp(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("SnmpError", py.get_type_bound::<error::PySnmpError>())?;
-    m.add("SnmpEncodeError", py.get_type_bound::<error::PySnmpEncodeError>())?;
-    m.add("SnmpDecodeError", py.get_type_bound::<error::PySnmpDecodeError>())?;
-    m.add("SnmpAuthError", py.get_type_bound::<error::PySnmpAuthError>())?;
-    m.add("NoSuchInstance", py.get_type_bound::<error::PyNoSuchInstance>())?;
+    m.add(
+        "SnmpEncodeError",
+        py.get_type_bound::<error::PySnmpEncodeError>(),
+    )?;
+    m.add(
+        "SnmpDecodeError",
+        py.get_type_bound::<error::PySnmpDecodeError>(),
+    )?;
+    m.add(
+        "SnmpAuthError",
+        py.get_type_bound::<error::PySnmpAuthError>(),
+    )?;
+    m.add(
+        "NoSuchInstance",
+        py.get_type_bound::<error::PyNoSuchInstance>(),
+    )?;
     m.add_class::<socket::SnmpV1ClientSocket>()?;
     m.add_class::<socket::SnmpV2cClientSocket>()?;
     m.add_class::<socket::SnmpV3ClientSocket>()?;

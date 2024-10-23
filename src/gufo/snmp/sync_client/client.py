@@ -184,7 +184,7 @@ class SnmpSession(object):
         if self._policer:
             self._policer.wait_sync()
         try:
-            return self._sock.sync_get(oid)
+            return self._sock.get(oid)
         except BlockingIOError as e:
             raise TimeoutError from e
 
@@ -215,7 +215,7 @@ class SnmpSession(object):
         if self._policer:
             self._policer.wait_sync()
         try:
-            return self._sock.sync_get_many(list(oids))
+            return self._sock.get_many(list(oids))
         except BlockingIOError as e:
             raise TimeoutError from e
 

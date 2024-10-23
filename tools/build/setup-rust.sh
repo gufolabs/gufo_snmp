@@ -13,7 +13,7 @@ if [ -z "${RUST_ARCH}" ]; then
     exit 2
 fi
 
-RUST_VERSION=${RUST_VERSION:-1.81.0}
+RUST_VERSION=${RUST_VERSION:-1.82.0}
 
 # @todo: Allow override
 export RUSTUP_HOME=${RUSTUP_HOME:-/usr/local/rustup}
@@ -38,3 +38,6 @@ curl -s --tlsv1.2 https://sh.rustup.rs \
 # Check
 cargo --version
 rustc --version
+# Install components
+rustup component add clippy
+rustup component add rustfmt

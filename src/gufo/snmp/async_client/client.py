@@ -181,12 +181,12 @@ class SnmpSession(object):
         """
 
         def sender() -> None:
-            self._sock.async_send_get(oid)
+            self._sock.send_get(oid)
 
         return await send_and_recv(
             self._fd,
             sender,
-            self._sock.async_recv_getresponse,
+            self._sock.recv_get,
             self._policer,
             self._timeout,
         )
@@ -217,12 +217,12 @@ class SnmpSession(object):
         """
 
         def sender() -> None:
-            self._sock.async_send_get_many(list(oids))
+            self._sock.send_get_many(list(oids))
 
         return await send_and_recv(
             self._fd,
             sender,
-            self._sock.async_recv_getresponse_many,
+            self._sock.recv_get_many,
             self._policer,
             self._timeout,
         )

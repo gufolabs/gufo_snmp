@@ -56,6 +56,9 @@ pub enum SnmpError {
     AuthenticationFailed,
 }
 
+unsafe impl Send for SnmpError {}
+unsafe impl Sync for SnmpError {}
+
 impl From<nom::Err<SnmpError>> for SnmpError {
     fn from(value: nom::Err<SnmpError>) -> SnmpError {
         match value {

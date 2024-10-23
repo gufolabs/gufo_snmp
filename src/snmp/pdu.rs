@@ -74,4 +74,12 @@ impl<'a> SnmpPdu<'a> {
             SnmpPdu::Report(_) => true,
         }
     }
+    /// Get GERRESPONSE pdu
+    pub fn as_getresponse(&self) -> Option<&SnmpGetResponse<'_>> {
+        if let SnmpPdu::GetResponse(pdu) = self {
+            Some(pdu)
+        } else {
+            None
+        }
+    }
 }
