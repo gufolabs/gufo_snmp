@@ -47,7 +47,7 @@ class GetNextIter(object):
         if self._policer:
             self._policer.wait_sync()
         try:
-            return self._sock.sync_getnext(self._ctx)
+            return self._sock.get_next(self._ctx)
         except StopAsyncIteration as e:
             raise StopIteration from e
         except BlockingIOError as e:

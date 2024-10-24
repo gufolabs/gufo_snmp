@@ -51,10 +51,10 @@ class GetNextIter(object):
         """Get next value."""
 
         def sender() -> None:
-            self._sock.async_send_getnext(self._ctx)
+            self._sock.send_get_next(self._ctx)
 
         def receiver() -> Tuple[str, ValueType]:
-            return self._sock.async_recv_getresponse_next(self._ctx)
+            return self._sock.recv_get_next(self._ctx)
 
         return await send_and_recv(
             self._fd, sender, receiver, self._policer, self._timeout

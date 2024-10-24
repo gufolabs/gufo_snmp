@@ -107,6 +107,7 @@ impl SnmpTransport {
         T: TryFrom<&'a [u8], Error = SnmpError>,
         'b: 'a,
     {
+        self.buf.reset();
         let size = match self.io.recv(self.buf.as_mut()) {
             Ok(s) => s,
             Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {

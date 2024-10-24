@@ -224,8 +224,13 @@ impl SnmpV3ClientSocket {
             }
         }
     }
+    // .get_next
+    fn get_next(&mut self, py: Python, iter: &mut GetNextIter) -> PyResult<(PyObject, PyObject)> {
+        self.send_get_next(iter)?;
+        self.recv_get_next(iter, py)
+    }
     // Send GetNext request according to iter
-    fn async_send_getnext(&mut self, iter: &GetNextIter) -> PyResult<()> {
+    fn send_get_next(&mut self, iter: &GetNextIter) -> PyResult<()> {
         let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(
             SnmpPdu::GetNextRequest(SnmpGet {
@@ -235,32 +240,8 @@ impl SnmpV3ClientSocket {
             false,
         )?)
     }
-    // Send GetBulk request according to iter
-    fn async_send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
-        let request_id = self.request_id.get_next();
-        Ok(self.wrap_and_send(
-            SnmpPdu::GetBulkRequest(SnmpGetBulk {
-                request_id,
-                non_repeaters: 0,
-                max_repetitions: iter.get_max_repetitions(),
-                vars: vec![iter.get_next_oid()],
-            }),
-            false,
-        )?)
-    }
-    // Send GET+Report to adjust boots and time
-    fn async_send_refresh(&mut self) -> PyResult<()> {
-        let request_id = self.request_id.get_next();
-        Ok(self.wrap_and_send(
-            SnmpPdu::GetRequest(SnmpGet {
-                request_id,
-                vars: vec![],
-            }),
-            true,
-        )?)
-    }
     // Try to receive GETRESPONSE for GETNEXT
-    fn async_recv_getresponse_next(
+    fn recv_get_next(
         &mut self,
         iter: &mut GetNextIter,
         py: Python,
@@ -298,6 +279,30 @@ impl SnmpV3ClientSocket {
                 None => continue,
             }
         }
+    }
+    // Send GetBulk request according to iter
+    fn async_send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
+        let request_id = self.request_id.get_next();
+        Ok(self.wrap_and_send(
+            SnmpPdu::GetBulkRequest(SnmpGetBulk {
+                request_id,
+                non_repeaters: 0,
+                max_repetitions: iter.get_max_repetitions(),
+                vars: vec![iter.get_next_oid()],
+            }),
+            false,
+        )?)
+    }
+    // Send GET+Report to adjust boots and time
+    fn async_send_refresh(&mut self) -> PyResult<()> {
+        let request_id = self.request_id.get_next();
+        Ok(self.wrap_and_send(
+            SnmpPdu::GetRequest(SnmpGet {
+                request_id,
+                vars: vec![],
+            }),
+            true,
+        )?)
     }
     // Try to receive GETRESPONSE for GETBULK
     fn async_recv_getresponse_bulk(
@@ -362,14 +367,6 @@ impl SnmpV3ClientSocket {
         }
     }
     //
-    fn sync_getnext(
-        &mut self,
-        py: Python,
-        iter: &mut GetNextIter,
-    ) -> PyResult<(PyObject, PyObject)> {
-        self.async_send_getnext(iter)?;
-        self.async_recv_getresponse_next(iter, py)
-    }
     //
     fn sync_getbulk(&mut self, py: Python, iter: &mut GetBulkIter) -> PyResult<PyObject> {
         self.async_send_getbulk(iter)?;
