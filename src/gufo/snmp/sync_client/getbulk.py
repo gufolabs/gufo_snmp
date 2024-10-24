@@ -58,7 +58,7 @@ class GetBulkIter(object):
         if self._policer:
             self._policer.wait_sync()
         try:
-            self._buffer = self._sock.sync_getbulk(self._ctx)
+            self._buffer = self._sock.get_bulk(self._ctx)
         except BlockingIOError as e:
             raise TimeoutError from e
         except StopAsyncIteration as e:

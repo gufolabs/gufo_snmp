@@ -47,7 +47,7 @@ class SnmpV1ClientSocket(object):
         self: "SnmpV1ClientSocket", oids: List[str]
     ) -> Dict[str, ValueType]: ...
     def send_get_many(self: "SnmpV1ClientSocket", oids: List[str]) -> None: ...
-    def recv_getresponse_many(
+    def recv_get_many(
         self: "SnmpV1ClientSocket",
     ) -> Dict[str, ValueType]: ...
 
@@ -62,15 +62,15 @@ class SnmpV1ClientSocket(object):
         self: "SnmpV1ClientSocket", iter_getnext: GetNextIter
     ) -> Tuple[str, ValueType]: ...
 
-    # Rest
-    def async_send_getbulk(
+    # .get_bulk()
+    def get_bulk(
+        self: "SnmpV1ClientSocket", iter_getbulk: GetBulkIter
+    ) -> List[Tuple[str, ValueType]]: ...
+    def send_get_bulk(
         self: "SnmpV1ClientSocket", iter_getbulk: GetBulkIter
     ) -> None: ...
-    def async_recv_getresponse_bulk(
+    def recv_get_bulk(
         self: "SnmpV1ClientSocket", iter_getnext: GetBulkIter
-    ) -> List[Tuple[str, ValueType]]: ...
-    def sync_getbulk(
-        self: "SnmpV1ClientSocket", iter_getbulk: GetBulkIter
     ) -> List[Tuple[str, ValueType]]: ...
 
 class SnmpV2cClientSocket(object):
@@ -108,15 +108,15 @@ class SnmpV2cClientSocket(object):
     def recv_get_next(
         self: "SnmpV2cClientSocket", iter_getnext: GetNextIter
     ) -> Tuple[str, ValueType]: ...
-    # Rest
-    def async_send_getbulk(
+    # .get_bulk()
+    def get_bulk(
+        self: "SnmpV2cClientSocket", iter_getbulk: GetBulkIter
+    ) -> List[Tuple[str, ValueType]]: ...
+    def send_get_bulk(
         self: "SnmpV2cClientSocket", iter_getbulk: GetBulkIter
     ) -> None: ...
-    def async_recv_getresponse_bulk(
+    def recv_get_bulk(
         self: "SnmpV2cClientSocket", iter_getnext: GetBulkIter
-    ) -> List[Tuple[str, ValueType]]: ...
-    def sync_getbulk(
-        self: "SnmpV2cClientSocket", iter_getbulk: GetBulkIter
     ) -> List[Tuple[str, ValueType]]: ...
 
 class SnmpV3ClientSocket(object):
@@ -166,17 +166,18 @@ class SnmpV3ClientSocket(object):
         self: "SnmpV3ClientSocket", iter_getnext: GetNextIter
     ) -> Tuple[str, ValueType]: ...
     # Rest
-    def async_send_getbulk(
+    def get_bulk(
+        self: "SnmpV3ClientSocket", iter_getbulk: GetBulkIter
+    ) -> List[Tuple[str, ValueType]]: ...
+    def send_get_bulk(
         self: "SnmpV3ClientSocket", iter_getbulk: GetBulkIter
     ) -> None: ...
-    def async_send_refresh(self: "SnmpV3ClientSocket") -> None: ...
-    def async_recv_getresponse_bulk(
+    def recv_get_bulk(
         self: "SnmpV3ClientSocket", iter_getnext: GetBulkIter
     ) -> List[Tuple[str, ValueType]]: ...
+    # .refresh
     def async_recv_refresh(self: "SnmpV3ClientSocket") -> None: ...
-    def sync_getbulk(
-        self: "SnmpV3ClientSocket", iter_getbulk: GetBulkIter
-    ) -> List[Tuple[str, ValueType]]: ...
+    def async_send_refresh(self: "SnmpV3ClientSocket") -> None: ...
     def sync_refresh(self: "SnmpV3ClientSocket") -> None: ...
 
 def get_master_key(auth_alg: int, passwd: bytes) -> bytes: ...

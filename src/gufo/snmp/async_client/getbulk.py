@@ -55,10 +55,10 @@ class GetBulkIter(object):
         """Get next value."""
 
         def sender() -> None:
-            self._sock.async_send_getbulk(self._ctx)
+            self._sock.send_get_bulk(self._ctx)
 
         def receiver() -> List[Tuple[str, ValueType]]:
-            return self._sock.async_recv_getresponse_bulk(self._ctx)
+            return self._sock.recv_get_bulk(self._ctx)
 
         # Return item from buffer, if present
         if self._buffer:

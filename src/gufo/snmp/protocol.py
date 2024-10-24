@@ -47,15 +47,15 @@ class SnmpClientSocketProtocol(Protocol):
         self: "SnmpClientSocketProtocol", iter_getnext: GetNextIter
     ) -> Tuple[str, ValueType]: ...
 
-    # Rest
-    def send_getbulk(
+    # .get_bulk
+    def get_bulk(
+        self: "SnmpClientSocketProtocol", iter_getbulk: GetBulkIter
+    ) -> List[Tuple[str, ValueType]]: ...
+
+    def send_get_bulk(
         self: "SnmpClientSocketProtocol", iter_getbulk: GetBulkIter
     ) -> None: ...
 
-    def recv_getresponse_bulk(
+    def recv_get_bulk(
         self: "SnmpClientSocketProtocol", iter_getnext: GetBulkIter
-    ) -> List[Tuple[str, ValueType]]: ...
-
-    def sync_getbulk(
-        self: "SnmpClientSocketProtocol", iter_getbulk: GetBulkIter
     ) -> List[Tuple[str, ValueType]]: ...

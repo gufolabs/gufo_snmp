@@ -6,7 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::iter::{GetBulkIter, GetNextIter};
-use super::op::{SnmpSocket, SupportsGet, SupportsGetMany, SupportsGetNext};
+use super::op::{SnmpSocket, SupportsGet, SupportsGetBulk, SupportsGetMany, SupportsGetNext};
 use super::transport::SnmpTransport;
 use crate::ber::{SnmpOid, ToPython};
 use crate::error::{SnmpError, SnmpResult};
@@ -95,77 +95,17 @@ impl SnmpV1ClientSocket {
     ) -> PyResult<(PyObject, PyObject)> {
         SupportsGetNext::recv_get_next(self, py, iter)
     }
+    // .get_bulk()
+    fn get_bulk(&mut self, py: Python, iter: &mut GetBulkIter) -> PyResult<PyObject> {
+        SupportsGetBulk::get_bulk(self, py, iter)
+    }
     // Send GetBulk request according to iter
-    fn async_send_getbulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
-        // Encode message
-        Ok(self.io.send(SnmpV1Message {
-            community: self.community.as_ref(),
-            pdu: SnmpPdu::GetBulkRequest(SnmpGetBulk {
-                request_id: self.request_id.get_next(),
-                non_repeaters: 0,
-                max_repetitions: iter.get_max_repetitions(),
-                vars: vec![iter.get_next_oid()],
-            }),
-        })?)
+    fn send_get_bulk(&mut self, py: Python, iter: &GetBulkIter) -> PyResult<()> {
+        Ok(SupportsGetBulk::send_get_bulk(self, py, iter)?)
     }
     // Try to receive GETRESPONSE for GETBULK
-    fn async_recv_getresponse_bulk(
-        &mut self,
-        iter: &mut GetBulkIter,
-        py: Python,
-    ) -> PyResult<PyObject> {
-        loop {
-            // Receive and decode message
-            let msg = self.io.recv::<SnmpV1Message>()?;
-            // Check community match
-            if msg.community != self.community.as_bytes() {
-                continue; // Community mismatch, not our response.
-            }
-            match msg.pdu {
-                SnmpPdu::GetResponse(resp) => {
-                    // Check request id
-                    if !self.request_id.check(resp.request_id) {
-                        continue; // Not our request
-                    }
-                    // Check error_index
-                    // Check varbinds size
-                    if resp.vars.is_empty() {
-                        return Err(PyStopAsyncIteration::new_err("stop"));
-                    }
-                    let list = PyList::empty_bound(py);
-                    for var in resp.vars.iter() {
-                        match &var.value {
-                            SnmpValue::Null
-                            | SnmpValue::NoSuchObject
-                            | SnmpValue::NoSuchInstance
-                            | SnmpValue::EndOfMibView => continue,
-                            _ => {
-                                // Check if we can continue
-                                if !iter.set_next_oid(&var.oid) {
-                                    break;
-                                }
-                                // Append to list
-                                list.append(PyTuple::new_bound(
-                                    py,
-                                    vec![var.oid.try_to_python(py)?, var.value.try_to_python(py)?],
-                                ))
-                                .map_err(|e| PyRuntimeError::new_err(e.to_string()))?
-                            }
-                        }
-                    }
-                    if list.is_empty() {
-                        return Err(PyStopAsyncIteration::new_err("stop"));
-                    }
-                    return Ok(list.into());
-                }
-                _ => continue,
-            }
-        }
-    }
-    //
-    fn sync_getbulk(&mut self, py: Python, iter: &mut GetBulkIter) -> PyResult<PyObject> {
-        self.async_send_getbulk(iter)?;
-        self.async_recv_getresponse_bulk(iter, py)
+    fn recv_get_bulk(&mut self, iter: &mut GetBulkIter, py: Python) -> PyResult<PyObject> {
+        SupportsGetBulk::recv_get_bulk(self, py, iter)
     }
 }
 
@@ -294,6 +234,54 @@ impl SupportsGetNext for SnmpV1ClientSocket {
                 // Multiple response, surely an error
                 _ => return Err(SnmpError::InvalidPdu.into()),
             }
+        }
+        Err(SnmpError::InvalidPdu.into())
+    }
+}
+
+impl SupportsGetBulk for SnmpV1ClientSocket {
+    fn request<'a>(&'a self, iter: &GetBulkIter, request_id: i64) -> SnmpResult<Self::Message<'a>> {
+        Ok(Self::Message {
+            community: self.community.as_ref(),
+            pdu: SnmpPdu::GetBulkRequest(SnmpGetBulk {
+                request_id,
+                non_repeaters: 0,
+                max_repetitions: iter.get_max_repetitions(),
+                vars: vec![iter.get_next_oid()],
+            }),
+        })
+    }
+    fn parse(py: Python, msg: &Self::Message<'_>, iter: &mut GetBulkIter) -> PyResult<PyObject> {
+        if let Some(resp) = msg.as_pdu().as_getresponse() {
+            // Check varbinds size
+            if resp.vars.is_empty() {
+                return Err(PyStopAsyncIteration::new_err("stop"));
+            }
+            let list = PyList::empty_bound(py);
+            for var in resp.vars.iter() {
+                match &var.value {
+                    SnmpValue::Null
+                    | SnmpValue::NoSuchObject
+                    | SnmpValue::NoSuchInstance
+                    | SnmpValue::EndOfMibView => continue,
+                    _ => {
+                        // Check if we can continue
+                        if !iter.set_next_oid(&var.oid) {
+                            break;
+                        }
+                        // Append to list
+                        list.append(PyTuple::new_bound(
+                            py,
+                            vec![var.oid.try_to_python(py)?, var.value.try_to_python(py)?],
+                        ))
+                        .map_err(|e| PyRuntimeError::new_err(e.to_string()))?
+                    }
+                }
+            }
+            if list.is_empty() {
+                return Err(PyStopAsyncIteration::new_err("stop"));
+            }
+            return Ok(list.into());
         }
         Err(SnmpError::InvalidPdu.into())
     }
