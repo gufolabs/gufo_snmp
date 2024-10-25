@@ -8,19 +8,14 @@
 use super::iter::{GetBulkIter, GetNextIter};
 use super::op::{SnmpSocket, SupportsGet, SupportsGetBulk, SupportsGetMany, SupportsGetNext};
 use super::transport::SnmpTransport;
-use crate::ber::{SnmpOid, ToPython};
+use crate::ber::SnmpOid;
 use crate::error::{SnmpError, SnmpResult};
 use crate::reqid::RequestId;
 use crate::snmp::get::SnmpGet;
 use crate::snmp::getbulk::SnmpGetBulk;
-use crate::snmp::msg::{SnmpMessage, SnmpV2cMessage};
+use crate::snmp::msg::SnmpV2cMessage;
 use crate::snmp::pdu::SnmpPdu;
-use crate::snmp::value::SnmpValue;
-use pyo3::{
-    exceptions::{PyRuntimeError, PyStopAsyncIteration},
-    prelude::*,
-    types::{PyDict, PyList, PyTuple},
-};
+use pyo3::prelude::*;
 use std::os::fd::AsRawFd;
 
 /// Python class wrapping socket implementation
@@ -135,31 +130,6 @@ impl SupportsGet for SnmpV2cClientSocket {
             }),
         })
     }
-    fn parse(py: Python, msg: &Self::Message<'_>) -> PyResult<Option<PyObject>> {
-        if let Some(resp) = msg.as_pdu().as_getresponse() {
-            // Check varbinds size
-            match resp.vars.len() {
-                // Empty response, return None
-                0 => Ok(None),
-                // Return value
-                1 => {
-                    let var = &resp.vars[0];
-                    let value = &var.value;
-                    match value {
-                        SnmpValue::NoSuchObject
-                        | SnmpValue::NoSuchInstance
-                        | SnmpValue::EndOfMibView => Err(SnmpError::NoSuchInstance.into()),
-                        SnmpValue::Null => Ok(None),
-                        _ => Ok(Some(value.try_to_python(py)?)),
-                    }
-                }
-                // Multiple response, surely an error
-                _ => Err(SnmpError::InvalidPdu.into()),
-            }
-        } else {
-            Err(SnmpError::InvalidPdu.into())
-        }
-    }
 }
 
 impl SupportsGetMany for SnmpV2cClientSocket {
@@ -175,25 +145,6 @@ impl SupportsGetMany for SnmpV2cClientSocket {
             }),
         })
     }
-    fn parse(py: Python, msg: &Self::Message<'_>) -> PyResult<PyObject> {
-        if let Some(resp) = msg.as_pdu().as_getresponse() {
-            // Build resulting dict
-            let dict = PyDict::new_bound(py);
-            for var in resp.vars.iter() {
-                match &var.value {
-                    SnmpValue::Null
-                    | SnmpValue::NoSuchObject
-                    | SnmpValue::NoSuchInstance
-                    | SnmpValue::EndOfMibView => continue,
-                    _ => dict
-                        .set_item(var.oid.try_to_python(py)?, var.value.try_to_python(py)?)
-                        .map_err(|e| PyRuntimeError::new_err(e.to_string()))?,
-                }
-            }
-            return Ok(dict.into());
-        }
-        Err(SnmpError::InvalidPdu.into())
-    }
 }
 
 impl SupportsGetNext for SnmpV2cClientSocket {
@@ -205,37 +156,6 @@ impl SupportsGetNext for SnmpV2cClientSocket {
                 vars: vec![iter.get_next_oid()],
             }),
         })
-    }
-    fn parse(
-        py: Python,
-        msg: &Self::Message<'_>,
-        iter: &mut GetNextIter,
-    ) -> PyResult<(PyObject, PyObject)> {
-        if let Some(resp) = msg.as_pdu().as_getresponse() {
-            // Check varbinds size
-            match resp.vars.len() {
-                // Empty response, stop iteration
-                0 => return Err(PyStopAsyncIteration::new_err("stop")),
-                // Return value
-                1 => {
-                    let var = &resp.vars[0];
-                    // Check if we can continue
-                    if !iter.set_next_oid(&var.oid) {
-                        return Err(PyStopAsyncIteration::new_err("stop"));
-                    }
-                    // v1 may return Null at end of mib
-                    return match &var.value {
-                        SnmpValue::EndOfMibView | SnmpValue::Null => {
-                            Err(PyStopAsyncIteration::new_err("stop"))
-                        }
-                        value => Ok((var.oid.try_to_python(py)?, value.try_to_python(py)?)),
-                    };
-                }
-                // Multiple response, surely an error
-                _ => return Err(SnmpError::InvalidPdu.into()),
-            }
-        }
-        Err(SnmpError::InvalidPdu.into())
     }
 }
 
@@ -250,39 +170,5 @@ impl SupportsGetBulk for SnmpV2cClientSocket {
                 vars: vec![iter.get_next_oid()],
             }),
         })
-    }
-    fn parse(py: Python, msg: &Self::Message<'_>, iter: &mut GetBulkIter) -> PyResult<PyObject> {
-        if let Some(resp) = msg.as_pdu().as_getresponse() {
-            // Check varbinds size
-            if resp.vars.is_empty() {
-                return Err(PyStopAsyncIteration::new_err("stop"));
-            }
-            let list = PyList::empty_bound(py);
-            for var in resp.vars.iter() {
-                match &var.value {
-                    SnmpValue::Null
-                    | SnmpValue::NoSuchObject
-                    | SnmpValue::NoSuchInstance
-                    | SnmpValue::EndOfMibView => continue,
-                    _ => {
-                        // Check if we can continue
-                        if !iter.set_next_oid(&var.oid) {
-                            break;
-                        }
-                        // Append to list
-                        list.append(PyTuple::new_bound(
-                            py,
-                            vec![var.oid.try_to_python(py)?, var.value.try_to_python(py)?],
-                        ))
-                        .map_err(|e| PyRuntimeError::new_err(e.to_string()))?
-                    }
-                }
-            }
-            if list.is_empty() {
-                return Err(PyStopAsyncIteration::new_err("stop"));
-            }
-            return Ok(list.into());
-        }
-        Err(SnmpError::InvalidPdu.into())
     }
 }

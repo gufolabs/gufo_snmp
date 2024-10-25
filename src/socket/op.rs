@@ -10,12 +10,16 @@ use super::{
     transport::SnmpTransport,
 };
 use crate::{
-    ber::BerEncoder,
+    ber::{BerEncoder, ToPython},
     error::{SnmpError, SnmpResult},
     reqid::RequestId,
-    snmp::msg::SnmpMessage,
+    snmp::{msg::SnmpMessage, value::SnmpValue},
 };
-use pyo3::prelude::*;
+use pyo3::{
+    exceptions::{PyRuntimeError, PyStopAsyncIteration},
+    prelude::*,
+    types::{PyDict, PyList, PyTuple},
+};
 
 pub(crate) trait SnmpSocket
 where
@@ -52,7 +56,31 @@ where
 
 pub(crate) trait SupportsGet: SnmpSocket {
     fn request<'a>(&'a self, oid: &str, request_id: i64) -> SnmpResult<Self::Message<'a>>;
-    fn parse(py: Python, msg: &Self::Message<'_>) -> PyResult<Option<PyObject>>;
+    fn parse(py: Python, msg: &Self::Message<'_>) -> PyResult<Option<PyObject>> {
+        if let Some(resp) = msg.as_pdu().as_getresponse() {
+            // Check varbinds size
+            match resp.vars.len() {
+                // Empty response, return None
+                0 => Ok(None),
+                // Return value
+                1 => {
+                    let var = &resp.vars[0];
+                    let value = &var.value;
+                    match value {
+                        SnmpValue::NoSuchObject
+                        | SnmpValue::NoSuchInstance
+                        | SnmpValue::EndOfMibView => Err(SnmpError::NoSuchInstance.into()),
+                        SnmpValue::Null => Ok(None),
+                        _ => Ok(Some(value.try_to_python(py)?)),
+                    }
+                }
+                // Multiple response, surely an error
+                _ => Err(SnmpError::InvalidPdu.into()),
+            }
+        } else {
+            Err(SnmpError::InvalidPdu.into())
+        }
+    }
     // Send get request and receive and decode reply
     fn get(&mut self, py: Python, oid: &str) -> PyResult<Option<PyObject>> {
         // Release GIL
@@ -103,7 +131,25 @@ pub(crate) trait SupportsGet: SnmpSocket {
 
 pub(crate) trait SupportsGetMany: SnmpSocket {
     fn request<'a>(&'a self, oids: Vec<&str>, request_id: i64) -> SnmpResult<Self::Message<'a>>;
-    fn parse(py: Python, msg: &Self::Message<'_>) -> PyResult<PyObject>;
+    fn parse(py: Python, msg: &Self::Message<'_>) -> PyResult<PyObject> {
+        if let Some(resp) = msg.as_pdu().as_getresponse() {
+            // Build resulting dict
+            let dict = PyDict::new_bound(py);
+            for var in resp.vars.iter() {
+                match &var.value {
+                    SnmpValue::Null
+                    | SnmpValue::NoSuchObject
+                    | SnmpValue::NoSuchInstance
+                    | SnmpValue::EndOfMibView => continue,
+                    _ => dict
+                        .set_item(var.oid.try_to_python(py)?, var.value.try_to_python(py)?)
+                        .map_err(|e| PyRuntimeError::new_err(e.to_string()))?,
+                }
+            }
+            return Ok(dict.into());
+        }
+        Err(SnmpError::InvalidPdu.into())
+    }
     // Send get request and receive and decode reply
     fn get_many(&mut self, py: Python, oids: Vec<&str>) -> PyResult<PyObject> {
         // Release GIL
@@ -158,7 +204,33 @@ pub(crate) trait SupportsGetNext: SnmpSocket {
         py: Python,
         msg: &Self::Message<'_>,
         iter: &mut GetNextIter,
-    ) -> PyResult<(PyObject, PyObject)>;
+    ) -> PyResult<(PyObject, PyObject)> {
+        if let Some(resp) = msg.as_pdu().as_getresponse() {
+            // Check varbinds size
+            match resp.vars.len() {
+                // Empty response, stop iteration
+                0 => return Err(PyStopAsyncIteration::new_err("stop")),
+                // Return value
+                1 => {
+                    let var = &resp.vars[0];
+                    // Check if we can continue
+                    if !iter.set_next_oid(&var.oid) {
+                        return Err(PyStopAsyncIteration::new_err("stop"));
+                    }
+                    // v1 may return Null at end of mib
+                    return match &var.value {
+                        SnmpValue::EndOfMibView | SnmpValue::Null => {
+                            Err(PyStopAsyncIteration::new_err("stop"))
+                        }
+                        value => Ok((var.oid.try_to_python(py)?, value.try_to_python(py)?)),
+                    };
+                }
+                // Multiple response, surely an error
+                _ => return Err(SnmpError::InvalidPdu.into()),
+            }
+        }
+        Err(SnmpError::InvalidPdu.into())
+    }
     // Send get request and receive and decode reply
     fn get_next(&mut self, py: Python, iter: &mut GetNextIter) -> PyResult<(PyObject, PyObject)> {
         // Release GIL
@@ -213,7 +285,40 @@ pub(crate) trait SupportsGetNext: SnmpSocket {
 
 pub(crate) trait SupportsGetBulk: SnmpSocket {
     fn request<'a>(&'a self, iter: &GetBulkIter, request_id: i64) -> SnmpResult<Self::Message<'a>>;
-    fn parse(py: Python, msg: &Self::Message<'_>, iter: &mut GetBulkIter) -> PyResult<PyObject>;
+    fn parse(py: Python, msg: &Self::Message<'_>, iter: &mut GetBulkIter) -> PyResult<PyObject> {
+        if let Some(resp) = msg.as_pdu().as_getresponse() {
+            // Check varbinds size
+            if resp.vars.is_empty() {
+                return Err(PyStopAsyncIteration::new_err("stop"));
+            }
+            let list = PyList::empty_bound(py);
+            for var in resp.vars.iter() {
+                match &var.value {
+                    SnmpValue::Null
+                    | SnmpValue::NoSuchObject
+                    | SnmpValue::NoSuchInstance
+                    | SnmpValue::EndOfMibView => continue,
+                    _ => {
+                        // Check if we can continue
+                        if !iter.set_next_oid(&var.oid) {
+                            break;
+                        }
+                        // Append to list
+                        list.append(PyTuple::new_bound(
+                            py,
+                            vec![var.oid.try_to_python(py)?, var.value.try_to_python(py)?],
+                        ))
+                        .map_err(|e| PyRuntimeError::new_err(e.to_string()))?
+                    }
+                }
+            }
+            if list.is_empty() {
+                return Err(PyStopAsyncIteration::new_err("stop"));
+            }
+            return Ok(list.into());
+        }
+        Err(SnmpError::InvalidPdu.into())
+    }
     // Send get request and receive and decode reply
     fn get_bulk(&mut self, py: Python, iter: &mut GetBulkIter) -> PyResult<PyObject> {
         // Release GIL
