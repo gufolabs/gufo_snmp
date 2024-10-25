@@ -14,7 +14,9 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ### Infrastructure
 
-* Rust 1.81.1
+* Rust 1.82.0
+* mypy 1.13.0
+* Ruff 0.6.9
 
 ## 0.5.2 - 2024-07-30
 
