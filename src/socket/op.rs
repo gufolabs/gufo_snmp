@@ -51,6 +51,17 @@ where
             }
         }
     }
+    fn recv_and_check<'a>(&mut self) -> SnmpResult<Self::Message<'a>> {
+        loop {
+            if let Some(reply) = self.try_recv()? {
+                if let Some(r) = reply.as_pdu().as_getresponse() {
+                    if self.get_request_id().check(r.request_id) {
+                        return Ok(reply);
+                    }
+                }
+            }
+        }
+    }
     fn authenticate(&self, msg: &Self::Message<'_>) -> bool;
 }
 
@@ -84,20 +95,12 @@ pub(crate) trait SupportsGet: SnmpSocket {
     // Send get request and receive and decode reply
     fn get(&mut self, py: Python, oid: &str) -> PyResult<Option<PyObject>> {
         // Release GIL
-        let reply = py.allow_threads(|| -> SnmpResult<Self::Message<'_>> {
+        let reply = py.allow_threads(|| {
             // Send request
             let req_id = self.get_request_id().get_next();
             self.send(self.request(oid, req_id)?)?;
             // Check until our reply is received
-            loop {
-                if let Some(reply) = self.try_recv()? {
-                    if let Some(r) = reply.as_pdu().as_getresponse() {
-                        if self.get_request_id().check(r.request_id) {
-                            return Ok(reply);
-                        }
-                    }
-                }
-            }
+            self.recv_and_check()
         })?;
         // Convert to python structure under GIL
         Self::parse(py, &reply)
@@ -112,18 +115,7 @@ pub(crate) trait SupportsGet: SnmpSocket {
     // Receiver and parse getresponse (for async)
     fn recv_get(&mut self, py: Python) -> PyResult<Option<PyObject>> {
         // Release GIL
-        let reply = py.allow_threads(|| -> SnmpResult<Self::Message<'_>> {
-            // Check until our reply is received
-            loop {
-                if let Some(reply) = self.try_recv()? {
-                    if let Some(r) = reply.as_pdu().as_getresponse() {
-                        if self.get_request_id().check(r.request_id) {
-                            return Ok(reply);
-                        }
-                    }
-                }
-            }
-        })?;
+        let reply = py.allow_threads(|| self.recv_and_check())?;
         // Convert to python structure under GIL
         Self::parse(py, &reply)
     }
@@ -153,20 +145,12 @@ pub(crate) trait SupportsGetMany: SnmpSocket {
     // Send get request and receive and decode reply
     fn get_many(&mut self, py: Python, oids: Vec<&str>) -> PyResult<PyObject> {
         // Release GIL
-        let reply = py.allow_threads(|| -> SnmpResult<Self::Message<'_>> {
+        let reply = py.allow_threads(|| {
             // Send request
             let req_id = self.get_request_id().get_next();
             self.send(self.request(oids, req_id)?)?;
             // Check until our reply is received
-            loop {
-                if let Some(reply) = self.try_recv()? {
-                    if let Some(r) = reply.as_pdu().as_getresponse() {
-                        if self.get_request_id().check(r.request_id) {
-                            return Ok(reply);
-                        }
-                    }
-                }
-            }
+            self.recv_and_check()
         })?;
         // Convert to python structure under GIL
         Self::parse(py, &reply)
@@ -181,18 +165,7 @@ pub(crate) trait SupportsGetMany: SnmpSocket {
     // Receiver and parse getresponse (for async)
     fn recv_get_many(&mut self, py: Python) -> PyResult<PyObject> {
         // Release GIL
-        let reply = py.allow_threads(|| -> SnmpResult<Self::Message<'_>> {
-            // Check until our reply is received
-            loop {
-                if let Some(reply) = self.try_recv()? {
-                    if let Some(r) = reply.as_pdu().as_getresponse() {
-                        if self.get_request_id().check(r.request_id) {
-                            return Ok(reply);
-                        }
-                    }
-                }
-            }
-        })?;
+        let reply = py.allow_threads(|| self.recv_and_check())?;
         // Convert to python structure under GIL
         Self::parse(py, &reply)
     }
@@ -234,20 +207,12 @@ pub(crate) trait SupportsGetNext: SnmpSocket {
     // Send get request and receive and decode reply
     fn get_next(&mut self, py: Python, iter: &mut GetNextIter) -> PyResult<(PyObject, PyObject)> {
         // Release GIL
-        let reply = py.allow_threads(|| -> SnmpResult<Self::Message<'_>> {
+        let reply = py.allow_threads(|| {
             // Send request
             let req_id = self.get_request_id().get_next();
             self.send(self.request(iter, req_id)?)?;
             // Check until our reply is received
-            loop {
-                if let Some(reply) = self.try_recv()? {
-                    if let Some(r) = reply.as_pdu().as_getresponse() {
-                        if self.get_request_id().check(r.request_id) {
-                            return Ok(reply);
-                        }
-                    }
-                }
-            }
+            self.recv_and_check()
         })?;
         // Convert to python structure under GIL
         Self::parse(py, &reply, iter)
@@ -266,18 +231,7 @@ pub(crate) trait SupportsGetNext: SnmpSocket {
         iter: &mut GetNextIter,
     ) -> PyResult<(PyObject, PyObject)> {
         // Release GIL
-        let reply = py.allow_threads(|| -> SnmpResult<Self::Message<'_>> {
-            // Check until our reply is received
-            loop {
-                if let Some(reply) = self.try_recv()? {
-                    if let Some(r) = reply.as_pdu().as_getresponse() {
-                        if self.get_request_id().check(r.request_id) {
-                            return Ok(reply);
-                        }
-                    }
-                }
-            }
-        })?;
+        let reply = py.allow_threads(|| self.recv_and_check())?;
         // Convert to python structure under GIL
         Self::parse(py, &reply, iter)
     }
@@ -322,20 +276,12 @@ pub(crate) trait SupportsGetBulk: SnmpSocket {
     // Send get request and receive and decode reply
     fn get_bulk(&mut self, py: Python, iter: &mut GetBulkIter) -> PyResult<PyObject> {
         // Release GIL
-        let reply = py.allow_threads(|| -> SnmpResult<Self::Message<'_>> {
+        let reply = py.allow_threads(|| {
             // Send request
             let req_id = self.get_request_id().get_next();
             self.send(self.request(iter, req_id)?)?;
             // Check until our reply is received
-            loop {
-                if let Some(reply) = self.try_recv()? {
-                    if let Some(r) = reply.as_pdu().as_getresponse() {
-                        if self.get_request_id().check(r.request_id) {
-                            return Ok(reply);
-                        }
-                    }
-                }
-            }
+            self.recv_and_check()
         })?;
         // Convert to python structure under GIL
         Self::parse(py, &reply, iter)
@@ -350,19 +296,35 @@ pub(crate) trait SupportsGetBulk: SnmpSocket {
     // Receiver and parse getresponse (for async)
     fn recv_get_bulk(&mut self, py: Python, iter: &mut GetBulkIter) -> PyResult<PyObject> {
         // Release GIL
-        let reply = py.allow_threads(|| -> SnmpResult<Self::Message<'_>> {
-            // Check until our reply is received
-            loop {
-                if let Some(reply) = self.try_recv()? {
-                    if let Some(r) = reply.as_pdu().as_getresponse() {
-                        if self.get_request_id().check(r.request_id) {
-                            return Ok(reply);
-                        }
-                    }
-                }
-            }
-        })?;
+        let reply = py.allow_threads(|| self.recv_and_check())?;
         // Convert to python structure under GIL
         Self::parse(py, &reply, iter)
     }
 }
+
+// pub(crate) trait SupportsRefresh: SnmpSocket {
+//     fn request(&mut self, request_id: i64) -> SnmpResult<Self::Message<'_>>;
+//     fn on_refresh(&mut self, msg: &Self::Message<'_>) -> SnmpResult<()>;
+//     fn refresh(&mut self, py: Python) -> PyResult<()> {
+//         Ok(py.allow_threads(|| {
+//             let req_id = self.get_request_id().get_next();
+//             let req = self.request(req_id)?;
+//             self.send(req)?;
+//             let reply = self.recv_and_check()?;
+//             self.on_refresh(&reply)
+//         })?)
+//     }
+//     fn send_refresh(&mut self, py: Python) -> PyResult<()> {
+//         Ok(py.allow_threads(|| {
+//             let req_id = self.get_request_id().get_next();
+//             let req = self.request(req_id)?;
+//             self.send(req)
+//         })?)
+//     }
+//     fn recv_refresh(&mut self, py: Python) -> PyResult<()> {
+//         Ok(py.allow_threads(|| {
+//             let reply = self.recv_and_check()?;
+//             self.on_refresh(&reply)
+//         })?)
+//     }
+// }
