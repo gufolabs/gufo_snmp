@@ -55,7 +55,8 @@ async def send_and_recv(
 
     def write_callback() -> None:
         try:
-            fut.set_result(sender())
+            sender()
+            fut.set_result(None)
         except BaseException as e:  # noqa: BLE001
             fut.set_exception(e)
 
