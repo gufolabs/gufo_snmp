@@ -121,6 +121,7 @@ class SnmpSession(object):
             if not engine_id:
                 # Defer authentication until engine id is discovered
                 self._deferred_user = user
+                user = User.default()
             self._sock = SnmpV3ClientSocket(
                 f"{addr}:{port}",
                 engine_id if engine_id else b"",
@@ -313,6 +314,7 @@ class SnmpSession(object):
             self._sock.sync_refresh()
             # Set and localize actual keys
             self._sock.set_keys(
+                self._deferred_user.name,
                 self._deferred_user.get_auth_alg(),
                 self._deferred_user.get_auth_key(),
                 self._deferred_user.get_priv_alg(),

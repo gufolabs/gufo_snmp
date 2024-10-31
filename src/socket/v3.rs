@@ -89,11 +89,14 @@ impl SnmpV3ClientSocket {
     /// Change keys
     fn set_keys(
         &mut self,
+        user_name: String,
         auth_alg: u8,
         auth_key: &[u8],
         priv_alg: u8,
         priv_key: &[u8],
     ) -> PyResult<()> {
+        // Replace user
+        self.user_name = user_name;
         // Auth key
         let mut auth = AuthKey::new(auth_alg)?;
         auth.as_key_type(auth_alg, auth_key, &self.engine_id)?;

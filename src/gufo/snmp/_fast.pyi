@@ -136,6 +136,7 @@ class SnmpV3ClientSocket(object):
     ) -> None: ...
     def set_keys(
         self: "SnmpV3ClientSocket",
+        user_name: str,
         auth_alg: int,
         auth_key: bytes,
         priv_alg: int,

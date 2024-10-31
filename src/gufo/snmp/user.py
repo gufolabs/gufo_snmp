@@ -243,6 +243,16 @@ class User(object):
         ):
             self.priv_key._pad(self.auth_key.KEY_LENGTH)
 
+    @classmethod
+    def default(cls: Type["User"]) -> "User":
+        """
+        Default user without name and keys.
+
+        Returns:
+            Default user instance.
+        """
+        return User(name="")
+
     def require_auth(self: "User") -> bool:
         """
         Chech if user requires authentication.
