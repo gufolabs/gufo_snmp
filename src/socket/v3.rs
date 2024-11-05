@@ -5,7 +5,6 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::iter::{GetBulkIter, GetNextIter};
 use super::transport::SnmpTransport;
 use crate::auth::{AuthKey, SnmpAuth};
 use crate::ber::{SnmpOid, ToPython};
@@ -15,6 +14,7 @@ use crate::reqid::RequestId;
 use crate::snmp::get::SnmpGet;
 use crate::snmp::getbulk::SnmpGetBulk;
 use crate::snmp::msg::v3::{MsgData, ScopedPdu, SnmpV3Message, UsmParameters};
+use crate::snmp::op::GetIter;
 use crate::snmp::pdu::SnmpPdu;
 use crate::snmp::value::SnmpValue;
 use pyo3::exceptions::PyRuntimeError;
@@ -228,12 +228,12 @@ impl SnmpV3ClientSocket {
         }
     }
     // .get_next
-    fn get_next(&mut self, py: Python, iter: &mut GetNextIter) -> PyResult<(PyObject, PyObject)> {
+    fn get_next(&mut self, py: Python, iter: &mut GetIter) -> PyResult<(PyObject, PyObject)> {
         self.send_get_next(iter)?;
         self.recv_get_next(iter, py)
     }
     // Send GetNext request according to iter
-    fn send_get_next(&mut self, iter: &GetNextIter) -> PyResult<()> {
+    fn send_get_next(&mut self, iter: &GetIter) -> PyResult<()> {
         let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(
             SnmpPdu::GetNextRequest(SnmpGet {
@@ -244,11 +244,7 @@ impl SnmpV3ClientSocket {
         )?)
     }
     // Try to receive GETRESPONSE for GETNEXT
-    fn recv_get_next(
-        &mut self,
-        iter: &mut GetNextIter,
-        py: Python,
-    ) -> PyResult<(PyObject, PyObject)> {
+    fn recv_get_next(&mut self, iter: &mut GetIter, py: Python) -> PyResult<(PyObject, PyObject)> {
         loop {
             match self.recv_and_unwrap()? {
                 Some(pdu) => match pdu {
@@ -284,7 +280,7 @@ impl SnmpV3ClientSocket {
         }
     }
     // Send GetBulk request according to iter
-    fn send_get_bulk(&mut self, iter: &GetBulkIter) -> PyResult<()> {
+    fn send_get_bulk(&mut self, iter: &GetIter) -> PyResult<()> {
         let request_id = self.request_id.get_next();
         Ok(self.wrap_and_send(
             SnmpPdu::GetBulkRequest(SnmpGetBulk {
@@ -308,7 +304,7 @@ impl SnmpV3ClientSocket {
         )?)
     }
     // Try to receive GETRESPONSE for GETBULK
-    fn recv_get_bulk(&mut self, iter: &mut GetBulkIter, py: Python) -> PyResult<PyObject> {
+    fn recv_get_bulk(&mut self, iter: &mut GetIter, py: Python) -> PyResult<PyObject> {
         loop {
             match self.recv_and_unwrap()? {
                 Some(pdu) => match pdu {
@@ -367,7 +363,7 @@ impl SnmpV3ClientSocket {
     }
     //
     //
-    fn get_bulk(&mut self, py: Python, iter: &mut GetBulkIter) -> PyResult<PyObject> {
+    fn get_bulk(&mut self, py: Python, iter: &mut GetIter) -> PyResult<PyObject> {
         self.send_get_bulk(iter)?;
         self.recv_get_bulk(iter, py)
     }

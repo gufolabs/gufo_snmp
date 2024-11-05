@@ -6,7 +6,7 @@
 # ---------------------------------------------------------------------
 
 # Python modules
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 # Gufo Labs modules
 from .typing import ValueType
@@ -17,12 +17,9 @@ class SnmpDecodeError(SnmpError): ...
 class SnmpAuthError(SnmpError): ...  # v3 only
 class NoSuchInstance(SnmpError): ...
 
-class GetNextIter(object):
-    def __init__(self: "GetNextIter", oid: str) -> None: ...
-
-class GetBulkIter(object):
+class GetIter(object):
     def __init__(
-        self: "GetBulkIter", oid: str, max_repetitions: int
+        self: "GetIter", oid: str, max_repetitions: Optional[int] = None
     ) -> None: ...
 
 class SnmpV1ClientSocket(object):

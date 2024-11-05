@@ -23,6 +23,7 @@ pub mod get;
 pub mod getbulk;
 pub mod getresponse;
 pub mod msg;
+pub mod op;
 pub mod pdu;
 pub mod report;
 pub mod value;

@@ -40,8 +40,7 @@ fn gufo_snmp(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<socket::SnmpV1ClientSocket>()?;
     m.add_class::<socket::SnmpV2cClientSocket>()?;
     m.add_class::<socket::SnmpV3ClientSocket>()?;
-    m.add_class::<socket::GetNextIter>()?;
-    m.add_class::<socket::GetBulkIter>()?;
+    m.add_class::<snmp::op::GetIter>()?;
     m.add_function(wrap_pyfunction!(util::get_master_key, m)?)?;
     m.add_function(wrap_pyfunction!(util::get_localized_key, m)?)?;
     Ok(())

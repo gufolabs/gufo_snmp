@@ -5,30 +5,26 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::iter::{GetBulkIter, GetNextIter};
-use super::op::{SnmpSocket, SupportsGet, SupportsGetBulk, SupportsGetMany, SupportsGetNext};
-use super::transport::SnmpTransport;
-use crate::ber::SnmpOid;
-use crate::error::{SnmpError, SnmpResult};
+use super::snmpsocket::SnmpSocket;
+use crate::error::SnmpResult;
 use crate::reqid::RequestId;
-use crate::snmp::get::SnmpGet;
-use crate::snmp::getbulk::SnmpGetBulk;
 use crate::snmp::msg::SnmpV2cMessage;
+use crate::snmp::op::{GetIter, OpGet, OpGetBulk, OpGetMany, OpGetNext};
 use crate::snmp::pdu::SnmpPdu;
 use pyo3::prelude::*;
+use socket2::Socket;
 use std::os::fd::AsRawFd;
 
 /// Python class wrapping socket implementation
 #[pyclass]
 pub struct SnmpV2cClientSocket {
-    io: SnmpTransport,
+    io: Socket,
     community: String,
     request_id: RequestId,
 }
 
 #[pymethods]
 impl SnmpV2cClientSocket {
-    /// Python constructor
     #[new]
     fn new(
         addr: String,
@@ -38,11 +34,8 @@ impl SnmpV2cClientSocket {
         recv_buffer_size: usize,
         timeout_ns: u64,
     ) -> PyResult<Self> {
-        // Transport
-        let io = SnmpTransport::new(addr, tos, send_buffer_size, recv_buffer_size, timeout_ns)?;
-        //
         Ok(Self {
-            io,
+            io: Self::get_socket(addr, tos, send_buffer_size, recv_buffer_size, timeout_ns)?,
             community,
             request_id: RequestId::default(),
         })
@@ -53,122 +46,95 @@ impl SnmpV2cClientSocket {
     }
     // .get()
     // Prepare send GET request with single oid and receive reply
-    fn get(&mut self, py: Python, oid: &str) -> PyResult<Option<PyObject>> {
-        SupportsGet::get(self, py, oid)
+    fn get(&mut self, py: Python, oid: &str) -> PyResult<PyObject> {
+        Self::send_and_recv::<OpGet, _>(self, oid, None, py)
     }
     // Prepare and send GET request with single oid
     fn send_get(&mut self, py: Python, oid: &str) -> PyResult<()> {
-        Ok(SupportsGet::send_get(self, py, oid)?)
+        Self::send_request::<OpGet, _>(self, oid, py)
     }
     // Try to receive GETRESPONSE
-    fn recv_get(&mut self, py: Python) -> PyResult<Option<PyObject>> {
-        SupportsGet::recv_get(self, py)
+    fn recv_get(&mut self, py: Python) -> PyResult<PyObject> {
+        Self::recv_reply::<OpGet, _>(self, None, py)
     }
     // .get_many()
     // Prepare and send GET request with multiple oids and receive reply
     fn get_many(&mut self, py: Python, oids: Vec<&str>) -> PyResult<PyObject> {
-        SupportsGetMany::get_many(self, py, oids)
+        Self::send_and_recv::<OpGetMany, _>(self, oids, None, py)
     }
     // Prepare and send GET request with multiple oids
     fn send_get_many(&mut self, py: Python, oids: Vec<&str>) -> PyResult<()> {
-        Ok(SupportsGetMany::send_get_many(self, py, oids)?)
+        Self::send_request::<OpGetMany, _>(self, oids, py)
     }
     fn recv_get_many(&mut self, py: Python) -> PyResult<PyObject> {
-        SupportsGetMany::recv_get_many(self, py)
+        Self::recv_reply::<OpGetMany, _>(self, None, py)
     }
     // .get_next()
-    fn get_next(&mut self, py: Python, iter: &mut GetNextIter) -> PyResult<(PyObject, PyObject)> {
-        SupportsGetNext::get_next(self, py, iter)
+    fn get_next(&mut self, py: Python, iter: &mut GetIter) -> PyResult<PyObject> {
+        let oid = iter.get_next_oid();
+        Self::send_and_recv::<OpGetNext, _>(self, oid, Some(iter), py)
     }
-    fn send_get_next(&mut self, py: Python, iter: &GetNextIter) -> PyResult<()> {
-        Ok(SupportsGetNext::send_get_next(self, py, iter)?)
+    fn send_get_next(&mut self, py: Python, iter: &GetIter) -> PyResult<()> {
+        let oid = iter.get_next_oid();
+        Self::send_request::<OpGetNext, _>(self, oid, py)
     }
-    fn recv_get_next(
-        &mut self,
-        py: Python,
-        iter: &mut GetNextIter,
-    ) -> PyResult<(PyObject, PyObject)> {
-        SupportsGetNext::recv_get_next(self, py, iter)
+    fn recv_get_next(&mut self, py: Python, iter: &mut GetIter) -> PyResult<PyObject> {
+        Self::recv_reply::<OpGetNext, _>(self, Some(iter), py)
     }
     // .get_bulk()
-    fn get_bulk(&mut self, py: Python, iter: &mut GetBulkIter) -> PyResult<PyObject> {
-        SupportsGetBulk::get_bulk(self, py, iter)
+    fn get_bulk(&mut self, py: Python, iter: &mut GetIter) -> PyResult<PyObject> {
+        Self::send_and_recv::<OpGetBulk, _>(
+            self,
+            (iter.get_next_oid(), iter.get_max_repetitions()),
+            Some(iter),
+            py,
+        )
     }
     // Send GetBulk request according to iter
-    fn send_get_bulk(&mut self, py: Python, iter: &GetBulkIter) -> PyResult<()> {
-        Ok(SupportsGetBulk::send_get_bulk(self, py, iter)?)
+    fn send_get_bulk(&mut self, py: Python, iter: &GetIter) -> PyResult<()> {
+        Self::send_request::<OpGetBulk, _>(
+            self,
+            (iter.get_next_oid(), iter.get_max_repetitions()),
+            py,
+        )
     }
     // Try to receive GETRESPONSE for GETBULK
-    fn recv_get_bulk(&mut self, iter: &mut GetBulkIter, py: Python) -> PyResult<PyObject> {
-        SupportsGetBulk::recv_get_bulk(self, py, iter)
+    fn recv_get_bulk(&mut self, iter: &mut GetIter, py: Python) -> PyResult<PyObject> {
+        Self::recv_reply::<OpGetBulk, _>(self, Some(iter), py)
     }
 }
 
 impl SnmpSocket for SnmpV2cClientSocket {
     type Message<'a> = SnmpV2cMessage<'a>;
 
-    fn get_transport(&self) -> &SnmpTransport {
-        &self.io
+    fn get_io(&mut self) -> &mut Socket {
+        &mut self.io
     }
 
     fn get_request_id(&mut self) -> &mut RequestId {
         &mut self.request_id
     }
 
-    fn authenticate(&self, msg: &Self::Message<'_>) -> bool {
-        msg.community == self.community.as_bytes()
-    }
-}
-
-impl SupportsGet for SnmpV2cClientSocket {
-    fn request<'a>(&'a self, oid: &str, request_id: i64) -> SnmpResult<Self::Message<'a>> {
-        Ok(Self::Message {
-            community: self.community.as_bytes(),
-            pdu: SnmpPdu::GetRequest(SnmpGet {
-                request_id,
-                vars: vec![SnmpOid::try_from(oid)?],
-            }),
-        })
-    }
-}
-
-impl SupportsGetMany for SnmpV2cClientSocket {
-    fn request<'a>(&'a self, oids: Vec<&str>, request_id: i64) -> SnmpResult<Self::Message<'a>> {
+    fn wrap_pdu<'a, 'b>(&'a self, pdu: SnmpPdu<'b>) -> SnmpResult<Self::Message<'b>>
+    where
+        'a: 'b,
+    {
         Ok(Self::Message {
             community: self.community.as_ref(),
-            pdu: SnmpPdu::GetRequest(SnmpGet {
-                request_id,
-                vars: oids
-                    .into_iter()
-                    .map(SnmpOid::try_from)
-                    .collect::<Result<Vec<SnmpOid>, SnmpError>>()?,
-            }),
+            pdu,
         })
     }
-}
 
-impl SupportsGetNext for SnmpV2cClientSocket {
-    fn request<'a>(&'a self, iter: &GetNextIter, request_id: i64) -> SnmpResult<Self::Message<'a>> {
-        Ok(Self::Message {
-            community: self.community.as_ref(),
-            pdu: SnmpPdu::GetNextRequest(SnmpGet {
-                request_id,
-                vars: vec![iter.get_next_oid()],
-            }),
-        })
-    }
-}
-
-impl SupportsGetBulk for SnmpV2cClientSocket {
-    fn request<'a>(&'a self, iter: &GetBulkIter, request_id: i64) -> SnmpResult<Self::Message<'a>> {
-        Ok(Self::Message {
-            community: self.community.as_ref(),
-            pdu: SnmpPdu::GetBulkRequest(SnmpGetBulk {
-                request_id,
-                non_repeaters: 0,
-                max_repetitions: iter.get_max_repetitions(),
-                vars: vec![iter.get_next_oid()],
-            }),
-        })
+    fn unwrap_pdu<'a>(&mut self, msg: Self::Message<'a>) -> Option<SnmpPdu<'a>> {
+        // Check communnity
+        if msg.community != self.community.as_bytes() {
+            return None;
+        }
+        // Check request id
+        let pdu = msg.pdu;
+        if !pdu.check(&self.request_id) {
+            return None;
+        }
+        Some(pdu)
     }
 }

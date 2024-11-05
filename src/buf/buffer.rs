@@ -10,7 +10,7 @@ use std::mem::MaybeUninit;
 use std::ptr;
 use std::slice;
 
-const MAX_SIZE: usize = 4080;
+const MAX_SIZE: usize = 4080; // 4096 - other fields
 
 // SNMP message is build starting from the end,
 // So we use stack-like buffer.
