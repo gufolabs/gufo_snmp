@@ -311,7 +311,7 @@ class SnmpSession(object):
 
         if self._deferred_user:
             # First check runs engine id discovery
-            self._sock.sync_refresh()
+            self._sock.refresh()
             # Set and localize actual keys
             self._sock.set_keys(
                 self._deferred_user.name,
@@ -326,7 +326,7 @@ class SnmpSession(object):
             self._deferred_user = None
 
         # Refresh engine boots and time
-        self._sock.sync_refresh()
+        self._sock.refresh()
 
     def get_engine_id(self: "SnmpSession") -> bytes:
         """

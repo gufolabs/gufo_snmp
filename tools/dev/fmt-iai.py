@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 # Python modules
-from dataclasses import dataclass
 import sys
+from dataclasses import dataclass
 from typing import Iterable, List, Optional
 
 
@@ -17,7 +17,6 @@ class Bench(object):
 
     def adjust(self, base: "Bench") -> "Bench":
         """Adjust benchmark related to base."""
-
         return Bench(
             name=self.name,
             inst=self.inst - base.inst,

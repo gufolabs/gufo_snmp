@@ -6,11 +6,17 @@
 // ------------------------------------------------------------------------
 
 use super::snmpsocket::SnmpSocket;
-use crate::error::SnmpResult;
-use crate::reqid::RequestId;
-use crate::snmp::msg::SnmpV2cMessage;
-use crate::snmp::op::{GetIter, OpGet, OpGetBulk, OpGetMany, OpGetNext};
-use crate::snmp::pdu::SnmpPdu;
+use crate::{
+    ber::BerEncoder,
+    buf::Buffer,
+    error::SnmpResult,
+    reqid::RequestId,
+    snmp::{
+        msg::SnmpV2cMessage,
+        op::{GetIter, OpGet, OpGetBulk, OpGetMany, OpGetNext},
+        pdu::SnmpPdu,
+    },
+};
 use pyo3::prelude::*;
 use socket2::Socket;
 use std::os::fd::AsRawFd;
@@ -115,17 +121,15 @@ impl SnmpSocket for SnmpV2cClientSocket {
         &mut self.request_id
     }
 
-    fn wrap_pdu<'a, 'b>(&'a self, pdu: SnmpPdu<'b>) -> SnmpResult<Self::Message<'b>>
-    where
-        'a: 'b,
-    {
-        Ok(Self::Message {
+    fn push_pdu(&mut self, pdu: SnmpPdu, buf: &mut Buffer) -> SnmpResult<()> {
+        let msg = Self::Message {
             community: self.community.as_ref(),
             pdu,
-        })
+        };
+        msg.push_ber(buf)
     }
 
-    fn unwrap_pdu<'a>(&mut self, msg: Self::Message<'a>) -> Option<SnmpPdu<'a>> {
+    fn unwrap_pdu<'a>(&'a mut self, msg: Self::Message<'a>) -> Option<SnmpPdu<'a>> {
         // Check communnity
         if msg.community != self.community.as_bytes() {
             return None;

@@ -10,6 +10,7 @@ pub mod getbulk;
 pub mod getiter;
 pub mod getmany;
 pub mod getnext;
+pub mod refresh;
 
 use super::msg::SnmpPdu;
 pub use get::OpGet;
@@ -18,6 +19,7 @@ pub use getiter::GetIter;
 pub use getmany::OpGetMany;
 pub use getnext::OpGetNext;
 use pyo3::prelude::*;
+pub use refresh::OpRefresh;
 
 pub trait PyOp<'a, T>
 where

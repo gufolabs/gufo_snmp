@@ -322,8 +322,8 @@ class SnmpSession(object):
             # First check runs engine id discovery
             await send_and_recv(
                 self._fd,
-                self._sock.async_send_refresh,
-                self._sock.async_recv_refresh,
+                self._sock.send_refresh,
+                self._sock.recv_refresh,
                 self._policer,
                 self._timeout,
             )
@@ -343,8 +343,8 @@ class SnmpSession(object):
         # Refresh engine boots and time
         await send_and_recv(
             self._fd,
-            self._sock.async_send_refresh,
-            self._sock.async_recv_refresh,
+            self._sock.send_refresh,
+            self._sock.recv_refresh,
             self._policer,
             self._timeout,
         )

@@ -50,24 +50,24 @@ class SnmpV1ClientSocket(object):
 
     # .get_next
     def get_next(
-        self: "SnmpV1ClientSocket", iter_getnext: GetNextIter
+        self: "SnmpV1ClientSocket", iter_getnext: GetIter
     ) -> Tuple[str, ValueType]: ...
     def send_get_next(
-        self: "SnmpV1ClientSocket", iter_getnext: GetNextIter
+        self: "SnmpV1ClientSocket", iter_getnext: GetIter
     ) -> None: ...
     def recv_get_next(
-        self: "SnmpV1ClientSocket", iter_getnext: GetNextIter
+        self: "SnmpV1ClientSocket", iter_getnext: GetIter
     ) -> Tuple[str, ValueType]: ...
 
     # .get_bulk()
     def get_bulk(
-        self: "SnmpV1ClientSocket", iter_getbulk: GetBulkIter
+        self: "SnmpV1ClientSocket", iter_getbulk: GetIter
     ) -> List[Tuple[str, ValueType]]: ...
     def send_get_bulk(
-        self: "SnmpV1ClientSocket", iter_getbulk: GetBulkIter
+        self: "SnmpV1ClientSocket", iter_getbulk: GetIter
     ) -> None: ...
     def recv_get_bulk(
-        self: "SnmpV1ClientSocket", iter_getnext: GetBulkIter
+        self: "SnmpV1ClientSocket", iter_getnext: GetIter
     ) -> List[Tuple[str, ValueType]]: ...
 
 class SnmpV2cClientSocket(object):
@@ -97,23 +97,23 @@ class SnmpV2cClientSocket(object):
     ) -> Dict[str, ValueType]: ...
     # .get_next()
     def get_next(
-        self: "SnmpV2cClientSocket", iter_getnext: GetNextIter
+        self: "SnmpV2cClientSocket", iter_getnext: GetIter
     ) -> Tuple[str, ValueType]: ...
     def send_get_next(
-        self: "SnmpV2cClientSocket", iter_getnext: GetNextIter
+        self: "SnmpV2cClientSocket", iter_getnext: GetIter
     ) -> None: ...
     def recv_get_next(
-        self: "SnmpV2cClientSocket", iter_getnext: GetNextIter
+        self: "SnmpV2cClientSocket", iter_getnext: GetIter
     ) -> Tuple[str, ValueType]: ...
     # .get_bulk()
     def get_bulk(
-        self: "SnmpV2cClientSocket", iter_getbulk: GetBulkIter
+        self: "SnmpV2cClientSocket", iter_getbulk: GetIter
     ) -> List[Tuple[str, ValueType]]: ...
     def send_get_bulk(
-        self: "SnmpV2cClientSocket", iter_getbulk: GetBulkIter
+        self: "SnmpV2cClientSocket", iter_getbulk: GetIter
     ) -> None: ...
     def recv_get_bulk(
-        self: "SnmpV2cClientSocket", iter_getnext: GetBulkIter
+        self: "SnmpV2cClientSocket", iter_getnext: GetIter
     ) -> List[Tuple[str, ValueType]]: ...
 
 class SnmpV3ClientSocket(object):
@@ -155,28 +155,28 @@ class SnmpV3ClientSocket(object):
     ) -> Dict[str, ValueType]: ...
     # .get_next
     def get_next(
-        self: "SnmpV3ClientSocket", iter_getnext: GetNextIter
+        self: "SnmpV3ClientSocket", iter_getnext: GetIter
     ) -> Tuple[str, ValueType]: ...
     def send_get_next(
-        self: "SnmpV3ClientSocket", iter_getnext: GetNextIter
+        self: "SnmpV3ClientSocket", iter_getnext: GetIter
     ) -> None: ...
     def recv_get_next(
-        self: "SnmpV3ClientSocket", iter_getnext: GetNextIter
+        self: "SnmpV3ClientSocket", iter_getnext: GetIter
     ) -> Tuple[str, ValueType]: ...
     # Rest
     def get_bulk(
-        self: "SnmpV3ClientSocket", iter_getbulk: GetBulkIter
+        self: "SnmpV3ClientSocket", iter_getbulk: GetIter
     ) -> List[Tuple[str, ValueType]]: ...
     def send_get_bulk(
-        self: "SnmpV3ClientSocket", iter_getbulk: GetBulkIter
+        self: "SnmpV3ClientSocket", iter_getbulk: GetIter
     ) -> None: ...
     def recv_get_bulk(
-        self: "SnmpV3ClientSocket", iter_getnext: GetBulkIter
+        self: "SnmpV3ClientSocket", iter_getnext: GetIter
     ) -> List[Tuple[str, ValueType]]: ...
     # .refresh
-    def async_recv_refresh(self: "SnmpV3ClientSocket") -> None: ...
-    def async_send_refresh(self: "SnmpV3ClientSocket") -> None: ...
-    def sync_refresh(self: "SnmpV3ClientSocket") -> None: ...
+    def refresh(self: "SnmpV3ClientSocket") -> None: ...
+    def send_refresh(self: "SnmpV3ClientSocket") -> None: ...
+    def recv_refresh(self: "SnmpV3ClientSocket") -> None: ...
 
 def get_master_key(auth_alg: int, passwd: bytes) -> bytes: ...
 def get_localized_key(

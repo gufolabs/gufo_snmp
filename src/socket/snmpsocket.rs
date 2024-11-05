@@ -22,7 +22,9 @@ pub(crate) trait SnmpSocket
 where
     Self: Send + Sync,
 {
-    type Message<'a>: TryFrom<&'a [u8], Error = SnmpError> + BerEncoder + Send;
+    type Message<'a>: TryFrom<&'a [u8], Error = SnmpError> + BerEncoder + Send
+    where
+        Self: 'a;
 
     fn get_io(&mut self) -> &mut Socket;
     fn get_socket(
@@ -94,10 +96,8 @@ where
         Err(SnmpError::SocketError("unable to set buffer size".into()))
     }
     fn get_request_id(&mut self) -> &mut RequestId;
-    fn wrap_pdu<'a, 'b>(&'a self, pdu: SnmpPdu<'b>) -> SnmpResult<Self::Message<'b>>
-    where
-        'a: 'b;
-    fn unwrap_pdu<'a>(&mut self, msg: Self::Message<'a>) -> Option<SnmpPdu<'a>>;
+    fn push_pdu(&mut self, pdu: SnmpPdu, buf: &mut Buffer) -> SnmpResult<()>;
+    fn unwrap_pdu<'a>(&'a mut self, msg: Self::Message<'a>) -> Option<SnmpPdu<'a>>;
     //
     fn recv_socket<'a>(io: &mut Socket, buf: &'a mut Buffer) -> SnmpResult<&'a [u8]> {
         match io.recv(buf.as_mut()) {
@@ -114,13 +114,7 @@ where
         // Get buffer for pool
         let mut pool = get_buffer_pool().acquire();
         let buf = pool.as_mut();
-        // Nested scope to release borrow of self
-        {
-            // Wrap pdu to message
-            let msg = self.wrap_pdu(pdu)?;
-            // Serialize message to buffer
-            msg.push_ber(buf)?;
-        }
+        self.push_pdu(pdu, buf)?;
         // Send message
         self.get_io()
             .send(buf.data())
