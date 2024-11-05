@@ -4,7 +4,6 @@
 // Copyright (C) 2023-24, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
-use super::SnmpMessage;
 use crate::ber::{
     BerDecoder, BerEncoder, SnmpInt, SnmpOctetString, SnmpSequence, TAG_INT, TAG_OCTET_STRING,
 };
@@ -16,12 +15,6 @@ use crate::snmp::SNMP_V2C;
 pub struct SnmpV2cMessage<'a> {
     pub community: &'a [u8],
     pub pdu: SnmpPdu<'a>,
-}
-
-impl<'a> SnmpMessage for SnmpV2cMessage<'a> {
-    fn as_pdu(&self) -> &SnmpPdu {
-        &self.pdu
-    }
 }
 
 const V2C_BER: [u8; 3] = [TAG_INT, 1, SNMP_V2C];

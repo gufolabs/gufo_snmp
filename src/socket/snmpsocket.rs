@@ -5,14 +5,13 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use crate::snmp::op::GetIter;
-use crate::snmp::op::PyOp;
+use crate::snmp::op::{GetIter, PyOp};
 use crate::{
     ber::BerEncoder,
     buf::{get_buffer_pool, Buffer},
     error::{SnmpError, SnmpResult},
     reqid::RequestId,
-    snmp::{msg::SnmpMessage, pdu::SnmpPdu},
+    snmp::pdu::SnmpPdu,
 };
 use pyo3::prelude::*;
 use socket2::{Domain, Protocol, Socket, Type};
@@ -23,7 +22,7 @@ pub(crate) trait SnmpSocket
 where
     Self: Send + Sync,
 {
-    type Message<'a>: TryFrom<&'a [u8], Error = SnmpError> + BerEncoder + SnmpMessage + Send;
+    type Message<'a>: TryFrom<&'a [u8], Error = SnmpError> + BerEncoder + Send;
 
     fn get_io(&mut self) -> &mut Socket;
     fn get_socket(
