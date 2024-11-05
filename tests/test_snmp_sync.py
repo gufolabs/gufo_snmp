@@ -323,15 +323,12 @@ def test_get_engine_id(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
     assert r == snmpd.engine_id
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize("cfg", V2)
 def test_shift(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
     with SyncShiftProxy() as proxy:
         addr, port = proxy.addr
         with SnmpSession(addr=addr, port=port, timeout=2.0, **cfg) as session:
-            print("GET CONTACT")
             with pytest.raises(TimeoutError):
                 session.get(SNMP_CONTACT_OID)
-            print("GET LOCATION")
             y = session.get(SNMP_LOCATION_OID)
-            assert y == SNMP_LOCATION
+            assert y.decode() == SNMP_LOCATION
