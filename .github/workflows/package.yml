@@ -31,7 +31,7 @@ jobs:
         run: ./tools/build/build-sdist.sh
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: sdist
           path: dist/*.tar.gz
@@ -61,7 +61,7 @@ jobs:
           ./tools/build/build-many.sh 3.9 3.10 3.11 3.12 3.13
 
       - name: Save Artefacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheel_manylinux_2_17_${{ matrix.arch }}
           path: wheelhouse/*.whl
@@ -103,7 +103,7 @@ jobs:
           ./tools/build/build-many.sh 3.9 3.10 3.11 3.12 3.13
 
       - name: Save Artefacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheel_manylinux_2_24_${{ matrix.arch }}
           path: wheelhouse/*.whl
@@ -149,7 +149,7 @@ jobs:
   #         ./tools/build/build-many.sh 3.9 3.10
 
   #     - name: Save Artefacts
-  #       uses: actions/upload-artifact@v3
+  #       uses: actions/upload-artifact@v4
   #       with:
   #         name: wheel_musllinux_1_1_${{ matrix.arch }}
   #         path: wheelhouse/*.whl
@@ -182,7 +182,7 @@ jobs:
   #           RUST_ARCH=x86_64-apple-darwin
 
   #     - name: Save Artefacts
-  #       uses: actions/upload-artifact@v3
+  #       uses: actions/upload-artifact@v4
   #       with:
   #         name: wheel_${{ matrix.platform }}_${{ matrix.arch }}
   #         path: wheelhouse/*.whl
@@ -197,7 +197,7 @@ jobs:
       # - build-wheel-macos
     steps:
       - name: Download Artefacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: dist/
 
