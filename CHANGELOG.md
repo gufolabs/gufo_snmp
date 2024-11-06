@@ -23,7 +23,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ### Changed
 
-* Massive refactoring of internals to support PyO3 0.22.
+* Massive refactoring of internals to support PyO3 0.22 and to remove duplicated code.
 * Use reusable buffers pool insead of allocating buffer along with each socket.
 
 ### Infrastructure
@@ -33,6 +33,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 * Ruff 0.7.2
 * pytest 8.3.3
 * coverage 7.6.4
+* mkdocs-material 9.5.44
 * Black formatter replaced by Ruff.
 
 ## 0.5.2 - 2024-07-30
@@ -137,4 +138,5 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 * Initial implementation
 
 [#1]: https://github.com/gufolabs/gufo_snmp/issues/1
+[#15]: https://github.com/gufolabs/gufo_snmp/issues/16
 [#16]: https://github.com/gufolabs/gufo_snmp/issues/16
