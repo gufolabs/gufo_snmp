@@ -31,6 +31,8 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 * Rust 1.82.0
 * mypy 1.13.0
 * Ruff 0.7.2
+* pytest 8.3.3
+* coverage 7.6.4
 * Black formatter replaced by Ruff.
 
 ## 0.5.2 - 2024-07-30
