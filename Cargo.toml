@@ -21,7 +21,7 @@ digest = "0.10"
 enum_dispatch = "0.3"
 md-5 = "0.10"
 nom = "7.1"
-pyo3 = {version = "0.22", features = ["extension-module", "gil-refs"]}
+pyo3 = {version = "0.22", features = ["extension-module"]}
 rand = "0.8"
 sha1 = "0.10"
 socket2 = {version = "0.5", features = ["all"]}

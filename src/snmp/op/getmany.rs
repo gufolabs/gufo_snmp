@@ -11,18 +11,18 @@ use crate::error::SnmpError;
 use crate::snmp::get::SnmpGet;
 use crate::snmp::msg::SnmpPdu;
 use crate::snmp::value::SnmpValue;
-use pyo3::{exceptions::PyRuntimeError, prelude::*, types::PyDict};
+use pyo3::{exceptions::PyRuntimeError, prelude::*, pybacked::PyBackedStr, types::PyDict};
 
 pub struct OpGetMany;
 
-impl<'a> PyOp<'a, Vec<&'a str>> for OpGetMany {
+impl<'a> PyOp<'a, Vec<PyBackedStr>> for OpGetMany {
     // obj is list[str]
-    fn from_python(obj: Vec<&'a str>, request_id: i64) -> PyResult<SnmpPdu<'a>> {
+    fn from_python(obj: Vec<PyBackedStr>, request_id: i64) -> PyResult<SnmpPdu<'a>> {
         Ok(SnmpPdu::GetRequest(SnmpGet {
             request_id,
             vars: obj
                 .into_iter()
-                .map(SnmpOid::try_from)
+                .map(|x| SnmpOid::try_from(x.as_ref()))
                 .collect::<Result<Vec<SnmpOid>, SnmpError>>()?,
         }))
     }

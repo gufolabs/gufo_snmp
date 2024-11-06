@@ -17,7 +17,7 @@ use crate::{
         pdu::SnmpPdu,
     },
 };
-use pyo3::prelude::*;
+use pyo3::{prelude::*, pybacked::PyBackedStr};
 use socket2::Socket;
 use std::os::fd::AsRawFd;
 
@@ -65,11 +65,11 @@ impl SnmpV2cClientSocket {
     }
     // .get_many()
     // Prepare and send GET request with multiple oids and receive reply
-    fn get_many(&mut self, py: Python, oids: Vec<&str>) -> PyResult<PyObject> {
+    fn get_many(&mut self, py: Python, oids: Vec<PyBackedStr>) -> PyResult<PyObject> {
         Self::send_and_recv::<OpGetMany, _>(self, oids, None, py)
     }
     // Prepare and send GET request with multiple oids
-    fn send_get_many(&mut self, py: Python, oids: Vec<&str>) -> PyResult<()> {
+    fn send_get_many(&mut self, py: Python, oids: Vec<PyBackedStr>) -> PyResult<()> {
         Self::send_request::<OpGetMany, _>(self, oids, py)
     }
     fn recv_get_many(&mut self, py: Python) -> PyResult<PyObject> {
