@@ -63,10 +63,6 @@ release = true
 [[tool.setuptools-rust.ext-modules]]
 target = "gufo.snmp._fast"
 
-[tool.black]
-line-length = 79
-target-version = ['py39']
-
 [tool.coverage.run]
 omit = ["*tests*", "*examples*"]
 

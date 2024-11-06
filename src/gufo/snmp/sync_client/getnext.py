@@ -7,7 +7,6 @@
 
 """GetNextIter iterator."""
 
-
 # Python modules
 from typing import Optional, Tuple
 

@@ -7,7 +7,6 @@
 
 """GetBulkIter iterator."""
 
-
 # Python modules
 from typing import List, Optional, Tuple
 

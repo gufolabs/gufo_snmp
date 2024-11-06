@@ -260,6 +260,19 @@ def test_getbulk(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     assert n > 0
 
 
+@pytest.mark.parametrize("cfg", V2 + V3)
+def test_getbulk_max_repetitions(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+    n = 0
+    with SnmpSession(
+        addr=SNMPD_ADDRESS, port=SNMPD_PORT, timeout=1.0, **cfg
+    ) as session:
+        for _ in session.getbulk("1.3.6", max_repetitions=20):
+            n += 1
+            if n >= 30:
+                break
+    assert n == 30
+
+
 @pytest.mark.parametrize("cfg", V2 + V3, ids=ids)
 def test_getbulk_single(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
     """Test single value is returned with bulk."""

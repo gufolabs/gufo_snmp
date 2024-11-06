@@ -4,7 +4,7 @@ We share the common code quality standards between all Gufo Labs projects.
 
 ## Python Code Formatting
 
-All Python code must be formatting using [Black][Black] code formatter
+All Python code must be formatting using [Ruff][Ruff] code formatter
 with settings defined in the project's `pyproject.toml` file.
 
 ## Python Code Linting
@@ -23,6 +23,5 @@ The test suite must provide 100% code coverage whenever possible.
 
 * Documentation must be clean and mean.
 
-[Black]: https://black.readthedocs.io/en/stable
-[ruff]: https://github.com/charliermarsh/ruff
+[Ruff]: https://github.com/charliermarsh/ruff
 [Mypy]: https://mypy.readthedocs.io/en/stable/

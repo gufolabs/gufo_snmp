@@ -16,7 +16,7 @@ The code base of the project has following structure:
     * `build.txt` - Setuptools build requirements.
     * `docs.txt` - [Mkdocs Material][Mkdocs Material] dependencies.
     * `ipython.txt` - [IPython] dependencies.
-    * `lint.txt` - [Black][Black], [Flake8][Flake8], and [Mypy][Mypy] dependencies.
+    * `lint.txt` - [Ruff][Ruff] and [Mypy][Mypy] dependencies.
     * `test.txt` - [Pytest][Pytest] dependencies.
 
 * `docs/` - [Mkdocs][Mkdocs] documentation.
@@ -32,7 +32,7 @@ The code base of the project has following structure:
 [GitHub Workflows]: https://docs.github.com/en/actions/using-workflows
 [Mkdocs]: https://www.mkdocs.org
 [Mkdocs Material]: https://squidfunk.github.io/mkdocs-material/
-[Black]: https://black.readthedocs.io/en/stable
+[Ruff]: https://docs.astral.sh/ruff/
 [Flake8]: https://flake8.pycqa.org/en/latest/
 [Mypy]: https://mypy.readthedocs.io/en/stable/
 [Pytest]: https://docs.pytest.org/
