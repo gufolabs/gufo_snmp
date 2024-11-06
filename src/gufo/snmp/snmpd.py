@@ -154,7 +154,7 @@ sysServices 72"""
     def _start(self: "Snmpd") -> None:
         """Run snmpd instance."""
         logger.info("Starting snmpd instance")
-        self._cfg = NamedTemporaryFile(
+        self._cfg = NamedTemporaryFile(  # noqa: SIM115
             prefix="snmpd-", suffix=".conf", mode="w"
         )
         cfg = self.get_config()
