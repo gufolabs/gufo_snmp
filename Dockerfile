@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bullseye AS dev
+FROM python:3.13-slim-bullseye AS dev
 COPY .requirements tools/build/setup-rust.sh /tmp
 ENV \
     PATH=/usr/local/cargo/bin:$PATH\

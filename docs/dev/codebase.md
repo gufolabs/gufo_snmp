@@ -33,7 +33,6 @@ The code base of the project has following structure:
 [Mkdocs]: https://www.mkdocs.org
 [Mkdocs Material]: https://squidfunk.github.io/mkdocs-material/
 [Ruff]: https://docs.astral.sh/ruff/
-[Flake8]: https://flake8.pycqa.org/en/latest/
 [Mypy]: https://mypy.readthedocs.io/en/stable/
 [Pytest]: https://docs.pytest.org/
 [Dockerfile]: https://docs.docker.com/engine/reference/builder/

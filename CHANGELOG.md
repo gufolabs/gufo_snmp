@@ -12,11 +12,26 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ## [Unreleased]
 
+### Fixed
+
+* Fix [#16][#16]: SNMPv3 requests not works with Mikrotik RouterOS devices.
+* Fix [#15][#15]: sync client not releasing Python GIL on blocking operations.
+
+### Added
+
+* Python 3.13 binary wheels.
+
+### Changed
+
+* Massive refactoring of internals to support PyO3 0.22.
+* Use reusable buffers pool insead of allocating buffer along with each socket.
+
 ### Infrastructure
 
 * Rust 1.82.0
 * mypy 1.13.0
-* Ruff 0.6.9
+* Ruff 0.7.2
+* Black formatter replaced by Ruff.
 
 ## 0.5.2 - 2024-07-30
 
@@ -120,3 +135,4 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 * Initial implementation
 
 [#1]: https://github.com/gufolabs/gufo_snmp/issues/1
+[#16]: https://github.com/gufolabs/gufo_snmp/issues/16
