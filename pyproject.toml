@@ -10,7 +10,6 @@ classifiers = [
   "Intended Audience :: System Administrators",
   "Intended Audience :: Telecommunications Industry",
   "Programming Language :: Rust",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -29,7 +28,7 @@ dynamic = ["version"]
 keywords = ["error"]
 license = {text = "BSD 3-Clause License"}
 name = "gufo_snmp"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 [project.readme]
 content-type = "text/markdown"

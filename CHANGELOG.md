@@ -23,6 +23,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ### Changed
 
+* Dropping support of Python 3.8
 * Massive refactoring of internals to support PyO3 0.22 and to remove duplicated code.
 * Use reusable buffers pool insead of allocating buffer along with each socket.
 
