@@ -37,7 +37,7 @@ pub enum SnmpValue<'a> {
     EndOfMibView,
 }
 
-impl<'a> SnmpValue<'a> {
+impl SnmpValue<'_> {
     pub fn from_ber(i: &[u8]) -> IResult<&[u8], SnmpValue, SnmpError> {
         let (tail, hdr) = BerHeader::from_ber(i)?;
         let value = match hdr.constructed {
@@ -120,7 +120,7 @@ impl<'a> SnmpValue<'a> {
     }
 }
 
-impl<'a> ToPython for &SnmpValue<'a> {
+impl ToPython for &SnmpValue<'_> {
     fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
         Ok(match self {
             SnmpValue::Bool(x) => x.try_to_python(py)?,

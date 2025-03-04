@@ -84,7 +84,7 @@ impl<'a> TryFrom<&'a [u8]> for SnmpV3Message<'a> {
     }
 }
 
-impl<'a> BerEncoder for SnmpV3Message<'a> {
+impl BerEncoder for SnmpV3Message<'_> {
     fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         //
         // Scoped PDU

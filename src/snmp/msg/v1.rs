@@ -46,7 +46,7 @@ impl<'a> TryFrom<&'a [u8]> for SnmpV1Message<'a> {
     }
 }
 
-impl<'a> BerEncoder for SnmpV1Message<'a> {
+impl BerEncoder for SnmpV1Message<'_> {
     fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         // Push PDU
         self.pdu.push_ber(buf)?;

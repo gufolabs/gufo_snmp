@@ -42,7 +42,7 @@ impl<'a> TryFrom<&'a [u8]> for SnmpPdu<'a> {
     }
 }
 
-impl<'a> BerEncoder for SnmpPdu<'a> {
+impl BerEncoder for SnmpPdu<'_> {
     fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         let rest = buf.len();
         match self {
@@ -63,7 +63,7 @@ impl<'a> BerEncoder for SnmpPdu<'a> {
     }
 }
 
-impl<'a> SnmpPdu<'a> {
+impl SnmpPdu<'_> {
     /// Check if request id is match
     pub fn check(&self, request_id: &RequestId) -> bool {
         match self {

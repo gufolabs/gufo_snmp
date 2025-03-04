@@ -54,7 +54,7 @@ impl<'a> TryFrom<&'a [u8]> for UsmParameters<'a> {
 
 const EMPTY_BER: [u8; 2] = [TAG_OCTET_STRING, 0];
 
-impl<'a> BerEncoder for UsmParameters<'a> {
+impl BerEncoder for UsmParameters<'_> {
     fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         let l0 = buf.len();
         // Push privacy parameters

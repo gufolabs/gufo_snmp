@@ -27,6 +27,7 @@ VERSIONS = [
     "actions/cache@v4",
     "actions/checkout@v4",
     "actions/setup-python@v5",
+    "actions/download-artifact@v4",
     "actions/upload-artifact@v4",
     "pypa/gh-action-pypi-publish@release/v1",
 ]

@@ -23,7 +23,7 @@ impl<'a> BerDecoder<'a> for SnmpOctetString<'a> {
     }
 }
 
-impl<'a> ToPython for &SnmpOctetString<'a> {
+impl ToPython for &SnmpOctetString<'_> {
     fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
         let v = PyBytes::new_bound(py, self.0);
         Ok(v.into())

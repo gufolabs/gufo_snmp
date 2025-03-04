@@ -33,7 +33,7 @@ impl<'a> TryFrom<&'a [u8]> for MsgData<'a> {
     }
 }
 
-impl<'a> BerEncoder for MsgData<'a> {
+impl BerEncoder for MsgData<'_> {
     fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         match self {
             MsgData::Plaintext(x) => x.push_ber(buf),

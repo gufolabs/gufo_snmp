@@ -8,12 +8,7 @@
 set -x
 set -e
 
-if [ -z "${RUST_ARCH}" ]; then
-    echo "RUST_ARCH is not set"
-    exit 2
-fi
-
-RUST_VERSION=${RUST_VERSION:-1.82.0}
+RUST_VERSION=${RUST_VERSION:-1.85.0}
 
 # @todo: Allow override
 export RUSTUP_HOME=${RUSTUP_HOME:-/usr/local/rustup}
@@ -33,8 +28,7 @@ curl -s --tlsv1.2 https://sh.rustup.rs \
     | sed 's#/proc/self/exe#/bin/sh#g' \
     | sh -s -- \
         -y --no-modify-path --profile minimal \
-        --default-toolchain ${RUST_VERSION} \
-        --default-host ${RUST_ARCH}
+        --default-toolchain ${RUST_VERSION}
 # Check
 cargo --version
 rustc --version

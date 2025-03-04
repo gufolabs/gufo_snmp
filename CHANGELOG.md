@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 To see unreleased changes, please see the [CHANGELOG on the main branch guide](https://github.com/gufolabs/gufo_snmp/blob/main/CHANGELOG.md).
 
+## [Unreleased]
+
+### Infrastructure
+
+* Rust 1.85.0
+* Migrate to Rust edition 2024
+
 ## 0.6.0 - 2024-11-06
 
 ### Fixed

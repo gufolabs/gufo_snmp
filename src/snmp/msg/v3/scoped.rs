@@ -34,7 +34,7 @@ impl<'a> TryFrom<&'a [u8]> for ScopedPdu<'a> {
     }
 }
 
-impl<'a> BerEncoder for ScopedPdu<'a> {
+impl BerEncoder for ScopedPdu<'_> {
     fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         let rest = buf.len();
         // Push PDU
