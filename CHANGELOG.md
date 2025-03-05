@@ -10,11 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 To see unreleased changes, please see the [CHANGELOG on the main branch guide](https://github.com/gufolabs/gufo_snmp/blob/main/CHANGELOG.md).
 
-## [Unreleased]
+## 0.7.0 - 2025-03-05
 
 ### Added
 
 * Musl and ARM64 binary wheels
+
+### Changed
+
+* Massive internals refactoring caused by moving to a new PyO3 API.
 
 ### Infrastructure
 

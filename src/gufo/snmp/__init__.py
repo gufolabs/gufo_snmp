@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: Python SNMP Library
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-24, Gufo Labs
+# Copyright (C) 2023-25, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -24,7 +24,7 @@ from .typing import ValueType
 from .user import Aes128Key, DesKey, Md5Key, Sha1Key, User
 from .version import SnmpVersion
 
-__version__: str = "0.6.0"
+__version__: str = "0.7.0"
 __all__ = [
     "__version__",
     "Aes128Key",
