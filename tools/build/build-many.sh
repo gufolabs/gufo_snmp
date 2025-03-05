@@ -24,8 +24,9 @@ empty_dir() {
 
 ensure_dir() {
     local path="$1"
-    if [ ! -d "${path}" ]; then
+    if [ ! -x "${path}" ]; then
         echo "Creating ${path}..."
+        mkdir -p "${path}"
     fi
 }
 
@@ -100,7 +101,7 @@ do
     pytest -vv
     echo "Saving..."
     ensure_dir "${WHEELHOUSE}"
-    cp "${TMP_WHEELHOUSE}"/*.whl "${WHEELHOUSE}"
+    cp "${TMP_WHEELHOUSE}"/*.whl "${WHEELHOUSE}"/
     empty_dir "${DIST}"
     empty_dir "${TMP_WHEELHOUSE}"
     echo "... done"
