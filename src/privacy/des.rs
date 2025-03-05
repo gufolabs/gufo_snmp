@@ -11,7 +11,7 @@ use crate::buf::Buffer;
 use crate::error::{SnmpError, SnmpResult};
 use crate::snmp::msg::v3::{ScopedPdu, UsmParameters};
 use cbc::{Decryptor, Encryptor};
-use cipher::{block_padding::NoPadding, BlockDecryptMut, BlockEncryptMut, KeyIvInit};
+use cipher::{BlockDecryptMut, BlockEncryptMut, KeyIvInit, block_padding::NoPadding};
 use des::Des;
 use rand::Rng;
 
@@ -41,8 +41,8 @@ impl SnmpPriv for DesKey {
         self.key.copy_from_slice(&key[..ENC_KEY_LENGTH]);
         self.pre_iv
             .copy_from_slice(&key[ENC_KEY_LENGTH..KEY_LENGTH]);
-        let mut rng = rand::thread_rng();
-        self.salt_value = rng.gen();
+        let mut rng = rand::rng();
+        self.salt_value = rng.random();
         Ok(())
     }
     fn has_priv(&self) -> bool {

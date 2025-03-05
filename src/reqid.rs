@@ -15,8 +15,8 @@ pub struct RequestId(i64);
 impl RequestId {
     /// Get next value
     pub fn get_next(&mut self) -> i64 {
-        let mut rng = rand::thread_rng();
-        let x: i64 = rng.gen();
+        let mut rng = rand::rng();
+        let x: i64 = rng.random();
         self.0 = x & MAX_REQUEST_ID;
         self.0
     }

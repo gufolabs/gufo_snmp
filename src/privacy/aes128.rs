@@ -12,7 +12,7 @@ use crate::error::{SnmpError, SnmpResult};
 use crate::snmp::msg::v3::{ScopedPdu, UsmParameters};
 use aes::Aes128;
 use cfb_mode::{Decryptor, Encryptor};
-use cipher::{block_padding::NoPadding, AsyncStreamCipher, BlockEncryptMut, KeyIvInit};
+use cipher::{AsyncStreamCipher, BlockEncryptMut, KeyIvInit, block_padding::NoPadding};
 use rand::Rng;
 
 const KEY_LENGTH: usize = 16;
@@ -36,8 +36,8 @@ impl SnmpPriv for Aes128Key {
             return Err(SnmpError::InvalidKey);
         }
         self.key.copy_from_slice(&key[..KEY_LENGTH]);
-        let mut rng = rand::thread_rng();
-        self.salt_value = rng.gen();
+        let mut rng = rand::rng();
+        self.salt_value = rng.random();
         Ok(())
     }
     fn has_priv(&self) -> bool {
