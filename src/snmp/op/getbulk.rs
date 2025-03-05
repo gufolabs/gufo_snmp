@@ -1,12 +1,12 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: GetBulk operation
 // ------------------------------------------------------------------------
-// Copyright (C) 2023-24, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
 use super::{GetIter, PyOp};
-use crate::ber::{SnmpOid, ToPython};
+use crate::ber::SnmpOid;
 use crate::error::SnmpError;
 use crate::snmp::getbulk::SnmpGetBulk;
 use crate::snmp::msg::SnmpPdu;
@@ -30,7 +30,11 @@ impl<'a> PyOp<'a, (SnmpOid, i64)> for OpGetBulk {
             vars: vec![oid],
         }))
     }
-    fn to_python(pdu: &SnmpPdu, iter: Option<&mut GetIter>, py: Python) -> PyResult<PyObject> {
+    fn to_python<'py>(
+        pdu: &SnmpPdu,
+        iter: Option<&mut GetIter>,
+        py: Python<'py>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let b_iter = iter.ok_or_else(|| PyValueError::new_err("GetIter expected"))?;
         match pdu {
             SnmpPdu::GetResponse(resp) => {
@@ -53,7 +57,7 @@ impl<'a> PyOp<'a, (SnmpOid, i64)> for OpGetBulk {
                             // Append to list
                             list.append(PyTuple::new(
                                 py,
-                                vec![var.oid.try_to_python(py)?, var.value.try_to_python(py)?],
+                                vec![var.oid.into_pyobject(py)?, var.value.into_pyobject(py)?],
                             )?)
                             .map_err(|e| PyRuntimeError::new_err(e.to_string()))?
                         }
@@ -62,7 +66,7 @@ impl<'a> PyOp<'a, (SnmpOid, i64)> for OpGetBulk {
                 if list.is_empty() {
                     return Err(PyStopAsyncIteration::new_err("stop"));
                 }
-                Ok(list.into())
+                Ok(list.as_any().to_owned())
             }
             SnmpPdu::Report(_) => Err(SnmpError::AuthenticationFailed.into()),
             _ => Err(SnmpError::InvalidPdu.into()),

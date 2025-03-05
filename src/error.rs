@@ -6,13 +6,13 @@
 // ------------------------------------------------------------------------
 
 use pyo3::{
-    create_exception,
+    PyErr, create_exception,
     exceptions::{
         PyBlockingIOError, PyException, PyNotImplementedError, PyOSError, PyTimeoutError,
         PyValueError,
     },
-    PyErr,
 };
+use std::convert::Infallible;
 
 pub type SnmpResult<T> = Result<T, SnmpError>;
 
@@ -127,5 +127,11 @@ impl From<SnmpError> for PyErr {
             SnmpError::UnknownSecurityModel => PySnmpDecodeError::new_err("unknown security model"),
             SnmpError::AuthenticationFailed => PySnmpAuthError::new_err("authentication failed"),
         }
+    }
+}
+
+impl From<Infallible> for SnmpError {
+    fn from(_value: Infallible) -> Self {
+        todo!("Should never happen")
     }
 }

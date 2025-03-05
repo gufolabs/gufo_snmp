@@ -1,13 +1,13 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: SNMP Application Class Counter64
 // ------------------------------------------------------------------------
-// Copyright (C) 2023, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_APP_COUNTER64};
-use crate::error::SnmpResult;
-use pyo3::{IntoPy, Py, PyAny, Python};
+use super::{BerDecoder, BerHeader, TAG_APP_COUNTER64, Tag};
+use crate::error::{SnmpError, SnmpResult};
+use pyo3::{Bound, IntoPyObject, PyAny, Python};
 
 pub struct SnmpCounter64(pub(crate) u64);
 
@@ -28,9 +28,13 @@ impl<'a> BerDecoder<'a> for SnmpCounter64 {
     }
 }
 
-impl ToPython for &SnmpCounter64 {
-    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
-        Ok(self.0.into_py(py))
+impl<'py> IntoPyObject<'py> for &SnmpCounter64 {
+    type Target = PyAny;
+    type Output = Bound<'py, Self::Target>;
+    type Error = SnmpError;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        Ok(self.0.into_pyobject(py)?.into_any())
     }
 }
 

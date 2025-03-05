@@ -8,7 +8,7 @@
 use crate::snmp::op::{GetIter, PyOp};
 use crate::{
     ber::BerEncoder,
-    buf::{get_buffer_pool, Buffer},
+    buf::{Buffer, get_buffer_pool},
     error::{SnmpError, SnmpResult},
     reqid::RequestId,
     snmp::pdu::SnmpPdu,
@@ -140,7 +140,9 @@ where
                 Self::Message::try_from(data)?
             };
             match self.unwrap_pdu(msg) {
-                Some(ref pdu) => return Python::with_gil(|py| T::to_python(pdu, iter, py)),
+                Some(ref pdu) => {
+                    return Python::with_gil(|py| Ok(T::to_python(pdu, iter, py)?.into()));
+                }
                 None => {
                     buf.reset();
                     continue;

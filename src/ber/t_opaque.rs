@@ -1,14 +1,13 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: SNMP Application Class Opaque
 // ------------------------------------------------------------------------
-// Copyright (C) 2023-24, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_APP_OPAQUE};
-use crate::error::SnmpResult;
-use pyo3::types::PyBytes;
-use pyo3::{Py, PyAny, Python};
+use super::{BerDecoder, BerHeader, TAG_APP_OPAQUE, Tag};
+use crate::error::{SnmpError, SnmpResult};
+use pyo3::{Bound, IntoPyObject, PyAny, Python, types::PyBytes};
 
 pub struct SnmpOpaque<'a>(pub(crate) &'a [u8]);
 
@@ -23,10 +22,13 @@ impl<'a> BerDecoder<'a> for SnmpOpaque<'a> {
     }
 }
 
-impl ToPython for &SnmpOpaque<'_> {
-    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
-        let v = PyBytes::new(py, self.0);
-        Ok(v.into())
+impl<'py> IntoPyObject<'py> for &SnmpOpaque<'_> {
+    type Target = PyAny;
+    type Output = Bound<'py, Self::Target>;
+    type Error = SnmpError;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        Ok(PyBytes::new(py, self.0).into_any())
     }
 }
 

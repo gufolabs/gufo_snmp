@@ -6,11 +6,9 @@
 // ------------------------------------------------------------------------
 
 use super::{GetIter, PyOp};
-use crate::ber::{SnmpOid, ToPython};
+use crate::ber::SnmpOid;
 use crate::error::SnmpError;
-use crate::snmp::get::SnmpGet;
-use crate::snmp::msg::SnmpPdu;
-use crate::snmp::value::SnmpValue;
+use crate::snmp::{get::SnmpGet, msg::SnmpPdu, value::SnmpValue};
 use pyo3::{exceptions::PyRuntimeError, prelude::*, pybacked::PyBackedStr, types::PyDict};
 
 pub struct OpGetMany;
@@ -26,7 +24,11 @@ impl<'a> PyOp<'a, Vec<PyBackedStr>> for OpGetMany {
                 .collect::<Result<Vec<SnmpOid>, SnmpError>>()?,
         }))
     }
-    fn to_python(pdu: &SnmpPdu, _iter: Option<&mut GetIter>, py: Python) -> PyResult<PyObject> {
+    fn to_python<'py>(
+        pdu: &SnmpPdu,
+        _iter: Option<&mut GetIter>,
+        py: Python<'py>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         match pdu {
             SnmpPdu::GetResponse(resp) => {
                 // Build resulting dict
@@ -38,11 +40,11 @@ impl<'a> PyOp<'a, Vec<PyBackedStr>> for OpGetMany {
                         | SnmpValue::NoSuchInstance
                         | SnmpValue::EndOfMibView => continue,
                         _ => dict
-                            .set_item(var.oid.try_to_python(py)?, var.value.try_to_python(py)?)
+                            .set_item(&var.oid, &var.value)
                             .map_err(|e| PyRuntimeError::new_err(e.to_string()))?,
                     }
                 }
-                Ok(dict.into())
+                Ok(dict.as_any().to_owned())
             }
             SnmpPdu::Report(_) => Err(SnmpError::AuthenticationFailed.into()),
             _ => Err(SnmpError::InvalidPdu.into()),

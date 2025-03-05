@@ -1,11 +1,11 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: BER RELATIVEE OBJECT IDENTIFIER Class
 // ------------------------------------------------------------------------
-// Copyright (C) 2023, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, SnmpOid, Tag, TAG_RELATIVE_OID};
+use super::{BerDecoder, BerHeader, SnmpOid, TAG_RELATIVE_OID, Tag};
 use crate::error::SnmpResult;
 
 #[derive(Debug, PartialEq, Clone)]

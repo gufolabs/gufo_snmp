@@ -1,12 +1,11 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: BER module definition
 // ------------------------------------------------------------------------
-// Copyright (C) 2023, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
 use nom::{Err, IResult};
-use pyo3::{Py, PyAny, Python};
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum BerClass {
@@ -115,9 +114,4 @@ where
 
 pub trait BerEncoder {
     fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()>;
-}
-
-// Convert value to python under the GIL held
-pub trait ToPython {
-    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>>;
 }

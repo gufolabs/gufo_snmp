@@ -1,14 +1,14 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: BER REAL Class
 // ------------------------------------------------------------------------
-// Copyright (C) 2023, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_REAL};
+use super::{BerDecoder, BerHeader, TAG_REAL, Tag};
 use crate::error::{SnmpError, SnmpResult};
 use core::str::from_utf8;
-use pyo3::{IntoPy, Py, PyAny, Python};
+use pyo3::{Bound, IntoPyObject, PyAny, Python};
 
 pub struct SnmpReal(f64);
 
@@ -121,9 +121,13 @@ impl SnmpReal {
     }
 }
 
-impl ToPython for &SnmpReal {
-    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
-        Ok(self.0.into_py(py))
+impl<'py> IntoPyObject<'py> for &SnmpReal {
+    type Target = PyAny;
+    type Output = Bound<'py, Self::Target>;
+    type Error = SnmpError;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        Ok(self.0.into_pyobject(py)?.into_any())
     }
 }
 

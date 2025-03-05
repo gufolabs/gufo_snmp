@@ -1,13 +1,13 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: BER BOOLEAN class
 // ------------------------------------------------------------------------
-// Copyright (C) 2023, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_BOOL};
+use super::{BerDecoder, BerHeader, TAG_BOOL, Tag};
 use crate::error::{SnmpError, SnmpResult};
-use pyo3::{IntoPy, Py, PyAny, Python};
+use pyo3::{Bound, IntoPyObject, PyAny, Python, types::PyBool};
 
 pub struct SnmpBool(bool);
 
@@ -31,9 +31,13 @@ impl From<SnmpBool> for bool {
     }
 }
 
-impl ToPython for &SnmpBool {
-    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
-        Ok(self.0.into_py(py))
+impl<'py> IntoPyObject<'py> for &SnmpBool {
+    type Target = PyAny;
+    type Output = Bound<'py, Self::Target>;
+    type Error = SnmpError;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
+        Ok(PyBool::new(py, self.0).to_owned().into_any())
     }
 }
 

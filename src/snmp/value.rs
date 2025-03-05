@@ -8,14 +8,14 @@
 use crate::ber::{
     BerClass, BerDecoder, BerHeader, SnmpBool, SnmpCounter32, SnmpCounter64, SnmpGauge32, SnmpInt,
     SnmpIpAddress, SnmpNull, SnmpObjectDescriptor, SnmpOctetString, SnmpOid, SnmpOpaque, SnmpReal,
-    SnmpTimeTicks, SnmpUInteger32, ToPython, TAG_APP_COUNTER32, TAG_APP_COUNTER64, TAG_APP_GAUGE32,
+    SnmpTimeTicks, SnmpUInteger32, TAG_APP_COUNTER32, TAG_APP_COUNTER64, TAG_APP_GAUGE32,
     TAG_APP_IPADDRESS, TAG_APP_OPAQUE, TAG_APP_TIMETICKS, TAG_APP_UINTEGER32, TAG_BOOL,
     TAG_CTX_END_OF_MIB_VIEW, TAG_CTX_NO_SUCH_INSTANCE, TAG_CTX_NO_SUCH_OBJECT, TAG_INT, TAG_NULL,
     TAG_OBJECT_DESCRIPTOR, TAG_OBJECT_ID, TAG_OCTET_STRING, TAG_REAL,
 };
-use crate::error::{SnmpError, SnmpResult};
+use crate::error::SnmpError;
 use nom::{Err, IResult};
-use pyo3::{Py, PyAny, Python};
+use pyo3::{Bound, IntoPyObject, PyAny, Python};
 
 pub enum SnmpValue<'a> {
     Bool(SnmpBool),
@@ -65,7 +65,7 @@ impl SnmpValue<'_> {
                         return Err(Err::Failure(SnmpError::UnsupportedTag(format!(
                             "Universal primitive tag {}: {:X?}",
                             hdr.tag, i
-                        ))))
+                        ))));
                     }
                 },
                 BerClass::Application => match hdr.tag {
@@ -83,7 +83,7 @@ impl SnmpValue<'_> {
                         return Err(Err::Failure(SnmpError::UnsupportedTag(format!(
                             "Application primitive tag {}: {:X?}",
                             hdr.tag, i
-                        ))))
+                        ))));
                     }
                 },
                 BerClass::Context => match hdr.tag {
@@ -94,14 +94,14 @@ impl SnmpValue<'_> {
                         return Err(Err::Failure(SnmpError::UnsupportedTag(format!(
                             "Context primitive tag {}: {:X?}",
                             hdr.tag, i
-                        ))))
+                        ))));
                     }
                 },
                 _ => {
                     return Err(Err::Failure(SnmpError::UnsupportedTag(format!(
                         "{:?} primitive tag {}: {:X?}",
                         hdr.class, hdr.tag, i
-                    ))))
+                    ))));
                 }
             },
             // Constructed types
@@ -109,7 +109,7 @@ impl SnmpValue<'_> {
                 return Err(Err::Failure(SnmpError::UnsupportedTag(format!(
                     "{:?} constructed tag {}: {:X?}",
                     hdr.class, hdr.tag, i
-                ))))
+                ))));
             }
         };
         Ok((&tail[hdr.length..], value))
@@ -120,23 +120,27 @@ impl SnmpValue<'_> {
     }
 }
 
-impl ToPython for &SnmpValue<'_> {
-    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
+impl<'py> IntoPyObject<'py> for &SnmpValue<'_> {
+    type Target = PyAny;
+    type Output = Bound<'py, Self::Target>;
+    type Error = SnmpError;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
         Ok(match self {
-            SnmpValue::Bool(x) => x.try_to_python(py)?,
-            SnmpValue::Int(x) => x.try_to_python(py)?,
+            SnmpValue::Bool(x) => x.into_pyobject(py)?,
+            SnmpValue::Int(x) => x.into_pyobject(py)?,
             SnmpValue::Null => todo!("None"),
-            SnmpValue::OctetString(x) => x.try_to_python(py)?,
-            SnmpValue::Oid(x) => x.try_to_python(py)?,
-            SnmpValue::ObjectDescriptor(x) => x.try_to_python(py)?,
-            SnmpValue::Real(x) => x.try_to_python(py)?,
-            SnmpValue::IpAddress(x) => x.try_to_python(py)?,
-            SnmpValue::Counter32(x) => x.try_to_python(py)?,
-            SnmpValue::Gauge32(x) => x.try_to_python(py)?,
-            SnmpValue::TimeTicks(x) => x.try_to_python(py)?,
-            SnmpValue::Opaque(x) => x.try_to_python(py)?,
-            SnmpValue::Counter64(x) => x.try_to_python(py)?,
-            SnmpValue::UInteger32(x) => x.try_to_python(py)?,
+            SnmpValue::OctetString(x) => x.into_pyobject(py)?,
+            SnmpValue::Oid(x) => x.into_pyobject(py)?,
+            SnmpValue::ObjectDescriptor(x) => x.into_pyobject(py)?,
+            SnmpValue::Real(x) => x.into_pyobject(py)?,
+            SnmpValue::IpAddress(x) => x.into_pyobject(py)?,
+            SnmpValue::Counter32(x) => x.into_pyobject(py)?,
+            SnmpValue::Gauge32(x) => x.into_pyobject(py)?,
+            SnmpValue::TimeTicks(x) => x.into_pyobject(py)?,
+            SnmpValue::Opaque(x) => x.into_pyobject(py)?,
+            SnmpValue::Counter64(x) => x.into_pyobject(py)?,
+            SnmpValue::UInteger32(x) => x.into_pyobject(py)?,
             SnmpValue::NoSuchObject | SnmpValue::NoSuchInstance => todo!("never should be passed"),
             SnmpValue::EndOfMibView => todo!("never should be passed"),
         })

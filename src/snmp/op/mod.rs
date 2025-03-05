@@ -1,7 +1,7 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: Python interface for requests and reply
 // ------------------------------------------------------------------------
-// Copyright (C) 2023-24, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
@@ -26,5 +26,9 @@ where
     T: 'a,
 {
     fn from_python(obj: T, request_id: i64) -> PyResult<SnmpPdu<'a>>;
-    fn to_python(pdu: &SnmpPdu, iter: Option<&mut GetIter>, py: Python) -> PyResult<PyObject>;
+    fn to_python<'py>(
+        pdu: &SnmpPdu,
+        iter: Option<&mut GetIter>,
+        py: Python<'py>,
+    ) -> PyResult<Bound<'py, PyAny>>;
 }

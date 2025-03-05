@@ -1,7 +1,7 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: Get+Report operation
 // ------------------------------------------------------------------------
-// Copyright (C) 2023-24, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
@@ -20,7 +20,11 @@ impl<'a> PyOp<'a, ()> for OpRefresh {
             vars: vec![],
         }))
     }
-    fn to_python(_pdu: &SnmpPdu, _iter: Option<&mut GetIter>, py: Python) -> PyResult<PyObject> {
-        Ok(PyNone::get(py).into_py(py))
+    fn to_python<'py>(
+        _pdu: &SnmpPdu,
+        _iter: Option<&mut GetIter>,
+        py: Python<'py>,
+    ) -> PyResult<Bound<'py, PyAny>> {
+        Ok(PyNone::get(py).as_any().to_owned())
     }
 }

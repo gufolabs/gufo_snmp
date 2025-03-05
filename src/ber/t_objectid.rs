@@ -1,15 +1,15 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: BER OBJECT IDENTIFIER Class
 // ------------------------------------------------------------------------
-// Copyright (C) 2023, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerEncoder, BerHeader, Tag, ToPython, TAG_OBJECT_ID};
+use super::{BerDecoder, BerEncoder, BerHeader, TAG_OBJECT_ID, Tag};
 use crate::buf::Buffer;
 use crate::error::{SnmpError, SnmpResult};
 use pyo3::types::PyString;
-use pyo3::{Py, PyAny, Python};
+use pyo3::{Bound, IntoPyObject, PyAny, Python};
 
 // Object identifier type
 // According RFC-1442 pp 7.1.3:
@@ -61,16 +61,19 @@ impl BerEncoder for SnmpOid {
     }
 }
 
-impl ToPython for &SnmpOid {
-    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
+impl<'py> IntoPyObject<'py> for &SnmpOid {
+    type Target = PyAny;
+    type Output = Bound<'py, Self::Target>;
+    type Error = SnmpError;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
         let v = self
             .0
             .iter()
             .map(|c| c.to_string())
             .collect::<Vec<String>>()
             .join(".");
-        let v = PyString::new(py, &v);
-        Ok(v.into())
+        Ok(PyString::new(py, &v).into_any())
     }
 }
 

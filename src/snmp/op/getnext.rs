@@ -7,11 +7,8 @@
 
 use super::{GetIter, PyOp};
 use crate::ber::SnmpOid;
-use crate::ber::ToPython;
 use crate::error::SnmpError;
-use crate::snmp::get::SnmpGet;
-use crate::snmp::msg::SnmpPdu;
-use crate::snmp::value::SnmpValue;
+use crate::snmp::{get::SnmpGet, msg::SnmpPdu, value::SnmpValue};
 use pyo3::{
     exceptions::{PyStopAsyncIteration, PyValueError},
     prelude::*,
@@ -28,7 +25,11 @@ impl<'a> PyOp<'a, SnmpOid> for OpGetNext {
             vars: vec![obj],
         }))
     }
-    fn to_python(pdu: &SnmpPdu, iter: Option<&mut GetIter>, py: Python) -> PyResult<PyObject> {
+    fn to_python<'py>(
+        pdu: &SnmpPdu,
+        iter: Option<&mut GetIter>,
+        py: Python<'py>,
+    ) -> PyResult<Bound<'py, PyAny>> {
         let b_iter = iter.ok_or_else(|| PyValueError::new_err("GetIter expected"))?;
         match pdu {
             SnmpPdu::GetResponse(resp) => {
@@ -51,9 +52,10 @@ impl<'a> PyOp<'a, SnmpOid> for OpGetNext {
                             }
                             value => Ok(PyTuple::new(
                                 py,
-                                vec![var.oid.try_to_python(py)?, value.try_to_python(py)?],
+                                vec![var.oid.into_pyobject(py)?, value.into_pyobject(py)?],
                             )?
-                            .into()),
+                            .as_any()
+                            .to_owned()),
                         }
                     }
                     // Multiple response, surely an error

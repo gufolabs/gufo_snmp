@@ -5,10 +5,9 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, Tag, ToPython, TAG_APP_IPADDRESS};
+use super::{BerDecoder, BerHeader, TAG_APP_IPADDRESS, Tag};
 use crate::error::{SnmpError, SnmpResult};
-use pyo3::types::PyString;
-use pyo3::{Py, PyAny, Python};
+use pyo3::{Bound, IntoPyObject, PyAny, Python, types::PyString};
 
 pub struct SnmpIpAddress(u8, u8, u8, u8);
 
@@ -32,10 +31,14 @@ impl From<&SnmpIpAddress> for String {
     }
 }
 
-impl ToPython for &SnmpIpAddress {
-    fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
+impl<'py> IntoPyObject<'py> for &SnmpIpAddress {
+    type Target = PyAny;
+    type Output = Bound<'py, Self::Target>;
+    type Error = SnmpError;
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
         let s: String = self.into();
-        Ok(PyString::new(py, &s).into())
+        Ok(PyString::new(py, &s).into_any())
     }
 }
 

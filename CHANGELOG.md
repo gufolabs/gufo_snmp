@@ -15,7 +15,8 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 ### Infrastructure
 
 * Rust 1.85.0
-* Migrate to Rust edition 2024
+* Rust edition 2024
+* PyO3 0.23
 
 ## 0.6.0 - 2024-11-06
 
