@@ -36,123 +36,27 @@ jobs:
           name: sdist
           path: dist/*.tar.gz
 
-  # glibc 2.17, x86_64 (RHEL7)
-  build-manylinux_2_17-x86_64:
-    runs-on: ubuntu-22.04
+  build-linux:
+    runs-on: ubuntu-24.04
     needs: build-sdist
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - arch: x86_64
-            target: x86_64-unknown-linux-gnu
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - name: Build wheels
-        run: >
-          docker run --rm
-          -e RUST_ARCH=${{ matrix.target }}
-          -v $PWD:/workdir 
-          -w /workdir 
-          --user 0 
-          quay.io/pypa/manylinux2014_${{ matrix.arch }}:latest
-          ./tools/build/build-many.sh 3.9 3.10 3.11 3.12 3.13
-
-      - name: Save Artefacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheel_manylinux_2_17_${{ matrix.arch }}
-          path: wheelhouse/*.whl
-
-  # glibc 2.28, x86_64/aarch64
-  build-manylinux_2_28:
-    runs-on: ubuntu-22.04
-    needs: build-sdist
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - arch: x86_64
-            target: x86_64-unknown-linux-gnu
-            platform: linux/amd64
-          # - arch: aarch64
-          #   target: aarch64-unknown-linux-gnu
-          #   platform: linux/arm64
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
       - name: Set up QEMU
-        if: matrix.arch != 'x86_64'
         uses: docker/setup-qemu-action@v2
         with:
           image: tonistiigi/binfmt:qemu-v6.2.0
           platforms: all
 
       - name: Build wheels
-        run: >
-          docker run --rm
-          -e RUST_ARCH=${{ matrix.target }}
-          -v $PWD:/workdir 
-          -w /workdir 
-          --user 0 
-          --platform ${{ matrix.platform }}
-          quay.io/pypa/manylinux_2_28_${{ matrix.arch }}:latest
-          ./tools/build/build-many.sh 3.9 3.10 3.11 3.12 3.13
+        run: ./tools/build/build-linux.sh
 
       - name: Save Artefacts
         uses: actions/upload-artifact@v4
         with:
-          name: wheel_manylinux_2_24_${{ matrix.arch }}
+          name: wheel-linux
           path: wheelhouse/*.whl
-
-  # Fails with:
-  # Cannot repair wheel, because required library "libpthread.so.0" could not be located
-  # build-musllinux-1_1:
-  #   runs-on: ubuntu-22.04
-  #   needs: build-sdist
-  #   strategy:
-  #     fail-fast: true
-  #     matrix:
-  #       include:
-  #         - arch: x86_64
-  #           target: x86_64-unknown-linux-musl
-  #           platform: linux/amd64
-  #         # - arch: aarch64
-  #         #   target: aarch64-unknown-linux-musl
-  #         #   platform: linux/arm64
-  #   steps:
-  #     - name: Checkout Repo
-  #       uses: actions/checkout@v4
-
-  #     - name: Set up QEMU
-  #       if: matrix.arch != 'x86_64'
-  #       uses: docker/setup-qemu-action@v2
-  #       with:
-  #         image: tonistiigi/binfmt:qemu-v6.2.0
-  #         platforms: all
-
-  #     # auditwheel crashes on 3.11
-  #     # ValueError: Cannot repair wheel, because required library
-  #     # "librt.so.1" could not be located
-  #     - name: Build wheels
-  #       run: >
-  #         docker run --rm
-  #         -e RUST_ARCH=${{ matrix.target }}
-  #         -v $PWD:/workdir
-  #         -w /workdir
-  #         --user 0
-  #         --platform ${{ matrix.platform }}
-  #         quay.io/pypa/musllinux_1_1_${{ matrix.arch }}:latest
-  #         ./tools/build/build-many.sh 3.9 3.10
-
-  #     - name: Save Artefacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: wheel_musllinux_1_1_${{ matrix.arch }}
-  #         path: wheelhouse/*.whl
 
   # build-wheel-macos:
   #   runs-on: macos-11
@@ -191,10 +95,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs:
       - build-sdist
-      - build-manylinux_2_17-x86_64
-      - build-manylinux_2_28
-      # - build-musllinux-1_1
-      # - build-wheel-macos
+      - build-linux
     steps:
       - name: Download Artefacts
         uses: actions/download-artifact@v4

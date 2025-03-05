@@ -4,7 +4,6 @@ ENV \
     PATH=/usr/local/cargo/bin:$PATH\
     RUSTUP_HOME=/usr/local/rustup\
     CARGO_HOME=/usr/local/cargo
-#RUST_ARCH=x86_64-unknown-linux-gnu
 RUN \
     set -x \
     && apt-get clean \

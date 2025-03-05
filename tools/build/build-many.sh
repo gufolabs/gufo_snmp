@@ -1,15 +1,33 @@
 #!/bin/sh
 # ------------------------------------------------------------------------
-# Gufo Labs: Build wheel in the quay.io/pypa/manylinux2014_x86_64:latest
+# Build wheel in the quay.io/pypa/manylinux2014_x86_64:latest
 # Usage:
-# ./tools/build/build-manylinux 3.9 3.10 3.11 3.11 3.12 3.13
+# ./tools/build/build-many 3.9 3.10 3.11 3.11 3.12 3.13
 # expects RUST_VERSION and RUST_ARCH
 # ------------------------------------------------------------------------
-# Copyright (C) 2022-23, Gufo Labs
+# Copyright (C) 2022-25, Gufo Labs
 # ------------------------------------------------------------------------
 
 # set -x
 set -e
+
+empty_dir() {
+    local path="$1"
+    if [ -d "${path}" ]; then
+        echo "Clearing ${path}..."
+        rm -rf "${path}"/*
+    else
+        echo "Creating ${path}..."
+        mkdir -p "${path}"
+    fi
+}
+
+ensure_dir() {
+    local path="$1"
+    if [ ! -d "${path}" ]; then
+        echo "Creating ${path}..."
+    fi
+}
 
 # Save base path
 BASE_PATH=$PATH
@@ -18,9 +36,17 @@ export RUSTUP_HOME=${RUSTUP_HOME:-/usr/local/rustup}
 export CARGO_HOME=${CARGO_HOME:-/usr/local/cargo}
 PATH=$CARGO_HOME/bin:$BASE_PATH
 
+# Paths
+BUILD="build"
+DIST="dist"
+TMP_WHEELHOUSE="/tmp/wheelhouse"
+WHEELHOUSE="wheelhouse"
+TARGET="target"
+
 echo "##"
 echo "## Installing rust"
 echo "##"
+empty_dir "${TARGET}"
 ./tools/build/setup-rust.sh
 
 echo "##"
@@ -57,18 +83,26 @@ do
     # Check python
     PY_VER=$(python3 --version)
     echo "Python version: $PY_VER"
-    echo "Upgrade pip"
+    echo "Upgrade pip..."
     pip install --upgrade pip
-    echo "Setup build dependencies"
+    echo "Setup build dependencies..."
     pip install -r ./.requirements/build.txt -r ./.requirements/test.txt
-    echo "Building wheel"
+    echo "Building wheel..."
+    empty_dir "${DIST}"
+    empty_dir "${BUILD}"
     python3 -m build --wheel
-    echo "Auditing wheel"
-    auditwheel repair dist/*-$ABI-*.whl
-    echo "Installing wheel"
-    pip install wheelhouse/*-$ABI-*.whl
-    echo "Testing"
+    echo "Auditing wheel..."
+    empty_dir "${TMP_WHEELHOUSE}"
+    auditwheel repair --wheel-dir="${TMP_WHEELHOUSE}" "${DIST}"/*.whl
+    echo "Installing wheel..."
+    pip install "${TMP_WHEELHOUSE}"/*.whl
+    echo "Testing..."
     pytest -vv
+    echo "Saving..."
+    ensure_dir "${WHEELHOUSE}"
+    cp "${TMP_WHEELHOUSE}"/*.whl "${WHEELHOUSE}"
+    empty_dir "${DIST}"
+    empty_dir "${TMP_WHEELHOUSE}"
     echo "... done"
     shift
 done
