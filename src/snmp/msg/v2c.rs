@@ -9,8 +9,8 @@ use crate::ber::{
 };
 use crate::buf::Buffer;
 use crate::error::{SnmpError, SnmpResult};
-use crate::snmp::pdu::SnmpPdu;
 use crate::snmp::SNMP_V2C;
+use crate::snmp::pdu::SnmpPdu;
 
 pub struct SnmpV2cMessage<'a> {
     pub community: &'a [u8],

@@ -5,7 +5,6 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-
 use super::{GetIter, PyOp};
 use crate::{
     ber::SnmpOid,

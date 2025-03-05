@@ -7,8 +7,8 @@
 
 use super::value::SnmpValue;
 use crate::ber::{
-    BerDecoder, SnmpInt, SnmpOid, SnmpRelativeOid, SnmpSequence, Tag, TAG_OBJECT_ID,
-    TAG_RELATIVE_OID,
+    BerDecoder, SnmpInt, SnmpOid, SnmpRelativeOid, SnmpSequence, TAG_OBJECT_ID, TAG_RELATIVE_OID,
+    Tag,
 };
 use crate::error::SnmpError;
 

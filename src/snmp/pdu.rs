@@ -10,7 +10,7 @@ use super::getbulk::SnmpGetBulk;
 use super::getresponse::SnmpGetResponse;
 use super::report::SnmpReport;
 use super::{
-    PDU_GETNEXT_REQUEST, PDU_GET_BULK_REQUEST, PDU_GET_REQUEST, PDU_GET_RESPONSE, PDU_REPORT,
+    PDU_GET_BULK_REQUEST, PDU_GET_REQUEST, PDU_GET_RESPONSE, PDU_GETNEXT_REQUEST, PDU_REPORT,
 };
 use crate::ber::{BerDecoder, BerEncoder, SnmpOption};
 use crate::buf::Buffer;

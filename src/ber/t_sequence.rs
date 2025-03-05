@@ -5,7 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerHeader, Tag, TAG_SEQUENCE};
+use super::{BerDecoder, BerHeader, TAG_SEQUENCE, Tag};
 use crate::error::SnmpResult;
 
 pub struct SnmpSequence<'a>(pub(crate) &'a [u8]);

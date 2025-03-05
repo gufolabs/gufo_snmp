@@ -5,7 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerDecoder, BerEncoder, BerHeader, Tag, TAG_NULL};
+use super::{BerDecoder, BerEncoder, BerHeader, TAG_NULL, Tag};
 use crate::buf::Buffer;
 use crate::error::{SnmpError, SnmpResult};
 

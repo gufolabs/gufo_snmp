@@ -5,7 +5,7 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::{BerClass, BerDecoder, BerHeader, Tag, TAG_SEQUENCE};
+use super::{BerClass, BerDecoder, BerHeader, TAG_SEQUENCE, Tag};
 use crate::error::{SnmpError, SnmpResult};
 use nom::{Err, IResult};
 
