@@ -21,6 +21,6 @@ impl<'a> PyOp<'a, ()> for OpRefresh {
         }))
     }
     fn to_python(_pdu: &SnmpPdu, _iter: Option<&mut GetIter>, py: Python) -> PyResult<PyObject> {
-        Ok(PyNone::get_bound(py).into_py(py))
+        Ok(PyNone::get(py).into_py(py))
     }
 }

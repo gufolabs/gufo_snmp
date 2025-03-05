@@ -69,7 +69,7 @@ impl ToPython for &SnmpOid {
             .map(|c| c.to_string())
             .collect::<Vec<String>>()
             .join(".");
-        let v = PyString::new_bound(py, &v);
+        let v = PyString::new(py, &v);
         Ok(v.into())
     }
 }

@@ -38,7 +38,7 @@ impl<'a> PyOp<'a, (SnmpOid, i64)> for OpGetBulk {
                 if resp.vars.is_empty() {
                     return Err(PyStopAsyncIteration::new_err("stop"));
                 }
-                let list = PyList::empty_bound(py);
+                let list = PyList::empty(py);
                 for var in resp.vars.iter() {
                     match &var.value {
                         SnmpValue::Null
@@ -51,10 +51,10 @@ impl<'a> PyOp<'a, (SnmpOid, i64)> for OpGetBulk {
                                 break;
                             }
                             // Append to list
-                            list.append(PyTuple::new_bound(
+                            list.append(PyTuple::new(
                                 py,
                                 vec![var.oid.try_to_python(py)?, var.value.try_to_python(py)?],
-                            ))
+                            )?)
                             .map_err(|e| PyRuntimeError::new_err(e.to_string()))?
                         }
                     }

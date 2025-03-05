@@ -1,7 +1,7 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: Get operation
 // ------------------------------------------------------------------------
-// Copyright (C) 2023-24, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@ impl<'a> PyOp<'a, &'a str> for OpGet {
                 // Check varbinds size
                 match resp.vars.len() {
                     // Empty response, return None
-                    0 => Ok(PyNone::get_bound(py).into_py(py)),
+                    0 => Ok(PyNone::get(py).into_py(py)),
                     // Return value
                     1 => {
                         let var = &resp.vars[0];
@@ -38,7 +38,7 @@ impl<'a> PyOp<'a, &'a str> for OpGet {
                             SnmpValue::NoSuchObject
                             | SnmpValue::NoSuchInstance
                             | SnmpValue::EndOfMibView => Err(SnmpError::NoSuchInstance.into()),
-                            SnmpValue::Null => Ok(PyNone::get_bound(py).into_py(py)),
+                            SnmpValue::Null => Ok(PyNone::get(py).into_py(py)),
                             _ => Ok(value.try_to_python(py)?),
                         }
                     }

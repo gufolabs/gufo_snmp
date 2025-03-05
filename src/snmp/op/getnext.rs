@@ -1,7 +1,7 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: GetNext operation
 // ------------------------------------------------------------------------
-// Copyright (C) 2023-24, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
@@ -49,10 +49,10 @@ impl<'a> PyOp<'a, SnmpOid> for OpGetNext {
                             SnmpValue::EndOfMibView | SnmpValue::Null => {
                                 Err(PyStopAsyncIteration::new_err("stop"))
                             }
-                            value => Ok(PyTuple::new_bound(
+                            value => Ok(PyTuple::new(
                                 py,
                                 vec![var.oid.try_to_python(py)?, value.try_to_python(py)?],
-                            )
+                            )?
                             .into()),
                         }
                     }

@@ -1,7 +1,7 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: SnmpV3ClientSocket
 // ------------------------------------------------------------------------
-// Copyright (C) 2023-24, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
@@ -112,7 +112,7 @@ impl SnmpV3ClientSocket {
     }
     /// Get engine id
     fn get_engine_id(&self, py: Python) -> PyResult<PyObject> {
-        Ok(PyBytes::new_bound(py, &self.engine_id).into())
+        Ok(PyBytes::new(py, &self.engine_id).into())
     }
     // .get()
     // Prepare send GET request with single oid and receive reply

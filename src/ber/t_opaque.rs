@@ -25,7 +25,7 @@ impl<'a> BerDecoder<'a> for SnmpOpaque<'a> {
 
 impl ToPython for &SnmpOpaque<'_> {
     fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
-        let v = PyBytes::new_bound(py, self.0);
+        let v = PyBytes::new(py, self.0);
         Ok(v.into())
     }
 }

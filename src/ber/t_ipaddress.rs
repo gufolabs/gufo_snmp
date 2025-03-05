@@ -1,7 +1,7 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: SNMP Application Class IpAddress
 // ------------------------------------------------------------------------
-// Copyright (C) 2023-24, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
@@ -35,7 +35,7 @@ impl From<&SnmpIpAddress> for String {
 impl ToPython for &SnmpIpAddress {
     fn try_to_python(self, py: Python) -> SnmpResult<Py<PyAny>> {
         let s: String = self.into();
-        Ok(PyString::new_bound(py, &s).into())
+        Ok(PyString::new(py, &s).into())
     }
 }
 

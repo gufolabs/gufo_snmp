@@ -1,7 +1,7 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: GetMany operation
 // ------------------------------------------------------------------------
-// Copyright (C) 2023-24, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
@@ -30,7 +30,7 @@ impl<'a> PyOp<'a, Vec<PyBackedStr>> for OpGetMany {
         match pdu {
             SnmpPdu::GetResponse(resp) => {
                 // Build resulting dict
-                let dict = PyDict::new_bound(py);
+                let dict = PyDict::new(py);
                 for var in resp.vars.iter() {
                     match &var.value {
                         SnmpValue::Null
