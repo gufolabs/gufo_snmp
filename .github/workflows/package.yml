@@ -39,6 +39,15 @@ jobs:
   build-linux:
     runs-on: ubuntu-24.04
     needs: build-sdist
+    strategy:
+      fail-fast: true
+      matrix:
+        image:
+          - manylinux2014_x86_64
+          - manylinux_2_28_x86_64
+          - manylinux_2_28_aarch64
+          - musllinux_1_2_x86_64
+          - musllinux_1_2_aarch64
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -50,12 +59,12 @@ jobs:
           platforms: all
 
       - name: Build wheels
-        run: ./tools/build/build-linux.sh
+        run: ./tools/build/build-linux.sh ${{matrix.image}}
 
       - name: Save Artefacts
         uses: actions/upload-artifact@v4
         with:
-          name: wheel-linux
+          name: wheel-linux-${{image.matrix}}
           path: wheelhouse/*.whl
 
   # build-wheel-macos:

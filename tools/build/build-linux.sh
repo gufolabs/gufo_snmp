@@ -7,17 +7,34 @@
 
 set -e
 
-build() {
-    local image_arch="$1"
-    local image="$2"
+# Define all valid builds
+VALID_IMAGES="
+manylinux2014_x86_64
+manylinux_2_28_x86_64
+manylinux_2_28_aarch64
+musllinux_1_2_x86_64
+musllinux_1_2_aarch64
+"
 
-    case "${image_arch}" in
-        linux/amd64) rust_arch="x86_64-unknown-linux-gnu";;
-        linux/aarch64) rust_arch="aarch64-unknown-linux-gnu";;
-        *)
-            echo "Invalid arch: ${image_arch}"
-            exit 1
+# Check if a given combination is valid
+is_valid_image() {
+    echo "$VALID_IMAGES" | grep -qE "^$1$"
+}
+
+# Build for platform
+build() {
+    local image="$1"
+
+    case "$image" in
+        *_x86_64) 
+            local image_arch="linux/amd64"
+            local rust_arch="x86_64-unknown-linux-gnu"
             ;;
+        *_aarch64)
+            local image_arch="linux/aarch64"
+            local rust_arch="aarch64-unknown-linux-gnu"
+            ;;
+        *) return 1 ;; # Unknown platform
     esac
     docker run --rm\
         -e RUST_ARCH=${rust_arch}\
@@ -29,8 +46,21 @@ build() {
         ./tools/build/build-many.sh 3.9 3.10 3.11 3.12 3.13
 }
 
-build linux/amd64 manylinux2014_x86_64
-build linux/amd64 manylinux_2_28_x86_64
-build linux/aarch64 manylinux_2_28_aarch64
-build linux/amd64 musllinux_1_2_x86_64
-build linux/aarch64 musllinux_1_2_aarch64
+if [ "$#" -eq 0 ]; then
+    # No arguments: Run all builds
+    echo "$VALID_IMAGES" | while read -r image; do
+        build "$image"
+    done
+elif [ "$#" -eq 1 ]; then
+    # Two arguments: Check validity and run if valid
+    if is_valid_image "$1"; then
+        build "$1"
+    else
+        echo "Error: Invalid image '$1'"
+        exit 1
+    fi
+else
+    echo "Usage: $0 [image]"
+    echo "Where [image] is one of: $VALID_IMAGES"
+    exit 1
+fi
