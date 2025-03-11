@@ -64,7 +64,7 @@ jobs:
       - name: Save Artefacts
         uses: actions/upload-artifact@v4
         with:
-          name: wheel-linux-${{image.matrix}}
+          name: wheel-linux-${{matrix.image}}
           path: wheelhouse/*.whl
 
   # build-wheel-macos:
