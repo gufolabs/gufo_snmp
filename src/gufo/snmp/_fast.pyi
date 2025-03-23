@@ -1,12 +1,12 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: _fast typing
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-24, Gufo Labs
+# Copyright (C) 2023-25, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
 # Python modules
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 # Gufo Labs modules
 from .typing import ValueType
@@ -62,13 +62,13 @@ class SnmpV1ClientSocket(object):
     # .get_bulk()
     def get_bulk(
         self: "SnmpV1ClientSocket", iter_getbulk: GetIter
-    ) -> List[Tuple[str, ValueType] | None]: ...
+    ) -> List[Union[Tuple[str, ValueType], None]]: ...
     def send_get_bulk(
         self: "SnmpV1ClientSocket", iter_getbulk: GetIter
     ) -> None: ...
     def recv_get_bulk(
         self: "SnmpV1ClientSocket", iter_getnext: GetIter
-    ) -> List[Tuple[str, ValueType] | None]: ...
+    ) -> List[Union[Tuple[str, ValueType], None]]: ...
 
 class SnmpV2cClientSocket(object):
     def __init__(
@@ -108,13 +108,13 @@ class SnmpV2cClientSocket(object):
     # .get_bulk()
     def get_bulk(
         self: "SnmpV2cClientSocket", iter_getbulk: GetIter
-    ) -> List[Tuple[str, ValueType] | None]: ...
+    ) -> List[Union[Tuple[str, ValueType], None]]: ...
     def send_get_bulk(
         self: "SnmpV2cClientSocket", iter_getbulk: GetIter
     ) -> None: ...
     def recv_get_bulk(
         self: "SnmpV2cClientSocket", iter_getnext: GetIter
-    ) -> List[Tuple[str, ValueType] | None]: ...
+    ) -> List[Union[Tuple[str, ValueType], None]]: ...
 
 class SnmpV3ClientSocket(object):
     def __init__(
@@ -166,13 +166,13 @@ class SnmpV3ClientSocket(object):
     # Rest
     def get_bulk(
         self: "SnmpV3ClientSocket", iter_getbulk: GetIter
-    ) -> List[Tuple[str, ValueType] | None]: ...
+    ) -> List[Union[Tuple[str, ValueType], None]]: ...
     def send_get_bulk(
         self: "SnmpV3ClientSocket", iter_getbulk: GetIter
     ) -> None: ...
     def recv_get_bulk(
         self: "SnmpV3ClientSocket", iter_getnext: GetIter
-    ) -> List[Tuple[str, ValueType] | None]: ...
+    ) -> List[Union[Tuple[str, ValueType], None]]: ...
     # .refresh
     def refresh(self: "SnmpV3ClientSocket") -> None: ...
     def send_refresh(self: "SnmpV3ClientSocket") -> None: ...

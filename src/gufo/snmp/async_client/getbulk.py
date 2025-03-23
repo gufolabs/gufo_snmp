@@ -8,7 +8,7 @@
 """GetBulkIter iterator."""
 
 # Python modules
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 # Gufo Labs Modules
 from .._fast import GetIter as _Iter
@@ -42,7 +42,7 @@ class GetBulkIter(object):
         self._fd = sock.get_fd()
         self._timeout = timeout
         self._max_repetitions = max_repetitions
-        self._buffer: List[Tuple[str, ValueType] | None] = []
+        self._buffer: List[Union[Tuple[str, ValueType], None]] = []
         self._policer = policer
 
     def __aiter__(self: "GetBulkIter") -> "GetBulkIter":
@@ -55,7 +55,7 @@ class GetBulkIter(object):
         def sender() -> None:
             self._sock.send_get_bulk(self._ctx)
 
-        def receiver() -> List[Tuple[str, ValueType] | None]:
+        def receiver() -> List[Union[Tuple[str, ValueType], None]]:
             return self._sock.recv_get_bulk(self._ctx)
 
         def pop_or_stop() -> Tuple[str, ValueType]:

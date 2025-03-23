@@ -8,7 +8,7 @@
 """GetBulkIter iterator."""
 
 # Python modules
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 # Gufo Labs Modules
 from .._fast import GetIter as _Iter
@@ -37,7 +37,7 @@ class GetBulkIter(object):
         self._sock = sock
         self._ctx = _Iter(oid, max_repetitions)
         self._max_repetitions = max_repetitions
-        self._buffer: List[Tuple[str, ValueType] | None] = []
+        self._buffer: List[Union[Tuple[str, ValueType], None]] = []
         self._policer = policer
 
     def __iter__(self: "GetBulkIter") -> "GetBulkIter":

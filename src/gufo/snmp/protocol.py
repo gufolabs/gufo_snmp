@@ -1,12 +1,12 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: Socket protocol definition
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-24, Gufo Labs
+# Copyright (C) 2023-25, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
 # Python modules
-from typing import Dict, List, Protocol, Tuple
+from typing import Dict, List, Protocol, Tuple, Union
 
 # Gufo Labs modules
 from ._fast import GetIter
@@ -52,7 +52,7 @@ class SnmpClientSocketProtocol(Protocol):
     # .get_bulk
     def get_bulk(
         self: "SnmpClientSocketProtocol", iter_getbulk: GetIter
-    ) -> List[Tuple[str, ValueType] | None]: ...
+    ) -> List[Union[Tuple[str, ValueType], None]]: ...
 
     def send_get_bulk(
         self: "SnmpClientSocketProtocol", iter_getbulk: GetIter
@@ -60,4 +60,4 @@ class SnmpClientSocketProtocol(Protocol):
 
     def recv_get_bulk(
         self: "SnmpClientSocketProtocol", iter_getnext: GetIter
-    ) -> List[Tuple[str, ValueType] | None]: ...
+    ) -> List[Union[Tuple[str, ValueType], None]]: ...
