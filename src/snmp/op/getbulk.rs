@@ -52,6 +52,7 @@ impl<'a> PyOp<'a, (SnmpOid, i64)> for OpGetBulk {
                         _ => {
                             // Check if we can continue
                             if !b_iter.set_next_oid(&var.oid) {
+                                let _ = list.append(py.None());
                                 break;
                             }
                             // Append to list

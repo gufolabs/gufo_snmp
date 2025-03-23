@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: GetBulkIter
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-24, Gufo Labs
+# Copyright (C) 2023-25, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -37,8 +37,7 @@ class GetBulkIter(object):
         self._sock = sock
         self._ctx = _Iter(oid, max_repetitions)
         self._max_repetitions = max_repetitions
-        self._buffer: List[Tuple[str, ValueType]] = []
-        self._stop = False
+        self._buffer: List[Tuple[str, ValueType] | None] = []
         self._policer = policer
 
     def __iter__(self: "GetBulkIter") -> "GetBulkIter":
@@ -47,12 +46,16 @@ class GetBulkIter(object):
 
     def __next__(self: "GetBulkIter") -> Tuple[str, ValueType]:
         """Get next value."""
+
+        def pop_or_stop() -> Tuple[str, ValueType]:
+            v = self._buffer.pop(0)
+            if v is None:
+                raise StopIteration
+            return v
+
         # Return item from buffer, if present
         if self._buffer:
-            return self._buffer.pop(0)
-        # Complete
-        if self._stop:
-            raise StopIteration
+            return pop_or_stop()
         # Policer
         if self._policer:
             self._policer.wait_sync()
@@ -65,6 +68,4 @@ class GetBulkIter(object):
         # End
         if not self._buffer:
             raise StopIteration  # End of view
-        self._stop = len(self._buffer) < self._max_repetitions
-        # Having at least one item
-        return self._buffer.pop(0)
+        return pop_or_stop()

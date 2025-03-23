@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: GetBulkIter
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-24, Gufo Labs
+# Copyright (C) 2023-25, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -42,8 +42,7 @@ class GetBulkIter(object):
         self._fd = sock.get_fd()
         self._timeout = timeout
         self._max_repetitions = max_repetitions
-        self._buffer: List[Tuple[str, ValueType]] = []
-        self._stop = False
+        self._buffer: List[Tuple[str, ValueType] | None] = []
         self._policer = policer
 
     def __aiter__(self: "GetBulkIter") -> "GetBulkIter":
@@ -56,21 +55,23 @@ class GetBulkIter(object):
         def sender() -> None:
             self._sock.send_get_bulk(self._ctx)
 
-        def receiver() -> List[Tuple[str, ValueType]]:
+        def receiver() -> List[Tuple[str, ValueType] | None]:
             return self._sock.recv_get_bulk(self._ctx)
+
+        def pop_or_stop() -> Tuple[str, ValueType]:
+            v = self._buffer.pop(0)
+            if v is None:
+                raise StopAsyncIteration
+            return v
 
         # Return item from buffer, if present
         if self._buffer:
-            return self._buffer.pop(0)
-        # Complete
-        if self._stop:
-            raise StopAsyncIteration
+            return pop_or_stop()
         self._buffer = await send_and_recv(
             self._fd, sender, receiver, self._policer, self._timeout
         )
         # End?
         if not self._buffer:
             raise StopAsyncIteration  # End of view
-        self._stop = len(self._buffer) < self._max_repetitions
         # Having at least one item
-        return self._buffer.pop(0)
+        return pop_or_stop()
