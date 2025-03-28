@@ -107,25 +107,28 @@ impl From<Vec<u32>> for SnmpOid {
     }
 }
 
+struct OidSubelementIterator<'a>(core::str::Split<'a, &'a str>);
+
+impl<'a> OidSubelementIterator<'a> {
+    pub fn new(oid: &'a str) -> Self {
+        Self(oid.split("."))
+    }
+}
+
+impl<'a> Iterator for OidSubelementIterator<'a> {
+    type Item = Result<u32, SnmpError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0
+            .next()
+            .map(|part| part.parse::<u32>().map_err(|_| SnmpError::InvalidData))
+    }
+}
+
 impl TryFrom<&str> for SnmpOid {
     type Error = SnmpError;
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        let mut vec = Vec::new();
-        let mut last: u32 = 0;
-        for c in value.bytes() {
-            if c == 46 {
-                // "."
-                vec.push(last);
-                last = 0;
-                continue;
-            }
-            if (c >= 48) || (c <= 57) {
-                last = last * 10 + ((c - 48) as u32);
-            } else {
-                return Err(SnmpError::InvalidData);
-            }
-        }
-        vec.push(last);
+        let vec = OidSubelementIterator::new(value).collect::<Result<Vec<u32>, Self::Error>>()?;
         Ok(SnmpOid(vec))
     }
 }
