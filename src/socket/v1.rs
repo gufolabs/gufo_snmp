@@ -1,7 +1,7 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: SnmpV1ClientSocket
 // ------------------------------------------------------------------------
-// Copyright (C) 2023-24, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
@@ -53,11 +53,11 @@ impl SnmpV1ClientSocket {
     }
     // .get()
     // Prepare send GET request with single oid and receive reply
-    fn get(&mut self, py: Python, oid: &str) -> PyResult<PyObject> {
+    fn get(&mut self, py: Python, oid: PyBackedStr) -> PyResult<PyObject> {
         Self::send_and_recv::<OpGet, _>(self, oid, None, py)
     }
     // Prepare and send GET request with single oid
-    fn send_get(&mut self, py: Python, oid: &str) -> PyResult<()> {
+    fn send_get(&mut self, py: Python, oid: PyBackedStr) -> PyResult<()> {
         Self::send_request::<OpGet, _>(self, oid, py)
     }
     // Try to receive GETRESPONSE

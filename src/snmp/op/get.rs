@@ -11,16 +11,16 @@ use crate::{
     error::SnmpError,
     snmp::{get::SnmpGet, msg::SnmpPdu, value::SnmpValue},
 };
-use pyo3::{IntoPyObject, prelude::*, types::PyNone};
+use pyo3::{IntoPyObject, prelude::*, pybacked::PyBackedStr, types::PyNone};
 
 pub struct OpGet;
 
-impl<'a> PyOp<'a, &'a str> for OpGet {
+impl<'a> PyOp<'a, PyBackedStr> for OpGet {
     // Obj is str
-    fn from_python(obj: &'a str, request_id: i64) -> PyResult<SnmpPdu<'a>> {
+    fn from_python(obj: PyBackedStr, request_id: i64) -> PyResult<SnmpPdu<'a>> {
         Ok(SnmpPdu::GetRequest(SnmpGet {
             request_id,
-            vars: vec![SnmpOid::try_from(obj)?],
+            vars: vec![SnmpOid::try_from(obj.as_ref())?],
         }))
     }
     fn to_python<'py>(
