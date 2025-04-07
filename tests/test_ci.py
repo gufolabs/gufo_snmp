@@ -60,7 +60,7 @@ def _iter_actions() -> Iterable[Action]:
             for step in data["jobs"][job]["steps"]:
                 if "uses" in step:
                     uses = step["uses"]
-                    for v in versions:
+                    for v, expected in versions.items():
                         if uses.startswith(f"{v}@"):
                             yield Action(
                                 path=fn,
@@ -68,7 +68,7 @@ def _iter_actions() -> Iterable[Action]:
                                 step=step["name"],
                                 action=v,
                                 version=uses.split("@")[1],
-                                expected=versions[v],
+                                expected=expected,
                             )
                             break
 

@@ -35,7 +35,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./.pip
-          key: ${{ runner.os }}-tests-3.13-${{ hashFiles('./.requirements/lint.txt') }}
+          key: ${{ runner.os }}-lint-3.13-${{ hashFiles('./.requirements/lint.txt') }}
 
       - name: Upgrade Pip
         run: python -m pip install --upgrade pip

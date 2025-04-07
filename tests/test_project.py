@@ -50,11 +50,17 @@ def _get_project_info() -> Tuple[str, str]:
         assert len(d) == 1
         return d[0]
 
+    def has_init(*args: str) -> bool:
+        return Path(*(*args, "__init__.py")).exists()
+
     ns = explore_dir(ROOT, "src")
     if ns == "gufo":
         # gufo.* namespace
         pkg = explore_dir(ROOT, "src", ns)
-        return os.path.join("src", ns, pkg), f"{ns}.{pkg}"
+        if has_init("src", ns, pkg):
+            return os.path.join("src", ns, pkg), f"{ns}.{pkg}"
+        pkg2 = explore_dir(ROOT, "src", ns, pkg)
+        return os.path.join("src", ns, pkg, pkg2), f"{ns}.{pkg}.{pkg2}"
     return os.path.join("src", ns), ns
 
 
