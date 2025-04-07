@@ -2,13 +2,13 @@
 # ------------------------------------------------------------------------
 # Gufo Labs: Install and setup rust
 # ------------------------------------------------------------------------
-# Copyright (C) 2023-24, Gufo Labs
+# Copyright (C) 2023-25, Gufo Labs
 # ------------------------------------------------------------------------
 
 set -x
 set -e
 
-RUST_VERSION=${RUST_VERSION:-1.85.0}
+RUST_VERSION=${RUST_VERSION:-1.86.0}
 
 # @todo: Allow override
 export RUSTUP_HOME=${RUSTUP_HOME:-/usr/local/rustup}

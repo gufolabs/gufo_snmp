@@ -37,7 +37,7 @@ impl GetIter {
     // Save oid for next request.
     // Return true if next request may be send or return false otherwise
     pub fn set_next_oid(&mut self, oid: &SnmpOid) -> bool {
-        if self.start_oid.contains(oid) {
+        if self.start_oid.starts_with(oid) {
             self.next_oid = oid.clone();
             true
         } else {

@@ -15,6 +15,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 ### Infrastructure
 
 * Ruff 0.11.2
+* Rust 1.86.0
 
 ## 0.7.1 - 2025-03-23
 

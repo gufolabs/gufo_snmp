@@ -92,12 +92,8 @@ impl SnmpOid {
         Ok(())
     }
     // Check oid is contained within
-    pub fn contains(&self, oid: &SnmpOid) -> bool {
-        let sl = self.0.len();
-        if oid.0.len() < sl {
-            return false;
-        }
-        self.0 == oid.0[..sl]
+    pub fn starts_with(&self, oid: &SnmpOid) -> bool {
+        oid.0.starts_with(&self.0)
     }
 }
 
@@ -115,7 +111,7 @@ impl<'a> OidSubelementIterator<'a> {
     }
 }
 
-impl<'a> Iterator for OidSubelementIterator<'a> {
+impl Iterator for OidSubelementIterator<'_> {
     type Item = Result<u32, SnmpError>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -178,18 +174,18 @@ mod test {
     fn test_contains1() {
         let oid1 = SnmpOid::from(vec![1, 3, 6]);
         let oid2 = SnmpOid::from(vec![1, 3]);
-        assert!(!oid1.contains(&oid2));
+        assert!(!oid1.starts_with(&oid2));
     }
     #[test]
     fn test_contains2() {
         let oid1 = SnmpOid::from(vec![1, 3, 6]);
         let oid2 = SnmpOid::from(vec![1, 2, 5]);
-        assert!(!oid1.contains(&oid2));
+        assert!(!oid1.starts_with(&oid2));
     }
     #[test]
     fn test_contains3() {
         let oid1 = SnmpOid::from(vec![1, 3, 6]);
         let oid2 = SnmpOid::from(vec![1, 3, 6, 1, 5]);
-        assert!(oid1.contains(&oid2));
+        assert!(oid1.starts_with(&oid2));
     }
 }
