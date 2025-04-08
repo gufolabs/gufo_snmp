@@ -147,6 +147,7 @@ impl TryFrom<&str> for SnmpOid {
 #[cfg(test)]
 mod test {
     use super::*;
+    use test_case::test_case;
 
     #[test]
     fn test_parse_ber() -> SnmpResult<()> {
@@ -175,51 +176,32 @@ mod test {
         assert_eq!(oid, oid2);
         Ok(())
     }
-    #[test]
-    fn test_try_from_str() -> SnmpResult<()> {
-        let data = ["1.3.6.999.3", "1.3.6.1.2.1.1.5.0"];
-        let expected = [vec![43, 6, 135, 103, 3], vec![43, 6, 1, 2, 1, 1, 5, 0]];
-        for i in 0..data.len() {
-            let s = SnmpOid::try_from(data[i])?;
-            assert_eq!(s.0, expected[i]);
-        }
-        Ok(())
-    }
-    #[test]
-    fn test_starts_with1() -> SnmpResult<()> {
-        let oid1 = SnmpOid::try_from("1.3.6")?;
-        let oid2 = SnmpOid::try_from("1.3")?;
-        assert!(!oid1.starts_with(&oid2));
-        Ok(())
-    }
-    #[test]
-    fn test_starts_with2() -> SnmpResult<()> {
-        let oid1 = SnmpOid::try_from("1.3.6")?;
-        let oid2 = SnmpOid::try_from("1.2.5")?;
-        assert!(!oid1.starts_with(&oid2));
-        Ok(())
-    }
-    #[test]
-    fn test_starts_with3() -> SnmpResult<()> {
-        let oid1 = SnmpOid::try_from("1.3.6")?;
-        let oid2 = SnmpOid::try_from("1.3.6.1.5")?;
-        assert!(oid1.starts_with(&oid2));
+
+    #[test_case("1.3.6.999.3", vec![43, 6, 135, 103, 3]; "1")]
+    #[test_case("1.3.6.1.2.1.1.5.0", vec![43, 6, 1, 2, 1, 1, 5, 0]; "2")]
+    fn test_try_from_str(data: &str, expected: Vec<u8>) -> SnmpResult<()> {
+        let oid = SnmpOid::try_from(data)?;
+        assert_eq!(oid.0, expected);
         Ok(())
     }
 
-    #[test]
-    fn test_to_string() -> SnmpResult<()> {
-        let data = [
-            vec![43, 6],
-            vec![43, 6, 135, 103, 3],
-            vec![43, 6, 1, 2, 1, 1, 5, 0],
-        ];
-        let expected = ["1.3.6", "1.3.6.999.3", "1.3.6.1.2.1.1.5.0"];
-        for i in 0..data.len() {
-            let oid = SnmpOid(data[i].clone());
-            let s = String::try_from(&oid)?;
-            assert_eq!(&s, expected[i]);
-        }
+    #[test_case("1.3.6", "1.3", false; "1")]
+    #[test_case("1.3.6", "1.2.5", false; "2")]
+    #[test_case("1.3.6", "1.3.6.1.5", true; "3")]
+    fn test_starts_with(x: &str, y: &str, expected: bool) -> SnmpResult<()> {
+        let oid1 = SnmpOid::try_from(x)?;
+        let oid2 = SnmpOid::try_from(y)?;
+        assert_eq!(oid1.starts_with(&oid2), expected);
+        Ok(())
+    }
+
+    #[test_case(vec![43, 6], "1.3.6"; "1")]
+    #[test_case(vec![43, 6, 135, 103, 3], "1.3.6.999.3"; "2")]
+    #[test_case(vec![43, 6, 1, 2, 1, 1, 5, 0], "1.3.6.1.2.1.1.5.0"; "3")]
+    fn test_to_string(data: Vec<u8>, expected: &str) -> SnmpResult<()> {
+        let oid = SnmpOid(data);
+        let s = String::try_from(&oid)?;
+        assert_eq!(s, expected);
         Ok(())
     }
 }

@@ -41,21 +41,14 @@ impl<'py> IntoPyObject<'py> for &SnmpTimeTicks {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use test_case::test_case;
 
-    #[test]
-    fn test_parse1() -> SnmpResult<()> {
-        let data = [0x43, 0x4, 0, 0x89, 0x92, 0xDB];
+    #[test_case(vec![0x43, 0x4, 0, 0x89, 0x92, 0xDB], 0x008992DB; "1")]
+    #[test_case(vec![67, 4, 1, 53, 16, 171], 0x013510AB; "2")]
+    fn test_parse(data: Vec<u8>, expected: u32) -> SnmpResult<()> {
         let (tail, tt) = SnmpTimeTicks::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
-        assert_eq!(tt.0, 0x008992DB);
-        Ok(())
-    }
-    #[test]
-    fn test_parse2() -> SnmpResult<()> {
-        let data = [67, 4, 1, 53, 16, 171];
-        let (tail, tt) = SnmpTimeTicks::from_ber(&data)?;
-        assert_eq!(tail.len(), 0);
-        assert_eq!(tt.0, 0x013510AB);
+        assert_eq!(tt.0, expected);
         Ok(())
     }
 }

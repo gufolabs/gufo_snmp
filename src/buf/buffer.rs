@@ -181,7 +181,10 @@ impl AsMut<[MaybeUninit<u8>]> for Buffer {
 
 #[cfg(test)]
 mod tests {
+    use crate::ber::TAG_OCTET_STRING;
+
     use super::*;
+    use test_case::test_case;
 
     #[test]
     fn test_default() {
@@ -214,44 +217,16 @@ mod tests {
         Ok(())
     }
 
-    #[test]
-    fn test_push_tag_len_short1() -> SnmpResult<()> {
+    #[test_case(1, vec![4, 1]; "Short 1")]
+    #[test_case(127, vec![4, 127]; "Short 2")]
+    #[test_case(128, vec![4, 0x81,128]; "Long 1")]
+    #[test_case(255, vec![4, 0x81,255]; "Long 2")]
+    #[test_case(256, vec![4, 0x82,1,0]; "Long 3")]
+    fn test_push_tag_len(len: usize, expected: Vec<u8>) -> SnmpResult<()> {
         let mut b = Buffer::default();
-        b.push_tag_len(4, 1)?;
-        assert_eq!(b.len(), 2);
-        assert_eq!(b.data(), &[4, 1]);
-        Ok(())
-    }
-    #[test]
-    fn test_push_tag_len_short2() -> SnmpResult<()> {
-        let mut b = Buffer::default();
-        b.push_tag_len(4, 127)?;
-        assert_eq!(b.len(), 2);
-        assert_eq!(b.data(), &[4, 127]);
-        Ok(())
-    }
-    #[test]
-    fn test_push_tag_len_long1() -> SnmpResult<()> {
-        let mut b = Buffer::default();
-        b.push_tag_len(4, 128)?;
-        assert_eq!(b.len(), 3);
-        assert_eq!(b.data(), &[4, 0x81, 128]);
-        Ok(())
-    }
-    #[test]
-    fn test_push_tag_len_long2() -> SnmpResult<()> {
-        let mut b = Buffer::default();
-        b.push_tag_len(4, 255)?;
-        assert_eq!(b.len(), 3);
-        assert_eq!(b.data(), &[4, 0x81, 255]);
-        Ok(())
-    }
-    #[test]
-    fn test_push_tag_len_long3() -> SnmpResult<()> {
-        let mut b = Buffer::default();
-        b.push_tag_len(4, 256)?;
-        assert_eq!(b.len(), 4);
-        assert_eq!(b.data(), &[4, 0x82, 1, 0]);
+        b.push_tag_len(TAG_OCTET_STRING, len)?;
+        assert_eq!(b.len(), expected.len());
+        assert_eq!(b.data(), &expected);
         Ok(())
     }
 }
