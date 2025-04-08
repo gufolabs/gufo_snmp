@@ -322,7 +322,7 @@ class User(object):
     @property
     def snmpd_create_user(self: "User") -> str:
         """
-        createUser part of snmpd.conf.
+        CreateUser part of snmpd.conf.
 
         Returns:
             createUser configuration directive.

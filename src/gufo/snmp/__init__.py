@@ -26,18 +26,18 @@ from .version import SnmpVersion
 
 __version__: str = "0.7.1"
 __all__ = [
-    "__version__",
     "Aes128Key",
     "DesKey",
     "Md5Key",
+    "NoSuchInstance",
     "Sha1Key",
     "SnmpAuthError",
+    "SnmpDecodeError",
+    "SnmpEncodeError",
+    "SnmpError",
     "SnmpSession",
     "SnmpVersion",
-    "SnmpError",
-    "SnmpEncodeError",
-    "SnmpDecodeError",
-    "NoSuchInstance",
     "User",
     "ValueType",
+    "__version__",
 ]

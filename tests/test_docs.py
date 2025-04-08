@@ -58,6 +58,6 @@ def test_links(doc: str) -> None:
 def test_rfc_links(doc: str) -> None:
     data = get_file(doc)
     match = rx_datatracker_ietf.search(data)
-    assert (
-        not match
-    ), f"{match.group(0)} link used. Must be https://www.rfc-editor.org/rfc/{match.group(1)}.html"
+    assert not match, (
+        f"{match.group(0)} link used. Must be https://www.rfc-editor.org/rfc/{match.group(1)}.html"
+    )
