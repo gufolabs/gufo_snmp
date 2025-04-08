@@ -30,6 +30,7 @@ socket2 = {version = "0.5", features = ["all"]}
 [dev-dependencies]
 criterion = "0.4"
 iai = "0.1"
+test-case = "3"
 
 # [[bench]]
 # harness = false

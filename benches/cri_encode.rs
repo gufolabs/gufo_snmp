@@ -21,10 +21,10 @@ pub fn bench_get(c: &mut Criterion) {
         pdu: SnmpPdu::GetRequest(SnmpGet {
             request_id: 0x63ccac7d,
             vars: vec![
-                SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 3]),
-                SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 2]),
-                SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 6]),
-                SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 4]),
+                SnmpOid::try_from("1.3.6.1.2.1.1.3"),
+                SnmpOid::try_from("1.3.6.1.2.1.1.2"),
+                SnmpOid::try_from("1.3.6.1.2.1.1.6"),
+                SnmpOid::try_from("1.3.6.1.2.1.1.4"),
             ],
         }),
     };

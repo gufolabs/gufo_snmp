@@ -74,9 +74,9 @@ mod tests {
             0x1a, 0x30, 0x0b, 0x06, 0x07, 0x2b, 0x06, 0x01, 0x02, 0x01, 0x01, 0x03, 0x05, 0x00,
             0x30, 0x0b, 0x06, 0x07, 0x2b, 0x06, 0x01, 0x02, 0x01, 0x01, 0x02, 0x05, 0x00,
         ];
-        let vars: Vec<SnmpOid> = vec![
-            SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 3]),
-            SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 2]),
+        let vars = vec![
+            SnmpOid::try_from("1.3.6.1.2.1.1.3")?,
+            SnmpOid::try_from("1.3.6.1.2.1.1.2")?,
         ];
         let msg = SnmpV1Message::try_from(data.as_ref())?;
         // community == public
@@ -313,8 +313,8 @@ mod tests {
             pdu: SnmpPdu::GetRequest(SnmpGet {
                 request_id: 0x63ccac7d,
                 vars: vec![
-                    SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 3]),
-                    SnmpOid::from(vec![1, 3, 6, 1, 2, 1, 1, 2]),
+                    SnmpOid::try_from("1.3.6.1.2.1.1.3")?,
+                    SnmpOid::try_from("1.3.6.1.2.1.1.2")?,
                 ],
             }),
         };

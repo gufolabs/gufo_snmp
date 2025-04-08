@@ -12,6 +12,10 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ## [Unreleased]
 
+### Changed
+
+* Change OID internal format, reduce memory allocations.
+
 ### Infrastructure
 
 * Ruff 0.11.2

@@ -206,7 +206,7 @@ mod tests {
     #[test]
     fn test_object_id() -> SnmpResult<()> {
         let data = [0x6u8, 0x8, 0x2b, 0x06, 0x01, 0x02, 0x01, 0x01, 0x05, 0x00];
-        let expected = [1u32, 3, 6, 1, 2, 1, 1, 5, 0];
+        let expected = [43, 6, 1, 2, 1, 1, 5, 0];
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
         if let SnmpValue::Oid(x) = value {
