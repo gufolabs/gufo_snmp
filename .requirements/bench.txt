@@ -1,0 +1,2 @@
+# Benchmark requirements
+pysnmp==7.1.17

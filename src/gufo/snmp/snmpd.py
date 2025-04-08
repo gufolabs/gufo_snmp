@@ -279,3 +279,13 @@ sysServices 72"""
     ) -> None:
         """Asynchronous context manager exit."""
         self._stop()
+
+    @property
+    def address(self) -> str:
+        """Get listen address."""
+        return self._address
+
+    @property
+    def port(self) -> int:
+        """Get listen port."""
+        return self._port

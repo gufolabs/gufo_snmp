@@ -34,6 +34,7 @@ nav:
           - Rate Limiting: examples/async/ratelimit.md
           - Debugging: examples/async/debugging.md
   - Reference: reference/
+  - Benchmarks: benchmarks.md
   - Developers' Guide:
       - Overview: dev/index.md
       - Developer's Environment: dev/environment.md
