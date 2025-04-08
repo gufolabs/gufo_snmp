@@ -459,4 +459,3 @@ feel free to [discuss it on GitHub][discussion].
 [Gufo SNMP]: https://docs.gufolabs.com/gufo_snmp/
 [discussion]: https://github.com/gufolabs/gufo_snmp/discussions/31
 [pysnmp]: https://docs.lextudio.com/snmp/
-[easysnmp]: https://easysnmp.readthedocs.io/en/latest/index.html
