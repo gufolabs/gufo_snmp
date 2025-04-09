@@ -24,6 +24,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 * Ruff 0.11.2
 * Rust 1.86.0
+* mkdocs-material 9.6.11
 
 ## 0.7.1 - 2025-03-23
 
