@@ -4,9 +4,9 @@ Here is the summary table for Gufo SNMP bencmarks.
 
 **Conclusions:**
 
-* **Async mode** is approximately 10-20% slower than synchronous mode in most cases,
-  depending on amount of the network operations.
-  This overhead is expected due to the increased complexity of event loop coordination.
+* **Gufo SNMP is clear winner:** in the terms of performance.
+* **Async mode** adds significant overhead per each I/O operation. It is expecially
+  noticeable in GETNEXT mode.
 * **GETBULK** consistently outperforms GETNEXT. As anticipated, it provides
   better performance and should be preferred whenever supported.
 * **The encryption overhead of SNMPv3** (AES128 + SHA1) is minimal,

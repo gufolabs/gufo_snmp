@@ -1,22 +1,23 @@
-=============================================== test session starts ================================================
+============================= test session starts ==============================
 platform linux -- Python 3.13.2, pytest-8.3.3, pluggy-1.5.0
-benchmark: 5.1.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+benchmark: 5.1.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=50 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
 rootdir: /workspaces/gufo_snmp
 configfile: pyproject.toml
 plugins: benchmark-5.1.0
-collected 2 items                                                                                                  
+collected 3 items
 
-benchmarks/test_v2c_getnext.py ..                                                                            [100%]
+benchmarks/test_v2c_getnext.py ...                                       [100%]
 
 
-------------------------------------------------------------------------------------- benchmark: 2 tests ------------------------------------------------------------------------------------
-Name (time in ms)             Min                 Max                Mean             StdDev              Median                IQR            Outliers     OPS            Rounds  Iterations
+------------------------------------------------------------------------------------- benchmark: 3 tests ------------------------------------------------------------------------------------
+Name (time in ms)             Min                 Max                Mean             StdDev              Median               IQR            Outliers      OPS            Rounds  Iterations
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-test_gufo_snmp_sync      206.9305 (1.0)      213.5748 (1.0)      210.3227 (1.0)       2.8388 (1.0)      210.3246 (1.0)       4.8891 (1.0)           2;0  4.7546 (1.0)           6           1
-test_gufo_snmp_async     221.5734 (1.07)     276.1817 (1.29)     262.2044 (1.25)     23.1550 (8.16)     272.0967 (1.29)     21.8713 (4.47)          1;0  3.8138 (0.80)          5           1
+test_gufo_snmp_sync       73.3329 (1.0)      199.4205 (1.0)       82.2934 (1.0)      23.0087 (4.77)      75.0686 (1.0)      1.4334 (1.0)           5;6  12.1516 (1.0)          50           1
+test_easysnmp_sync       218.4903 (2.98)     248.3279 (1.25)     234.8907 (2.85)      4.8239 (1.0)      235.0058 (3.13)     5.4647 (3.81)          9;3   4.2573 (0.35)         50           1
+test_gufo_snmp_async     251.4602 (3.43)     285.9706 (1.43)     260.0614 (3.16)      5.2893 (1.10)     259.0088 (3.45)     3.7682 (2.63)          5;3   3.8452 (0.32)         50           1
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Legend:
   Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
   OPS: Operations Per Second, computed as 1 / Mean
-================================================ 2 passed in 4.59s =================================================
+============================== 3 passed in 31.01s ==============================

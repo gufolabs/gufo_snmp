@@ -10,6 +10,8 @@ import asyncio
 
 # Third-party modules
 # from pysnmp.hlapi import v3arch
+from easysnmp import snmp_bulkwalk as e_snmp_bulkwalk
+
 # Gufo SNMP modules
 from gufo.snmp import SnmpVersion
 from gufo.snmp.async_client import SnmpSession as AsyncSnmpSession
@@ -52,3 +54,28 @@ def test_gufo_snmp_async(snmpd: Snmpd, benchmark) -> None:
                     pass
 
         asyncio.run(inner())
+
+
+# Fails with ValueError: embedded null character
+def __test_easysnmp_sync(snmpd: Snmpd, benchmark) -> None:
+    user_name = SNMP_USER.name
+    privacy_key = SNMP_USER.priv_key.key.decode()
+    auth_key = SNMP_USER.auth_key.key.decode()
+
+    @benchmark
+    def bench():
+        for item in e_snmp_bulkwalk(
+            oids=BASE_OID,
+            security_level="authPriv",
+            security_username=user_name,
+            privacy_protocol="SHA1",
+            privacy_password=privacy_key,
+            auth_protocol="AES128",
+            auth_password=auth_key,
+            hostname=snmpd.address,
+            version=3,
+            remote_port=snmpd.port,
+            use_numeric=True,
+        ):
+            _ = item.oid  # Force deserialization
+            _ = item.value  # Force deserialization

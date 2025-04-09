@@ -151,3 +151,6 @@ explicit_package_bases = true
 mypy_path = ["src"]
 strict = true
 warn_unused_ignores = false
+
+[tool.pytest.ini_options]
+addopts = "--benchmark-min-rounds=50"

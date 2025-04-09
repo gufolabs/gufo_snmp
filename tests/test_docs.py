@@ -9,14 +9,12 @@
 import os
 import re
 from functools import lru_cache
-from typing import List, Optional, Set
+from typing import List, Set
 
 # Third-party modules
 import pytest
 
-_doc_files: Optional[List[str]] = None
-
-rx_link = re.compile(r"\[([^\]]+)\]\[([^\]]+)\]", re.MULTILINE)
+rx_link = re.compile(r"\[([^\]]*)\]\[([^\]]+)\]", re.MULTILINE)
 rx_link_def = re.compile(r"^\[([^\]]+)\]:", re.MULTILINE)
 rx_footnote = re.compile(r"[^\]]\[(\^\d+)\][^\[]", re.MULTILINE)
 rx_datatracker_ietf = re.compile(

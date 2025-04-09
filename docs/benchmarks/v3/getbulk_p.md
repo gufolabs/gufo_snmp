@@ -8,6 +8,12 @@ This test evaluates:
 * Granularity of the internal locks.
 * Ability to release GIL when runnning native code.
 
+Look at the [source code][source] for details.
+
+**Notes**:
+
+* easysnmp doesn't supports async mode
+
 Run tests:
 
 ```
@@ -22,3 +28,5 @@ pytest benchmarks/test_v3_p4_getbulk.py
 
 ![Median chart](getbulk_p.png)
 *Lower is better*
+
+[source]: https://github.com/gufolabs/gufo_snmp/blob/master/benchmarks/test_v3_p4_getbulk.py

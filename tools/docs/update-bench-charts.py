@@ -229,7 +229,7 @@ def write_summary(scale: str, data: dict[str, list[float]]) -> None:
         "| --- | ---: | ---: | ---: |",
     ]
     for tn, tv in data.items():
-        overhead = (tv[1] - tv[0]) * 100.0 / tv[1]
+        overhead = (tv[1] - tv[0]) * 100.0 / tv[0]
         r.append(f"| {tn} | {tv[0]:.2f} | {tv[1]:.2f} | {overhead:.2f}% |")
     r.append("")
     with open(path, "w") as fp:

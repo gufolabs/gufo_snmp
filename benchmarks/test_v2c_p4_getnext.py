@@ -11,6 +11,8 @@ import concurrent.futures
 
 # Third-party modules
 # from pysnmp.hlapi import v3arch
+from easysnmp import snmp_walk as e_snmp_walk
+
 # Gufo SNMP modules
 from gufo.snmp.async_client import SnmpSession as AsyncSnmpSession
 from gufo.snmp.snmpd import Snmpd
@@ -58,3 +60,21 @@ def test_gufo_snmp_async(snmpd: Snmpd, benchmark) -> None:
                     pass
 
         asyncio.run(run_async(inner))
+
+
+def test_easysnmp_sync(snmpd: Snmpd, benchmark) -> None:
+    def do_test():
+        for item in e_snmp_walk(
+            oids=BASE_OID,
+            community=SNMP_COMMUNITY,
+            hostname=snmpd.address,
+            version=2,
+            remote_port=snmpd.port,
+            use_numeric=True,
+        ):
+            _ = item.oid  # Force deserialization
+            _ = item.value  # Force deserialization
+
+    @benchmark
+    def bench():
+        run_on_threadpool(do_test)

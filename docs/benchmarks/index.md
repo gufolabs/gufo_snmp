@@ -14,8 +14,11 @@
 
 This benchmark evaluates several Python SNMP client libraries:
 
-* [Gufo SNMP][Gufo SNMP] (current version)
-* [pysnmp][pysnmp] (7.1.17)
+| Library                | Version | Description                       | Stars                | Sync<br>Mode     | Async<br>Mode    | SNMPv3           |
+| ---------------------- | ------- | --------------------------------- | -------------------- | ---------------- | ---------------- | ---------------- |
+| [Gufo SNMP][Gufo SNMP] | 0.8.0   | An accelerated Python SNMP client | ![][Gufo SNMP Stars] | :material-check: | :material-check: | :material-check: |
+| [pysnmp][pysnmp]       | 7.1.17  | pure-Python SNMP client           | ![][pysnmp Stars]    |                  |                  |                  |
+| [easysnmp][easysnmp]   | 0.2.6   | Net-SNMP Python bindings          | ![][easysnmp Stars]  | :material-check: | :material-close: |                  |
 
 The evaluation covers the following aspects:
 
@@ -41,4 +44,8 @@ Apple M4 Pro processor.
 [Gufo Labs]: https://gufolabs.com/
 [Gufo Stack]: https://docs.gufolabs.com/
 [Gufo SNMP]: https://docs.gufolabs.com/gufo_snmp/
+[easysnmp]: https://easysnmp.readthedocs.io/en/latest/
 [pysnmp]: https://docs.lextudio.com/snmp/
+[Gufo SNMP Stars]: https://img.shields.io/github/stars/gufolabs/gufo_snmp
+[pysnmp Stars]: https://img.shields.io/github/stars/lextudio/pysnmp.com
+[easysnmp Stars]: https://img.shields.io/github/stars/easysnmp/easysnmp
