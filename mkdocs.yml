@@ -34,7 +34,7 @@ nav:
           - Rate Limiting: examples/async/ratelimit.md
           - Debugging: examples/async/debugging.md
   - Reference: reference/
-  - Benchmarks: benchmarks.md
+  - Benchmarks: benchmarks/
   - Developers' Guide:
       - Overview: dev/index.md
       - Developer's Environment: dev/environment.md
@@ -46,7 +46,6 @@ nav:
       - Code of Conduct: dev/CODE_OF_CONDUCT.md
       - Supported Standards: dev/standards.md
       - Supported BER Types: dev/types.md
-  - Benchmarks: benchmarks.md
   - FAQ: faq.md
   - Changelog: CHANGELOG.md
   - License: LICENSE.md

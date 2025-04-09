@@ -1,0 +1,22 @@
+=============================================== test session starts ================================================
+platform linux -- Python 3.13.2, pytest-8.3.3, pluggy-1.5.0
+benchmark: 5.1.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /workspaces/gufo_snmp
+configfile: pyproject.toml
+plugins: benchmark-5.1.0
+collected 2 items                                                                                                  
+
+benchmarks/test_v3_p4_getbulk.py ..                                                                          [100%]
+
+
+------------------------------------------------------------------------------------ benchmark: 2 tests -----------------------------------------------------------------------------------
+Name (time in ms)             Min                 Max                Mean            StdDev              Median               IQR            Outliers     OPS            Rounds  Iterations
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_gufo_snmp_sync      150.0330 (1.0)      153.8316 (1.0)      151.9661 (1.0)      1.4649 (1.0)      151.6387 (1.0)      2.5829 (1.0)           3;0  6.5804 (1.0)           7           1
+test_gufo_snmp_async     177.8214 (1.19)     198.1452 (1.29)     184.0607 (1.21)     7.7897 (5.32)     181.1055 (1.19)     9.1532 (3.54)          1;0  5.4330 (0.83)          6           1
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Legend:
+  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
+  OPS: Operations Per Second, computed as 1 / Mean
+================================================ 2 passed in 3.88s =================================================

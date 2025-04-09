@@ -1,0 +1,22 @@
+=============================================== test session starts ================================================
+platform linux -- Python 3.13.2, pytest-8.3.3, pluggy-1.5.0
+benchmark: 5.1.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /workspaces/gufo_snmp
+configfile: pyproject.toml
+plugins: benchmark-5.1.0
+collected 2 items                                                                                                  
+
+benchmarks/test_v3_getbulk.py ..                                                                             [100%]
+
+
+---------------------------------------------------------------------------------- benchmark: 2 tests ----------------------------------------------------------------------------------
+Name (time in ms)            Min                Max               Mean            StdDev             Median               IQR            Outliers      OPS            Rounds  Iterations
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_gufo_snmp_sync      39.7543 (1.0)      52.3246 (1.0)      47.9780 (1.0)      2.5077 (1.0)      48.1247 (1.0)      0.9668 (1.0)           4;4  20.8429 (1.0)          22           1
+test_gufo_snmp_async     46.3861 (1.17)     60.6987 (1.16)     53.6321 (1.12)     2.9953 (1.19)     53.1425 (1.10)     1.4347 (1.48)          4;4  18.6456 (0.89)         18           1
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Legend:
+  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
+  OPS: Operations Per Second, computed as 1 / Mean
+================================================ 2 passed in 3.26s =================================================
