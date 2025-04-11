@@ -1,0 +1,22 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.2, pytest-8.3.3, pluggy-1.5.0
+benchmark: 5.1.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=50 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /workspaces/gufo_snmp
+configfile: pyproject.toml
+plugins: benchmark-5.1.0
+collected 2 items
+
+benchmarks/test_v3_getbulk.py ..                                         [100%]
+
+
+---------------------------------------------------------------------------------- benchmark: 2 tests ----------------------------------------------------------------------------------
+Name (time in ms)            Min                Max               Mean            StdDev             Median               IQR            Outliers      OPS            Rounds  Iterations
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_gufo_snmp_sync      40.6764 (1.0)      43.3609 (1.0)      41.7682 (1.0)      0.5694 (1.0)      41.8508 (1.0)      0.7527 (1.0)          14;1  23.9416 (1.0)          50           1
+test_gufo_snmp_async     46.8461 (1.15)     55.0030 (1.27)     49.5638 (1.19)     2.6448 (4.64)     48.2802 (1.15)     2.3188 (3.08)        12;10  20.1760 (0.84)         50           1
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Legend:
+  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
+  OPS: Operations Per Second, computed as 1 / Mean
+============================== 2 passed in 5.81s ===============================
