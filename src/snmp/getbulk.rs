@@ -10,14 +10,14 @@ use crate::buf::Buffer;
 use crate::error::{SnmpError, SnmpResult};
 use nom::IResult;
 
-pub struct SnmpGetBulk {
+pub struct SnmpGetBulk<'a> {
     pub(crate) request_id: i64,
     pub(crate) non_repeaters: i64,
     pub(crate) max_repetitions: i64,
-    pub(crate) vars: Vec<SnmpOid>,
+    pub(crate) vars: Vec<SnmpOid<'a>>,
 }
 
-impl<'a> TryFrom<&'a [u8]> for SnmpGetBulk {
+impl<'a> TryFrom<&'a [u8]> for SnmpGetBulk<'a> {
     type Error = SnmpError;
 
     fn try_from(value: &'a [u8]) -> Result<Self, Self::Error> {
@@ -48,7 +48,7 @@ impl<'a> TryFrom<&'a [u8]> for SnmpGetBulk {
     }
 }
 
-impl BerEncoder for SnmpGetBulk {
+impl BerEncoder for SnmpGetBulk<'_> {
     fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         // Push all vars in the reversed order
         let rest = buf.len();
@@ -78,7 +78,7 @@ impl BerEncoder for SnmpGetBulk {
     }
 }
 
-impl SnmpGetBulk {
+impl SnmpGetBulk<'_> {
     fn parse_var(i: &[u8]) -> IResult<&[u8], SnmpOid, SnmpError> {
         // Parse enclosing sequence
         let (rest, vs) = SnmpSequence::from_ber(i)?;

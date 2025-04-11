@@ -19,9 +19,9 @@ use pyo3::{
 
 pub struct OpGetBulk;
 
-impl<'a> PyOp<'a, (SnmpOid, i64)> for OpGetBulk {
+impl<'a> PyOp<'a, (SnmpOid<'a>, i64)> for OpGetBulk {
     // obj is iterable[str]
-    fn from_python(obj: (SnmpOid, i64), request_id: i64) -> PyResult<SnmpPdu<'a>> {
+    fn from_python(obj: (SnmpOid<'a>, i64), request_id: i64) -> PyResult<SnmpPdu<'a>> {
         let (oid, max_repetitions) = obj;
         Ok(SnmpPdu::GetBulkRequest(SnmpGetBulk {
             request_id,

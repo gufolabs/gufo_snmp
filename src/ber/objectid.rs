@@ -10,6 +10,7 @@ use crate::buf::Buffer;
 use crate::error::{SnmpError, SnmpResult};
 use pyo3::types::PyString;
 use pyo3::{Bound, IntoPyObject, PyAny, Python};
+use std::borrow::Cow;
 use std::fmt::Write;
 
 // Object identifier type
@@ -17,30 +18,41 @@ use std::fmt::Write;
 // Any instance of this type may have at most
 // 128 sub-identifiers.  Further, each sub-identifier must not
 // exceed the value 2^32-1 (4294967295 decimal).
-// We store raw BER encoding.
-// We use owned implementation to process relative oids correctly.
+// We store raw BER encoding, using CoW to hold both owned or borrowed values.
 #[derive(Debug, PartialEq, Clone)]
-pub struct SnmpOid(pub(crate) Vec<u8>);
+pub struct SnmpOid<'a>(pub(crate) Cow<'a, [u8]>);
 
-impl<'a> BerDecoder<'a> for SnmpOid {
+pub(crate) trait OidStorage {
+    fn as_owned<'a>(&self) -> SnmpOid<'a>;
+    fn as_borrowed(&self) -> SnmpOid<'_>;
+    fn store(&mut self, oid: &SnmpOid<'_>);
+}
+
+impl From<Vec<u8>> for SnmpOid<'_> {
+    fn from(value: Vec<u8>) -> Self {
+        SnmpOid(Cow::Owned(value))
+    }
+}
+
+impl<'a> BerDecoder<'a> for SnmpOid<'a> {
     const ALLOW_PRIMITIVE: bool = true;
     const ALLOW_CONSTRUCTED: bool = false;
     const TAG: Tag = TAG_OBJECT_ID;
 
     // Implement X.690 pp 8.19: Encoding of an object identifier value
     fn decode(i: &'a [u8], h: &BerHeader) -> SnmpResult<Self> {
-        Ok(SnmpOid(Vec::from(&i[..h.length])))
+        Ok(SnmpOid(Cow::Borrowed(&i[..h.length])))
     }
 }
 
-impl BerEncoder for SnmpOid {
+impl BerEncoder for SnmpOid<'_> {
     fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         buf.push(&self.0)?;
         buf.push_tag_len(TAG_OBJECT_ID, self.0.len())
     }
 }
 
-impl<'py> IntoPyObject<'py> for &SnmpOid {
+impl<'py> IntoPyObject<'py> for &SnmpOid<'_> {
     type Target = PyAny;
     type Output = Bound<'py, Self::Target>;
     type Error = SnmpError;
@@ -51,7 +63,7 @@ impl<'py> IntoPyObject<'py> for &SnmpOid {
     }
 }
 
-impl TryFrom<&SnmpOid> for String {
+impl TryFrom<&SnmpOid<'_>> for String {
     type Error = SnmpError;
 
     fn try_from(value: &SnmpOid) -> Result<Self, Self::Error> {
@@ -72,7 +84,7 @@ impl TryFrom<&SnmpOid> for String {
     }
 }
 
-impl SnmpOid {
+impl SnmpOid<'_> {
     // Check oid is contained within
     #[inline]
     pub fn starts_with(&self, oid: &SnmpOid) -> bool {
@@ -98,7 +110,7 @@ impl Iterator for OidSubelementIterator<'_> {
     }
 }
 
-impl TryFrom<&str> for SnmpOid {
+impl TryFrom<&str> for SnmpOid<'_> {
     type Error = SnmpError;
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         // `1.3.` encoded as one octet.
@@ -140,7 +152,25 @@ impl TryFrom<&str> for SnmpOid {
             }
         }
         // Done
-        Ok(SnmpOid(vec))
+        Ok(SnmpOid(Cow::Owned(vec)))
+    }
+}
+
+impl OidStorage for Vec<u8> {
+    fn as_owned<'a>(&self) -> SnmpOid<'a> {
+        SnmpOid(Cow::Owned(self.clone()))
+    }
+    fn as_borrowed(&self) -> SnmpOid<'_> {
+        SnmpOid(Cow::Borrowed(self))
+    }
+    fn store(&mut self, oid: &SnmpOid<'_>) {
+        *self = oid.0.to_vec();
+    }
+}
+
+impl From<&SnmpOid<'_>> for Vec<u8> {
+    fn from(value: &SnmpOid<'_>) -> Self {
+        value.0.to_vec().clone()
     }
 }
 
@@ -155,7 +185,10 @@ mod test {
         let expected = [43, 6, 1, 2, 1, 1, 5, 0];
         let (tail, v) = SnmpOid::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
-        assert_eq!(v.0, &expected);
+        match v.0 {
+            Cow::Borrowed(x) => assert_eq!(x, &expected),
+            Cow::Owned(_) => panic!("borrowed value expected"),
+        };
         Ok(())
     }
     #[test]
@@ -199,7 +232,7 @@ mod test {
     #[test_case(vec![43, 6, 135, 103, 3], "1.3.6.999.3"; "2")]
     #[test_case(vec![43, 6, 1, 2, 1, 1, 5, 0], "1.3.6.1.2.1.1.5.0"; "3")]
     fn test_to_string(data: Vec<u8>, expected: &str) -> SnmpResult<()> {
-        let oid = SnmpOid(data);
+        let oid = SnmpOid::from(data);
         let s = String::try_from(&oid)?;
         assert_eq!(s, expected);
         Ok(())

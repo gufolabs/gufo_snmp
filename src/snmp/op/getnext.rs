@@ -17,9 +17,9 @@ use pyo3::{
 
 pub struct OpGetNext;
 
-impl<'a> PyOp<'a, SnmpOid> for OpGetNext {
+impl<'a> PyOp<'a, SnmpOid<'a>> for OpGetNext {
     // obj is iterable[str]
-    fn from_python(obj: SnmpOid, request_id: i64) -> PyResult<SnmpPdu<'a>> {
+    fn from_python(obj: SnmpOid<'a>, request_id: i64) -> PyResult<SnmpPdu<'a>> {
         Ok(SnmpPdu::GetNextRequest(SnmpGet {
             request_id,
             vars: vec![obj],

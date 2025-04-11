@@ -1,18 +1,32 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: Async SnmpSession
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-24, Gufo Labs
+# Copyright (C) 2023-25, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
 """SnmpSession implementation."""
 
 # Python modules
+from asyncio import Future, get_running_loop, wait_for
+from asyncio import TimeoutError as AIOTimeoutError
 from types import TracebackType
-from typing import AsyncIterator, Dict, Iterable, Optional, Tuple, Type, Union
+from typing import (
+    AsyncIterator,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 # Gufo Labs modules
 from .._fast import (
+    GetIter,
     SnmpV1ClientSocket,
     SnmpV2cClientSocket,
     SnmpV3ClientSocket,
@@ -22,9 +36,8 @@ from ..protocol import SnmpClientSocketProtocol
 from ..typing import ValueType
 from ..user import User
 from ..version import SnmpVersion
-from .getbulk import GetBulkIter
-from .getnext import GetNextIter
-from .util import send_and_recv
+
+T = TypeVar("T")
 
 
 class SnmpSession(object):
@@ -163,6 +176,64 @@ class SnmpSession(object):
     ) -> None:
         """Asynchronous context manager exit."""
 
+    async def _send(self, sender: Callable[[], None]) -> None:
+        """
+        Execute callable when socket in writable.
+
+        Args:
+            sender: Function to execute a write operation.
+        """
+
+        def callback() -> None:
+            try:
+                sender()
+                future.set_result(None)
+            except BaseException as e:  # noqa: BLE001
+                future.set_exception(e)
+
+        if self._policer:
+            await self._policer.wait()
+        try:
+            # Hot path.
+            # Usually successful unless output buffer is full
+            sender()
+        except BlockingIOError:
+            # Buffer is full, wait
+            loop = get_running_loop()
+            future = loop.create_future()
+            loop.add_writer(self._fd, callback)
+            try:
+                await future
+            finally:
+                loop.remove_writer(self._fd)
+
+    async def _recv(self, receiver: Callable[[], T]) -> T:
+        """
+        Execute callable when socket is ready.
+
+        Args:
+            receiver: Function to execute read operation.
+        """
+
+        async def get_response() -> T:
+            loop = get_running_loop()
+            while True:
+                fut: Future[None] = loop.create_future()
+                loop.add_reader(self._fd, fut.set_result, None)
+                try:
+                    await fut
+                    return receiver()
+                except BlockingIOError:
+                    continue
+                finally:
+                    loop.remove_reader(self._fd)
+
+        # Await response or timeout
+        try:
+            return await wait_for(get_response(), self._timeout)
+        except AIOTimeoutError as e:
+            raise TimeoutError from e  # Remap the error
+
     async def get(self: "SnmpSession", oid: str) -> ValueType:
         """
         Send SNMP GET request and await for response.
@@ -184,13 +255,8 @@ class SnmpSession(object):
         def sender() -> None:
             self._sock.send_get(oid)
 
-        return await send_and_recv(
-            self._fd,
-            sender,
-            self._sock.recv_get,
-            self._policer,
-            self._timeout,
-        )
+        await self._send(sender)
+        return await self._recv(self._sock.recv_get)
 
     async def get_many(
         self: "SnmpSession", oids: Iterable[str]
@@ -220,13 +286,8 @@ class SnmpSession(object):
         def sender() -> None:
             self._sock.send_get_many(list(oids))
 
-        return await send_and_recv(
-            self._fd,
-            sender,
-            self._sock.recv_get_many,
-            self._policer,
-            self._timeout,
-        )
+        await self._send(sender)
+        return await self._recv(self._sock.recv_get_many)
 
     def getnext(
         self: "SnmpSession", oid: str
@@ -246,7 +307,7 @@ class SnmpSession(object):
                 print(oid, value)
             ```
         """
-        return GetNextIter(self._sock, oid, self._timeout, self._policer)
+        return GetNextIter(self, oid)
 
     def getbulk(
         self: "SnmpSession", oid: str, max_repetitions: Optional[int] = None
@@ -269,11 +330,9 @@ class SnmpSession(object):
             ```
         """
         return GetBulkIter(
-            self._sock,
+            self,
             oid,
-            self._timeout,
             max_repetitions or self._max_repetitions,
-            self._policer,
         )
 
     def fetch(
@@ -320,13 +379,8 @@ class SnmpSession(object):
 
         if self._deferred_user:
             # First check runs engine id discovery
-            await send_and_recv(
-                self._fd,
-                self._sock.send_refresh,
-                self._sock.recv_refresh,
-                self._policer,
-                self._timeout,
-            )
+            await self._send(self._sock.send_refresh)
+            await self._recv(self._sock.recv_refresh)
             # Set and localize actual keys
             self._sock.set_keys(
                 self._deferred_user.name,
@@ -341,13 +395,8 @@ class SnmpSession(object):
             self._deferred_user = None
 
         # Refresh engine boots and time
-        await send_and_recv(
-            self._fd,
-            self._sock.send_refresh,
-            self._sock.recv_refresh,
-            self._policer,
-            self._timeout,
-        )
+        await self._send(self._sock.send_refresh)
+        await self._recv(self._sock.recv_refresh)
 
     def get_engine_id(self: "SnmpSession") -> bytes:
         """
@@ -360,3 +409,94 @@ class SnmpSession(object):
             msg = "Must use SNMPv3"
             raise NotImplementedError(msg)
         return self._sock.get_engine_id()
+
+
+class GetNextIter(object):
+    """Wrap the series of the GetNext requests.
+
+    Args:
+        sock: Requsting SnmpClientSocket instance.
+        oid: Base oid.
+        timeout: Request timeout.
+        policer: Optional BasePolicer instance to limit
+            outgoing requests.
+    """
+
+    def __init__(
+        self: "GetNextIter",
+        session: SnmpSession,
+        oid: str,
+    ) -> None:
+        self._session = session
+        self._sock = session._sock
+        self._ctx = GetIter(oid)
+
+    def __aiter__(self: "GetNextIter") -> "GetNextIter":
+        """Return asynchronous iterator."""
+        return self
+
+    async def __anext__(self: "GetNextIter") -> Tuple[str, ValueType]:
+        """Get next value."""
+
+        def sender() -> None:
+            self._sock.send_get_next(self._ctx)
+
+        def receiver() -> Tuple[str, ValueType]:
+            return self._sock.recv_get_next(self._ctx)
+
+        await self._session._send(sender)
+        return await self._session._recv(receiver)
+
+
+class GetBulkIter(object):
+    """Wrap the series of the GetBulk requests.
+
+    Args:
+        sock: Parent SnmpClientSocket.
+        oid: Base oid.
+        timeout: Request timeout.
+        max_repetitions: Max amount of iterms per response.
+        policer: Optional BasePolicer instance to limit requests.
+    """
+
+    def __init__(
+        self: "GetBulkIter",
+        session: SnmpSession,
+        oid: str,
+        max_repetitions: int,
+    ) -> None:
+        self._session = session
+        self._sock = session._sock
+        self._ctx = GetIter(oid, max_repetitions)
+        self._max_repetitions = max_repetitions
+        self._buffer: List[Union[Tuple[str, ValueType], None]] = []
+
+    def __aiter__(self: "GetBulkIter") -> "GetBulkIter":
+        """Return asynchronous iterator."""
+        return self
+
+    async def __anext__(self: "GetBulkIter") -> Tuple[str, ValueType]:
+        """Get next value."""
+
+        def sender() -> None:
+            self._sock.send_get_bulk(self._ctx)
+
+        def receiver() -> List[Union[Tuple[str, ValueType], None]]:
+            return self._sock.recv_get_bulk(self._ctx)
+
+        def pop_or_stop() -> Tuple[str, ValueType]:
+            v = self._buffer.pop(0)
+            if v is None:
+                raise StopAsyncIteration
+            return v
+
+        # Return item from buffer, if present
+        if self._buffer:
+            return pop_or_stop()
+        await self._session._send(sender)
+        self._buffer = await self._session._recv(receiver)
+        # End?
+        if not self._buffer:
+            raise StopAsyncIteration  # End of view
+        # Having at least one item
+        return pop_or_stop()

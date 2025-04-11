@@ -13,9 +13,11 @@ use crate::{
     error::SnmpResult,
     privacy::{PrivKey, SnmpPriv},
     reqid::RequestId,
-    snmp::msg::v3::{MsgData, ScopedPdu, SnmpV3Message, UsmParameters},
-    snmp::op::{GetIter, OpGet, OpGetBulk, OpGetMany, OpGetNext, OpRefresh},
-    snmp::pdu::SnmpPdu,
+    snmp::{
+        msg::v3::{MsgData, ScopedPdu, SnmpV3Message, UsmParameters},
+        op::{GetIter, OpGet, OpGetBulk, OpGetMany, OpGetNext, OpRefresh},
+        pdu::SnmpPdu,
+    },
 };
 use pyo3::types::PyBytes;
 use pyo3::{prelude::*, pybacked::PyBackedStr};

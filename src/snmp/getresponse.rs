@@ -21,7 +21,7 @@ pub struct SnmpGetResponse<'a> {
 }
 
 pub struct SnmpVar<'a> {
-    pub oid: SnmpOid,
+    pub oid: SnmpOid<'a>,
     pub value: SnmpValue<'a>,
 }
 
@@ -55,8 +55,9 @@ impl<'a> TryFrom<&'a [u8]> for SnmpGetResponse<'a> {
                     }
                     // Parse relative oid
                     let (t, r_oid) = SnmpRelativeOid::from_ber(vs.0)?;
+                    let oid = r_oid.normalize(&vars[vars.len() - 1].oid);
                     // Apply relative oid
-                    (t, r_oid.normalize(&vars[vars.len() - 1].oid))
+                    (t, oid)
                 }
                 _ => return Err(SnmpError::UnexpectedTag),
             };

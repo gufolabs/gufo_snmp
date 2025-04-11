@@ -19,10 +19,10 @@ use crate::reqid::RequestId;
 
 #[allow(clippy::enum_variant_names)]
 pub enum SnmpPdu<'a> {
-    GetRequest(SnmpGet),
-    GetNextRequest(SnmpGet),
+    GetRequest(SnmpGet<'a>),
+    GetNextRequest(SnmpGet<'a>),
     GetResponse(SnmpGetResponse<'a>),
-    GetBulkRequest(SnmpGetBulk),
+    GetBulkRequest(SnmpGetBulk<'a>),
     Report(SnmpReport<'a>),
 }
 

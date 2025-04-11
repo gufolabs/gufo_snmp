@@ -9,25 +9,25 @@ use super::{BerDecoder, BerHeader, SnmpOid, TAG_RELATIVE_OID, Tag};
 use crate::error::SnmpResult;
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct SnmpRelativeOid(pub(crate) Vec<u8>);
+pub struct SnmpRelativeOid<'a>(&'a [u8]);
 
-impl<'a> BerDecoder<'a> for SnmpRelativeOid {
+impl<'a> BerDecoder<'a> for SnmpRelativeOid<'a> {
     const ALLOW_PRIMITIVE: bool = true;
     const ALLOW_CONSTRUCTED: bool = false;
     const TAG: Tag = TAG_RELATIVE_OID;
 
     // Implement X.690 pp 8.20: Encoding of a relative object identifier value
     fn decode(i: &'a [u8], h: &BerHeader) -> SnmpResult<Self> {
-        Ok(SnmpRelativeOid(Vec::from(&i[..h.length])))
+        Ok(SnmpRelativeOid(&i[..h.length]))
     }
 }
 
-impl SnmpRelativeOid {
+impl SnmpRelativeOid<'_> {
     /// Apply relative oid to absolute one
     /// and return normalized absolute oid
-    pub fn normalize(&self, oid: &SnmpOid) -> SnmpOid {
+    pub fn normalize<'a>(&self, oid: &SnmpOid) -> SnmpOid<'a> {
         // Number of subelements
-        let rel_si = SnmpRelativeOid::subelements(&self.0);
+        let rel_si = SnmpRelativeOid::subelements(self.0);
         // Number of subelements in base. First octet holds 2 subidentifiers.
         let base_si = SnmpRelativeOid::subelements(&oid.0[1..]) + 2;
         //
@@ -37,8 +37,8 @@ impl SnmpRelativeOid {
                 + 1;
             let mut r = Vec::with_capacity(oid.0.len() + self.0.len());
             r.extend_from_slice(&oid.0[..offset]);
-            r.extend_from_slice(&self.0);
-            SnmpOid(r)
+            r.extend_from_slice(self.0);
+            SnmpOid::from(r)
         } else {
             // Replace fully
             // First value is collapsed to one
@@ -47,7 +47,7 @@ impl SnmpRelativeOid {
             r.push(self.0[0] * 40 + self.0[1]);
             // Push others
             r.extend_from_slice(&self.0[2..]);
-            SnmpOid(r)
+            SnmpOid::from(r)
         }
     }
     // Calculate number of subelements
@@ -75,10 +75,10 @@ impl SnmpRelativeOid {
 
 // For tests
 #[cfg(test)]
-impl TryFrom<Vec<u8>> for SnmpRelativeOid {
+impl<'a> TryFrom<&'a [u8]> for SnmpRelativeOid<'a> {
     type Error = std::convert::Infallible;
 
-    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
+    fn try_from(value: &'a [u8]) -> Result<Self, Self::Error> {
         Ok(Self(value))
     }
 }
@@ -120,7 +120,7 @@ mod test {
     #[test_case("1.3.6.1.2", vec![1,3,6,2,1,5], vec![43,6,2,1,5]; "Replace all")]
     fn test_normalize(base: &str, relative: Vec<u8>, expected: Vec<u8>) -> SnmpResult<()> {
         let oid = SnmpOid::try_from(base)?;
-        let rel = SnmpRelativeOid::try_from(relative)?;
+        let rel = SnmpRelativeOid::try_from(relative.as_ref())?;
         let norm = rel.normalize(&oid);
         assert_eq!(norm.0, expected);
         Ok(())

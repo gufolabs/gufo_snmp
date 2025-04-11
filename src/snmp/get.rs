@@ -12,12 +12,12 @@ use nom::IResult;
 
 const DOUBLE_ZEROES: [u8; 6] = [2u8, 1, 0, 2, 1, 0];
 
-pub struct SnmpGet {
+pub struct SnmpGet<'a> {
     pub request_id: i64,
-    pub vars: Vec<SnmpOid>,
+    pub vars: Vec<SnmpOid<'a>>,
 }
 
-impl<'a> TryFrom<&'a [u8]> for SnmpGet {
+impl<'a> TryFrom<&'a [u8]> for SnmpGet<'a> {
     type Error = SnmpError;
 
     fn try_from(value: &'a [u8]) -> Result<Self, Self::Error> {
@@ -52,7 +52,7 @@ impl<'a> TryFrom<&'a [u8]> for SnmpGet {
     }
 }
 
-impl BerEncoder for SnmpGet {
+impl BerEncoder for SnmpGet<'_> {
     fn push_ber(&self, buf: &mut Buffer) -> SnmpResult<()> {
         // Push all vars in the reversed order
         let rest = buf.len();
@@ -78,7 +78,7 @@ impl BerEncoder for SnmpGet {
     }
 }
 
-impl SnmpGet {
+impl SnmpGet<'_> {
     fn parse_var(i: &[u8]) -> IResult<&[u8], SnmpOid, SnmpError> {
         // Parse enclosing sequence
         let (rest, vs) = SnmpSequence::from_ber(i)?;

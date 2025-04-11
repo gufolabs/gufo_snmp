@@ -1,7 +1,7 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: SnmpVar struct
 // ------------------------------------------------------------------------
-// Copyright (C) 2023, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
@@ -22,7 +22,7 @@ pub enum SnmpValue<'a> {
     Int(SnmpInt),
     Null,
     OctetString(SnmpOctetString<'a>),
-    Oid(SnmpOid),
+    Oid(SnmpOid<'a>),
     ObjectDescriptor(SnmpObjectDescriptor<'a>),
     Real(SnmpReal),
     IpAddress(SnmpIpAddress),
@@ -151,6 +151,7 @@ impl<'py> IntoPyObject<'py> for &SnmpValue<'_> {
 mod tests {
     use super::*;
     use crate::error::{SnmpError, SnmpResult};
+    use std::borrow::Cow;
 
     #[test]
     fn test_bool() -> SnmpResult<()> {
@@ -210,7 +211,11 @@ mod tests {
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
         if let SnmpValue::Oid(x) = value {
-            assert_eq!(x.0, &expected);
+            // Ensure data is borrowed
+            match &x.0 {
+                Cow::Borrowed(x) => assert_eq!(x, &expected),
+                Cow::Owned(_) => panic!("expecting borrowed value"),
+            };
             Ok(())
         } else {
             Err(SnmpError::UnexpectedTag)
