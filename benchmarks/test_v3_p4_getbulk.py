@@ -56,16 +56,60 @@ def test_gufo_snmp_sync(snmpd: Snmpd, benchmark) -> None:
 
 
 def test_gufo_snmp_async(snmpd: Snmpd, benchmark) -> None:
+    async def inner():
+        async with AsyncSnmpSession(
+            addr=snmpd.address,
+            port=snmpd.port,
+            version=SnmpVersion.v3,
+            user=SNMP_USER,
+        ) as session:
+            async for _k, _v in session.getbulk(BASE_OID):
+                pass
+
     @benchmark
     def bench():
-        async def inner():
-            async with AsyncSnmpSession(
-                addr=snmpd.address,
-                port=snmpd.port,
-                version=SnmpVersion.v3,
-                user=SNMP_USER,
-            ) as session:
-                async for _k, _v in session.getbulk(BASE_OID):
-                    pass
-
         asyncio.run(run_async(inner))
+
+
+def test_pysnmp_async(snmpd: Snmpd, benchmark) -> None:
+    from pysnmp.hlapi.v3arch.asyncio import (
+        USM_AUTH_HMAC96_SHA,
+        USM_KEY_TYPE_MASTER,
+        USM_PRIV_CFB128_AES,
+        ContextData,
+        ObjectIdentity,
+        ObjectType,
+        SnmpEngine,
+        UdpTransportTarget,
+        UsmUserData,
+        bulk_walk_cmd,
+    )
+
+    user_name = SNMP_USER.name
+    privacy_key = SNMP_USER.priv_key.key.decode()
+    auth_key = SNMP_USER.auth_key.key.decode()
+
+    async def inner() -> None:
+        async for x, y, z, var_binds in bulk_walk_cmd(
+            SnmpEngine(),
+            UsmUserData(
+                user_name,
+                authProtocol=USM_AUTH_HMAC96_SHA,
+                authKey=auth_key,
+                authKeyType=USM_KEY_TYPE_MASTER,
+                privProtocol=USM_PRIV_CFB128_AES,
+                privKey=privacy_key,
+                privKeyType=USM_KEY_TYPE_MASTER,
+            ),
+            await UdpTransportTarget.create((snmpd.address, snmpd.port)),
+            ContextData(),
+            0,
+            25,
+            ObjectType(ObjectIdentity(BASE_OID)),
+        ):
+            for i in var_binds:
+                i.prettyPrint()
+
+    @benchmark
+    def bench():
+        asyncio.run(run_async(inner()))

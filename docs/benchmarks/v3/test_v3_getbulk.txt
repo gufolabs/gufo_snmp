@@ -4,19 +4,30 @@ benchmark: 5.1.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=
 rootdir: /workspaces/gufo_snmp
 configfile: pyproject.toml
 plugins: benchmark-5.1.0
-collected 2 items
+collected 3 items
 
-benchmarks/test_v3_getbulk.py ..                                         [100%]
+benchmarks/test_v3_getbulk.py ...                                        [100%]
 
+=============================== warnings summary ===============================
+benchmarks/test_v3_getbulk.py: 1248 warnings
+  /usr/local/lib/python3.13/site-packages/pysnmp/smi/mibs/SNMPv2-SMI.py:1259: DeprecationWarning: isFixedLength is deprecated. Please use is_fixed_length instead.
+    if impliedFlag or obj.isFixedLength():
 
----------------------------------------------------------------------------------- benchmark: 2 tests ----------------------------------------------------------------------------------
-Name (time in ms)            Min                Max               Mean            StdDev             Median               IQR            Outliers      OPS            Rounds  Iterations
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-test_gufo_snmp_sync      40.6764 (1.0)      43.3609 (1.0)      41.7682 (1.0)      0.5694 (1.0)      41.8508 (1.0)      0.7527 (1.0)          14;1  23.9416 (1.0)          50           1
-test_gufo_snmp_async     46.8461 (1.15)     55.0030 (1.27)     49.5638 (1.19)     2.6448 (4.64)     48.2802 (1.15)     2.3188 (3.08)        12;10  20.1760 (0.84)         50           1
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+benchmarks/test_v3_getbulk.py: 2808 warnings
+  /usr/local/lib/python3.13/site-packages/pysnmp/smi/mibs/SNMPv2-SMI.py:1231: DeprecationWarning: isFixedLength is deprecated. Please use is_fixed_length instead.
+    elif obj.isFixedLength():
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+------------------------------------------------------------------------------------ benchmark: 3 tests ------------------------------------------------------------------------------------
+Name (time in ms)             Min                 Max                Mean            StdDev              Median               IQR            Outliers      OPS            Rounds  Iterations
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_gufo_snmp_sync       40.8949 (1.0)       42.5268 (1.0)       41.7387 (1.0)      0.3886 (1.0)       41.7338 (1.0)      0.4662 (1.0)          18;0  23.9586 (1.0)          50           1
+test_gufo_snmp_async      48.5042 (1.19)      63.4232 (1.49)      54.9100 (1.32)     3.1731 (8.16)      54.9281 (1.32)     0.8040 (1.72)        11;13  18.2116 (0.76)         50           1
+test_pysnmp_async        623.7308 (15.25)    662.7956 (15.59)    636.0641 (15.24)    6.3969 (16.46)    635.2206 (15.22)    6.7626 (14.51)        10;1   1.5722 (0.07)         50           1
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Legend:
   Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
   OPS: Operations Per Second, computed as 1 / Mean
-============================== 2 passed in 5.81s ===============================
+====================== 3 passed, 4056 warnings in 39.17s =======================

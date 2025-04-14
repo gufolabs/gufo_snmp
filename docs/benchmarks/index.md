@@ -14,11 +14,11 @@
 
 This benchmark evaluates several Python SNMP client libraries:
 
-| Library                | Version | Description                       | Stars                | Sync<br>Mode     | Async<br>Mode    | SNMPv3           |
-| ---------------------- | ------- | --------------------------------- | -------------------- | ---------------- | ---------------- | ---------------- |
-| [Gufo SNMP][Gufo SNMP] | 0.8.0   | An accelerated Python SNMP client | ![][Gufo SNMP Stars] | :material-check: | :material-check: | :material-check: |
-| [pysnmp][pysnmp]       | 7.1.17  | pure-Python SNMP client           | ![][pysnmp Stars]    |                  |                  |                  |
-| [easysnmp][easysnmp]   | 0.2.6   | Net-SNMP Python bindings          | ![][easysnmp Stars]  | :material-check: | :material-close: |                  |
+| Library                | Version | Description                       | Stars                     | Sync<br>Mode     | Async<br>Mode    | SNMPv3           |
+| ---------------------- | ------- | --------------------------------- | ------------------------- | ---------------- | ---------------- | ---------------- |
+| [Gufo SNMP][Gufo SNMP] | 0.8.0   | An accelerated Python SNMP client | ![Stars][Gufo SNMP Stars] | :material-check: | :material-check: | :material-check: |
+| [pysnmp][pysnmp]       | 7.1.17  | pure-Python SNMP client           | ![Stars][pysnmp Stars]    |                  |                  |                  |
+| [easysnmp][easysnmp]   | 0.2.6   | Net-SNMP Python bindings          | ![Stars][easysnmp Stars]  | :material-check: | :material-close: |                  |
 
 The evaluation covers the following aspects:
 

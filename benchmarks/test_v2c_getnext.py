@@ -32,15 +32,15 @@ def test_gufo_snmp_sync(snmpd: Snmpd, benchmark) -> None:
 
 
 def test_gufo_snmp_async(snmpd: Snmpd, benchmark) -> None:
+    async def inner():
+        async with AsyncSnmpSession(
+            addr=snmpd.address, port=snmpd.port, community=SNMP_COMMUNITY
+        ) as session:
+            async for _k, _v in session.getnext(BASE_OID):
+                pass
+
     @benchmark
     def bench():
-        async def inner():
-            async with AsyncSnmpSession(
-                addr=snmpd.address, port=snmpd.port, community=SNMP_COMMUNITY
-            ) as session:
-                async for _k, _v in session.getnext(BASE_OID):
-                    pass
-
         asyncio.run(inner())
 
 
@@ -57,3 +57,30 @@ def test_easysnmp_sync(snmpd: Snmpd, benchmark) -> None:
         ):
             _ = item.oid  # Force deserialization
             _ = item.value  # Force deserialization
+
+
+def test_pysnmp_async(snmpd: Snmpd, benchmark) -> None:
+    from pysnmp.hlapi.v3arch.asyncio import (
+        CommunityData,
+        ContextData,
+        ObjectIdentity,
+        ObjectType,
+        SnmpEngine,
+        UdpTransportTarget,
+        walk_cmd,
+    )
+
+    async def inner() -> None:
+        async for _, _, _, var_binds in walk_cmd(
+            SnmpEngine(),
+            CommunityData(SNMP_COMMUNITY),
+            await UdpTransportTarget.create((snmpd.address, snmpd.port)),
+            ContextData(),
+            ObjectType(ObjectIdentity(BASE_OID)),
+        ):
+            for i in var_binds:
+                i.prettyPrint()
+
+    @benchmark
+    def bench():
+        asyncio.run(inner())

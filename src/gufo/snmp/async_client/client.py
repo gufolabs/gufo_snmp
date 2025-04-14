@@ -415,11 +415,8 @@ class GetNextIter(object):
     """Wrap the series of the GetNext requests.
 
     Args:
-        sock: Requsting SnmpClientSocket instance.
+        session: Parent SnmpSession.
         oid: Base oid.
-        timeout: Request timeout.
-        policer: Optional BasePolicer instance to limit
-            outgoing requests.
     """
 
     def __init__(
@@ -452,11 +449,9 @@ class GetBulkIter(object):
     """Wrap the series of the GetBulk requests.
 
     Args:
-        sock: Parent SnmpClientSocket.
+        session: Parent SnmpSession.
         oid: Base oid.
-        timeout: Request timeout.
         max_repetitions: Max amount of iterms per response.
-        policer: Optional BasePolicer instance to limit requests.
     """
 
     def __init__(

@@ -1,10 +1,10 @@
 | Test | Sync (ms) | Async (ms) | Async<br>overhead |
 | --- | ---: | ---: | ---: |
-| SNMPv2c GETNEXT | 75.07 | 259.01 | 245.03% |
-| SNMPv2c GETBULK | 39.59 | 49.47 | 24.95% |
-| SNMPv2c GETNEXT (x4) | 331.67 | 470.83 | 41.96% |
-| SNMPv2c GETBULK (x4) | 149.18 | 174.76 | 17.15% |
-| SNMPv3 GETNEXT | 96.84 | 283.32 | 192.57% |
-| SNMPv3 GETBULK | 41.85 | 48.28 | 15.36% |
-| SNMPv3 GETNEXT (x4) | 389.76 | 539.94 | 38.53% |
-| SNMPv3 GETBULK (x4) | 156.09 | 184.42 | 18.15% |
+| SNMPv2c GETNEXT | 75.67 | 267.60 | 253.67% |
+| SNMPv2c GETBULK | 38.71 | 51.97 | 34.24% |
+| SNMPv2c GETNEXT (x4) | 336.32 | 488.42 | 45.23% |
+| SNMPv2c GETBULK (x4) | 154.75 | 184.68 | 19.34% |
+| SNMPv3 GETNEXT | 119.94 | 296.15 | 146.92% |
+| SNMPv3 GETBULK | 41.73 | 54.93 | 31.62% |
+| SNMPv3 GETNEXT (x4) | 392.71 | 561.85 | 43.07% |
+| SNMPv3 GETBULK (x4) | 157.29 | 183.97 | 16.97% |

@@ -4,19 +4,93 @@ benchmark: 5.1.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=
 rootdir: /workspaces/gufo_snmp
 configfile: pyproject.toml
 plugins: benchmark-5.1.0
-collected 2 items
+collected 3 items
 
-benchmarks/test_v3_p4_getnext.py ..                                      [100%]
+benchmarks/test_v3_p4_getnext.py ..F                                     [100%]
 
+=================================== FAILURES ===================================
+______________________________ test_pysnmp_async _______________________________
+
+snmpd = <gufo.snmp.snmpd.Snmpd object at 0xffff9c9df4d0>
+benchmark = <pytest_benchmark.fixture.BenchmarkFixture object at 0xffff9ca25d10>
+
+    def test_pysnmp_async(snmpd: Snmpd, benchmark) -> None:
+        from pysnmp.hlapi.v3arch.asyncio import (
+            USM_AUTH_HMAC96_SHA,
+            USM_KEY_TYPE_MASTER,
+            USM_PRIV_CFB128_AES,
+            ContextData,
+            ObjectIdentity,
+            ObjectType,
+            SnmpEngine,
+            UdpTransportTarget,
+            UsmUserData,
+            walk_cmd,
+        )
+    
+        user_name = SNMP_USER.name
+        privacy_key = SNMP_USER.priv_key.key.decode()
+        auth_key = SNMP_USER.auth_key.key.decode()
+    
+        async def inner() -> None:
+            async for x, y, z, var_binds in walk_cmd(
+                SnmpEngine(),
+                UsmUserData(
+                    user_name,
+                    authProtocol=USM_AUTH_HMAC96_SHA,
+                    authKey=auth_key,
+                    authKeyType=USM_KEY_TYPE_MASTER,
+                    privProtocol=USM_PRIV_CFB128_AES,
+                    privKey=privacy_key,
+                    privKeyType=USM_KEY_TYPE_MASTER,
+                ),
+                await UdpTransportTarget.create((snmpd.address, snmpd.port)),
+                ContextData(),
+                ObjectType(ObjectIdentity(BASE_OID)),
+            ):
+                for i in var_binds:
+                    i.prettyPrint()
+    
+>       @benchmark
+
+benchmarks/test_v3_p4_getnext.py:112: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.13/site-packages/pytest_benchmark/fixture.py:156: in __call__
+    return self._raw(function_to_benchmark, *args, **kwargs)
+/usr/local/lib/python3.13/site-packages/pytest_benchmark/fixture.py:180: in _raw
+    duration, iterations, loops_range = self._calibrate_timer(runner)
+/usr/local/lib/python3.13/site-packages/pytest_benchmark/fixture.py:318: in _calibrate_timer
+    duration = runner(loops_range)
+/usr/local/lib/python3.13/site-packages/pytest_benchmark/fixture.py:109: in runner
+    function_to_benchmark(*args, **kwargs)
+benchmarks/test_v3_p4_getnext.py:114: in bench
+    asyncio.run(run_async(inner()))
+/usr/local/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+/usr/local/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+/usr/local/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fn = <coroutine object test_pysnmp_async.<locals>.inner at 0xffff99f3d560>
+
+    async def run_async(fn):
+>       tasks = [asyncio.create_task(fn()) for _ in range(CONCURRENCY)]
+E       TypeError: 'coroutine' object is not callable
+
+benchmarks/test_v3_p4_getnext.py:39: TypeError
 
 ------------------------------------------------------------------------------------- benchmark: 2 tests ------------------------------------------------------------------------------------
 Name (time in ms)             Min                 Max                Mean             StdDev              Median                IQR            Outliers     OPS            Rounds  Iterations
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-test_gufo_snmp_sync      363.8967 (1.0)      408.3535 (1.0)      388.5040 (1.0)       9.0652 (1.0)      389.7570 (1.0)      10.0797 (1.0)          15;1  2.5740 (1.0)          50           1
-test_gufo_snmp_async     443.8939 (1.22)     565.8303 (1.39)     532.1098 (1.37)     23.2471 (2.56)     539.9421 (1.39)     27.2727 (2.71)         11;2  1.8793 (0.73)         50           1
+test_gufo_snmp_sync      370.4605 (1.0)      413.4914 (1.0)      392.2666 (1.0)       9.6263 (1.0)      392.7121 (1.0)      12.4124 (1.0)          19;0  2.5493 (1.0)          50           1
+test_gufo_snmp_async     472.4127 (1.28)     623.8885 (1.51)     560.2945 (1.43)     23.2062 (2.41)     561.8482 (1.43)     15.3311 (1.24)         10;5  1.7848 (0.70)         50           1
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Legend:
   Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
   OPS: Operations Per Second, computed as 1 / Mean
-============================== 2 passed in 48.87s ==============================
+=========================== short test summary info ============================
+FAILED benchmarks/test_v3_p4_getnext.py::test_pysnmp_async - TypeError: 'coro...
+========================= 1 failed, 2 passed in 50.56s =========================

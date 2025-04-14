@@ -11,7 +11,8 @@ Look at the [source code][source] for details.
 
 **Notes**:
 
-* easysnmp doesn't supports async mode
+* easysnmp doesn't supports async mode.
+* easysnmp causes almost constant SEGFAULTs, so we were forced to turn off appropriate test.
 
 Run tests:
 
