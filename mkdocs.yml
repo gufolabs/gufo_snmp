@@ -2,7 +2,7 @@ site_name: Gufo SNMP
 site_description: Gufo SNMP Documentation
 site_author: Gufo Labs
 site_url: "https://docs.gufolabs.com/gufo_snmp/"
-copyright: "&copy; 2023, Gufo Labs"
+copyright: "&copy; 2023-25, Gufo Labs"
 site_dir: dist/docs/
 repo_url: https://github.com/gufolabs/gufo_snmp/
 repo_name: gufolabs/gufo_snmp
