@@ -1,4 +1,3 @@
 # Benchmark requirements
-pytest-benchmark==5.1.0
 easysnmp==0.2.6
 pysnmp==7.1.17
