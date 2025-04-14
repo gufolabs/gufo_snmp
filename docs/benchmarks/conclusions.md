@@ -12,3 +12,4 @@ Here is the summary table for Gufo SNMP bencmarks.
 * **BER parsing** is a complex algorithmic operation, so native CPU implementations provide significant performance gains.  
 * **Purpose-tailored BER parsers** that map directly to Python types offer substantial advantages over generic SNMP implementations.  
 * **Complex abstractions** are slow. A lean and efficient API is key to high performance.
+* **Wrappers over C-libraries** may demonstrate an unexpected behaviour in multi-threaded applications.
