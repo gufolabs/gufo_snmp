@@ -1,6 +1,6 @@
 #!/bin/sh
 # ------------------------------------------------------------------------
-# Build wheel in the quay.io/pypa/manylinux2014_x86_64:latest
+# Build wheel in the manylinux
 # Usage:
 # ./tools/build/build-many 3.9 3.10 3.11 3.11 3.12 3.13
 # expects RUST_VERSION and RUST_ARCH
@@ -30,6 +30,33 @@ ensure_dir() {
     fi
 }
 
+line() {
+    echo "# ------------------------------------------------------------------------"
+}
+
+header() {
+    line
+    echo "# $1"
+    line
+}
+
+section() {
+    echo "#"
+    echo "# $1"
+    echo "#"
+}
+
+checkpoint() {
+    # Store the current time in seconds
+    CHECKPOINT_TIME=$(date +%s)
+}
+
+elapsed() {
+    local now=$(date +%s)
+    local diff=$((now - CHECKPOINT_TIME))
+    echo "** Elapsed time: $diff seconds"
+}
+
 # Save base path
 BASE_PATH=$PATH
 # Rust settings
@@ -44,22 +71,21 @@ TMP_WHEELHOUSE="/tmp/wheelhouse"
 WHEELHOUSE="wheelhouse"
 TARGET="target"
 
-echo "##"
-echo "## Installing rust"
-echo "##"
+header "Installing rust"
+checkpoint
 empty_dir "${TARGET}"
 ./tools/build/setup-rust.sh
+rustup component add llvm-tools-preview
+elapsed
 
-echo "##"
-echo "## Installing snmpd"
-echo "##"
+header "Installing snmpd"
+checkpoint
 ./tools/build/setup-snmpd.sh
+elapsed
 
 while [ $# -gt 0 ]
 do
-    echo "##"
-    echo "## Building for Python $1"
-    echo "##"
+    header "Building for Python $1"
     # Convert version to ABI
     case "$1" in
         3.8) ABI=cp38-cp38 ;;
@@ -84,22 +110,41 @@ do
     # Check python
     PY_VER=$(python3 --version)
     echo "Python version: $PY_VER"
-    echo "Upgrade pip..."
+    section "Upgrade pip..."
+    checkpoint
     pip install --upgrade pip
-    echo "Setup build dependencies..."
+    elapsed
+    section "Setup build dependencies..."
+    checkpoint
     pip install -r ./.requirements/build.txt -r ./.requirements/test.txt
-    echo "Building wheel..."
+    elapsed
+    section "Collecting PGO..."
+    checkpoint
+    PGO_DATA_DIR=`mktemp -d`
+    ./tools/build/build-pgo.sh $PGO_DATA_DIR
+    elapsed
+    section "Building wheel..."
+    checkpoint
     empty_dir "${DIST}"
     empty_dir "${BUILD}"
     python3 -m build --wheel
-    echo "Auditing wheel..."
+    elapsed
+    section "Clearing PGO..."
+    rm -rf $PGO_DATA_DIR
+    section "Auditing wheel..."
+    checkpoint
     empty_dir "${TMP_WHEELHOUSE}"
     auditwheel repair --wheel-dir="${TMP_WHEELHOUSE}" "${DIST}"/*.whl
-    echo "Installing wheel..."
+    elapsed
+    section "Installing wheel..."
+    checkpoint
     pip install "${TMP_WHEELHOUSE}"/*.whl
-    echo "Testing..."
+    elapsed
+    section "Testing..."
+    checkpoint
     pytest tests/
-    echo "Saving..."
+    elapsed
+    section "Saving..."
     ensure_dir "${WHEELHOUSE}"
     cp "${TMP_WHEELHOUSE}"/*.whl "${WHEELHOUSE}"/
     empty_dir "${DIST}"
