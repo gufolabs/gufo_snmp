@@ -9,10 +9,10 @@ maintaining single client session per thread/coroutine.
 
 Look at the [source code][source] for details.
 
-**Notes**:
+!!! notes
 
-* easysnmp doesn't supports async mode.
-* easysnmp causes almost constant SEGFAULTs, so we were forced to turn off appropriate test.
+    * easysnmp doesn't supports async mode.
+    * easysnmp causes almost constant SEGFAULTs, so we were forced to turn off appropriate test.
 
 Run tests:
 

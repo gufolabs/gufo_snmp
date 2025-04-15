@@ -111,4 +111,4 @@ def test_pysnmp_async(snmpd: Snmpd, benchmark) -> None:
 
     @benchmark
     def bench():
-        asyncio.run(run_async(inner()))
+        asyncio.run(run_async(inner))

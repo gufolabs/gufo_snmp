@@ -10,9 +10,9 @@ This test evaluates:
 
 Look at the [source code][source] for details.
 
-**Notes**:
+!!! notes
 
-* easysnmp doesn't supports async mode
+    * easysnmp doesn't supports async mode
 
 Run tests:
 

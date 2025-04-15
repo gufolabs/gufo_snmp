@@ -6,9 +6,9 @@ Perform SNMP v2c GETBULK requests to iterate through whole MIB. This test evalua
 
 Look at the [source code][source] for details.
 
-**Notes**:
+!!! notes
 
-* easysnmp doesn't supports async mode
+    * easysnmp doesn't supports async mode
 
 Run tests:
 

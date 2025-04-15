@@ -9,6 +9,14 @@
 PYTEST=pytest
 PYTHON=python3
 
+# Collecting PGO
+PGO_DATA_DIR=`mktemp -d`
+./tools/build/build-pgo.sh $PGO_DATA_DIR
+# Build
+python -m pip install --editable .
+# Clearing PGO
+rm -rf $PGO_DATA_DIR
+
 # Run benchmarks
 for f in benchmarks/test_*.py; do
     # Extract parts from filename
