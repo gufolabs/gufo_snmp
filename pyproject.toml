@@ -24,8 +24,9 @@ classifiers = [
   "Operating System :: POSIX :: Linux",
   "Typing :: Typed",
 ]
+description = "The accelerated Python SNMP client library"
 dynamic = ["version"]
-keywords = ["error"]
+keywords = ["snmp"]
 license = {text = "BSD 3-Clause License"}
 name = "gufo_snmp"
 requires-python = ">=3.9"
