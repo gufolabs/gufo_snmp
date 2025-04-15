@@ -98,7 +98,7 @@ do
     echo "Installing wheel..."
     pip install "${TMP_WHEELHOUSE}"/*.whl
     echo "Testing..."
-    pytest
+    pytest tests/
     echo "Saving..."
     ensure_dir "${WHEELHOUSE}"
     cp "${TMP_WHEELHOUSE}"/*.whl "${WHEELHOUSE}"/
