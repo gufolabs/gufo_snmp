@@ -54,15 +54,15 @@ impl BerHeader {
         // bits 8, 7 - class
         let mut current = 1;
         let id_octets = i[0];
-        let class = match (id_octets >> 6) & 0x3 {
+        let class = match id_octets & 0b1100_0000 {
             0 => BerClass::Universal,
-            1 => BerClass::Application,
-            2 => BerClass::Context,
-            3 => BerClass::Private,
+            0b0100_0000 => BerClass::Application,
+            0b1000_0000 => BerClass::Context,
+            0b1100_0000 => BerClass::Private,
             _ => BerClass::Universal, // Unreachable
         };
         // bit 6 - costructed
-        let constructed = ((id_octets >> 5) & 0x1) == 0x1;
+        let constructed = (id_octets & 0b0010_0000) != 0;
         // bits 5 - 1 tag number
         let tag = match id_octets & 0x1f {
             0x1f => {
