@@ -1,11 +1,11 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: DES mode
 // ------------------------------------------------------------------------
-// Copyright (C) 2023-24, Gufo Labs
+// Copyright (C) 2023-25, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-use super::SnmpPriv;
+use super::{SnmpPriv, get_padded_len};
 use crate::ber::BerEncoder;
 use crate::buf::Buffer;
 use crate::error::{SnmpError, SnmpResult};
@@ -65,17 +65,12 @@ impl SnmpPriv for DesKey {
             iv[idx] = x ^ y;
         }
         // Add padding
+        self.buf.reset();
         self.buf.push(&PADDING)?;
         // Serialize
         pdu.push_ber(&mut self.buf)?;
         // Calculate length
-        let scoped_pdu_len = self.buf.len() - BLOCK_SIZE;
-        let rem = scoped_pdu_len % BLOCK_SIZE;
-        let padded_len = if rem > 0 {
-            scoped_pdu_len + BLOCK_SIZE - rem
-        } else {
-            scoped_pdu_len
-        };
+        let padded_len = get_padded_len(self.buf.len() - BLOCK_SIZE, BLOCK_SIZE);
         // Encrypt
         let encryptor =
             DesCbcEncryptor::new_from_slices(&self.key, &iv).map_err(|_| SnmpError::InvalidKey)?;

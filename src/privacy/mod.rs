@@ -44,6 +44,16 @@ pub trait SnmpPriv {
     ) -> SnmpResult<ScopedPdu<'c>>;
 }
 
+#[inline]
+fn get_padded_len(buf_len: usize, block_size: usize) -> usize {
+    let rem = buf_len % block_size;
+    if rem == 0 {
+        buf_len
+    } else {
+        buf_len - rem + block_size
+    }
+}
+
 const NO_PRIV: u8 = 0;
 const DES: u8 = 1;
 const AES128: u8 = 2;
