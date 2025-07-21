@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 To see unreleased changes, please see the [CHANGELOG on the main branch guide](https://github.com/gufolabs/gufo_snmp/blob/main/CHANGELOG.md).
 
+## 0.8.2 - 2025-07-21
+
+### Fixed
+
+* Bug-per-bug compatibility with Net-SNMP: Fill encryption padding with padding length.
+
 ## 0.8.1 - 2025-07-18
 
 ### Fixed
