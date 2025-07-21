@@ -222,15 +222,20 @@ def build_barchart(bench: Benchmark, data: list[BenchmarkItem]) -> None:
 
 def write_summary(scale: str, data: dict[str, list[float]]) -> None:
     """Write summary table."""
+
+    def ratio(v1: float, v0: float) -> float:
+        return (v1 - v0) * 100.0 / v0
+
     path = "docs/benchmarks/conclusions.txt"
     print(f"Writing {path}")
     r = [
-        f"| Test | Sync ({scale}) | Async ({scale}) | Async<br>overhead |",
+        f"| Test | Sync ({scale}) | Async ({scale}) | Async<br>Overhead (%) |",
         "| --- | ---: | ---: | ---: |",
     ]
     for tn, tv in data.items():
-        overhead = (tv[1] - tv[0]) * 100.0 / tv[0]
-        r.append(f"| {tn} | {tv[0]:.2f} | {tv[1]:.2f} | {overhead:.2f}% |")
+        v_sync, v_async = tv
+        r_async = ratio(v_async, v_sync)
+        r.append(f"| {tn} | {v_sync:.2f} | {v_async:.2f} | {r_async:.2f}% |")
     r.append("")
     with open(path, "w") as fp:
         fp.write("\n".join(r))
@@ -248,8 +253,7 @@ def main() -> None:
         for item in results:
             if not item.is_ours:
                 continue
-            i = 1 if item.is_async else 0
-            summary[bench.test_name][i] = item.value
+            summary[bench.test_name][1 if item.is_async else 0] = item.value
     write_summary(scale, summary)
 
 

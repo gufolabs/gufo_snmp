@@ -6,6 +6,8 @@
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
+set -e
+
 PYTEST=pytest
 PYTHON=python3
 
