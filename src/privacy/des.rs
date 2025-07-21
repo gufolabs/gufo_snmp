@@ -19,7 +19,6 @@ const KEY_LENGTH: usize = 16;
 const ENC_KEY_LENGTH: usize = 8;
 const SALT_SIZE: usize = 8;
 const BLOCK_SIZE: usize = 8;
-const PADDING: [u8; BLOCK_SIZE] = [0; BLOCK_SIZE];
 
 type DesCbcEncryptor = Encryptor<Des>;
 type DesCbcDecryptor = Decryptor<Des>;
@@ -66,11 +65,17 @@ impl SnmpPriv for DesKey {
         }
         // Add padding
         self.buf.reset();
-        self.buf.push(&PADDING)?;
+        self.buf.skip(BLOCK_SIZE);
         // Serialize
         pdu.push_ber(&mut self.buf)?;
         // Calculate length
-        let padded_len = get_padded_len(self.buf.len() - BLOCK_SIZE, BLOCK_SIZE);
+        let scoped_len = self.buf.len() - BLOCK_SIZE;
+        let padded_len = get_padded_len(scoped_len, BLOCK_SIZE);
+        // Fill padding
+        let pad_len = padded_len - scoped_len;
+        if pad_len > 0 {
+            self.buf.fill_u8(scoped_len, pad_len as u8, pad_len)?;
+        }
         // Encrypt
         let encryptor =
             DesCbcEncryptor::new_from_slices(&self.key, &iv).map_err(|_| SnmpError::InvalidKey)?;

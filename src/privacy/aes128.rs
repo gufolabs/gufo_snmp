@@ -17,7 +17,6 @@ use rand::Rng;
 
 const KEY_LENGTH: usize = 16;
 const BLOCK_SIZE: usize = 16;
-const PADDING: [u8; BLOCK_SIZE] = [0; BLOCK_SIZE];
 
 type Aes128CfbEncryptor = Encryptor<Aes128>;
 type Aes128CfbDecrypror = Decryptor<Aes128>;
@@ -57,11 +56,17 @@ impl SnmpPriv for Aes128Key {
         self.salt_value = self.salt_value.wrapping_add(1);
         // Add padding
         self.buf.reset();
-        self.buf.push(&PADDING)?;
+        self.buf.skip(BLOCK_SIZE);
         // Serialize
         pdu.push_ber(&mut self.buf)?;
         // Calculate length
-        let padded_len = get_padded_len(self.buf.len() - BLOCK_SIZE, BLOCK_SIZE);
+        let scoped_len = self.buf.len() - BLOCK_SIZE;
+        let padded_len = get_padded_len(scoped_len, BLOCK_SIZE);
+        // Fill padding
+        let pad_len = padded_len - scoped_len;
+        if pad_len > 0 {
+            self.buf.fill_u8(scoped_len, pad_len as u8, pad_len)?;
+        }
         // Encrypt
         let encryptor = Aes128CfbEncryptor::new_from_slices(&self.key, &self.priv_params)
             .map_err(|_| SnmpError::InvalidKey)?;

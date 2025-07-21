@@ -153,6 +153,18 @@ impl Buffer {
         self.push(data)?;
         self.push_tag_len(tag, data.len())
     }
+    // Fill given part of buffer
+    #[inline]
+    pub fn fill_u8(&mut self, offset: usize, c: u8, count: usize) -> SnmpResult<()> {
+        let start = self.pos + offset;
+        if start + count >= MAX_SIZE {
+            return Err(SnmpError::OutOfBuffer);
+        }
+        unsafe {
+            std::ptr::write_bytes(self.data.as_mut_ptr().add(start), c, count);
+        }
+        Ok(())
+    }
     #[inline]
     pub fn reset(&mut self) {
         self.pos = MAX_SIZE;
@@ -226,6 +238,34 @@ mod tests {
         let mut b = Buffer::default();
         b.push_tag_len(TAG_OCTET_STRING, len)?;
         assert_eq!(b.len(), expected.len());
+        assert_eq!(b.data(), &expected);
+        Ok(())
+    }
+
+    #[test_case(10, 10, 1)]
+    #[test_case(10, 11, 1)]
+    #[test_case(10, 5, 5)]
+    #[test_case(10, 5, 7)]
+    fn test_fill_u8_err(skip: usize, offset: usize, count: usize) {
+        let mut b = Buffer::default();
+        b.skip(skip);
+        let r = b.fill_u8(offset, 0xff, count);
+        assert!(r.is_err());
+    }
+
+    #[test_case(vec![0,1,2,3,4,5,6,7,8,9,10],0,0xff,1,vec![0xff,1,2,3,4,5,6,7,8,9,10])]
+    #[test_case(vec![0,1,2,3,4,5,6,7,8,9,10],1,0xff,1,vec![0,0xff,2,3,4,5,6,7,8,9,10])]
+    #[test_case(vec![0,1,2,3,4,5,6,7,8,9,10],3,0xff,5,vec![0,1,2,0xff,0xff,0xff,0xff,0xff,8,9,10])]
+    fn test_fill_u8(
+        init: Vec<u8>,
+        offset: usize,
+        c: u8,
+        count: usize,
+        expected: Vec<u8>,
+    ) -> SnmpResult<()> {
+        let mut b = Buffer::default();
+        b.push(&init)?;
+        b.fill_u8(offset, c, count)?;
         assert_eq!(b.data(), &expected);
         Ok(())
     }
