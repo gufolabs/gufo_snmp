@@ -1,0 +1,24 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.2, pytest-8.3.3, pluggy-1.5.0
+benchmark: 5.1.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=50 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /workspaces/gufo_snmp
+configfile: pyproject.toml
+plugins: benchmark-5.1.0
+collected 4 items
+
+benchmarks/test_v2c_getbulk.py ....                                      [100%]
+
+
+------------------------------------------------------------------------------------ benchmark: 4 tests ------------------------------------------------------------------------------------
+Name (time in ms)             Min                 Max                Mean            StdDev              Median               IQR            Outliers      OPS            Rounds  Iterations
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_gufo_snmp_sync       37.9863 (1.0)       74.4578 (1.25)      45.3796 (1.0)      5.5611 (2.73)      46.6150 (1.0)      7.1543 (7.34)         12;1  22.0364 (1.0)          50           1
+test_gufo_snmp_async      46.0101 (1.21)      59.4995 (1.0)       52.9366 (1.17)     2.0354 (1.0)       52.5597 (1.13)     0.9750 (1.0)           8;8  18.8905 (0.86)         50           1
+test_easysnmp_sync        49.8938 (1.31)      73.9654 (1.24)      67.1123 (1.48)     3.2053 (1.57)      66.7074 (1.43)     1.4055 (1.44)          6;9  14.9004 (0.68)         50           1
+test_pysnmp_async        573.2397 (15.09)    596.9186 (10.03)    583.6291 (12.86)    5.6439 (2.77)     583.4234 (12.52)    7.8223 (8.02)         17;0   1.7134 (0.08)         50           1
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Legend:
+  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
+  OPS: Operations Per Second, computed as 1 / Mean
+============================== 4 passed in 40.01s ==============================
