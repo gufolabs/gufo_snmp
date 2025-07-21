@@ -202,10 +202,6 @@ impl SnmpSocket for SnmpV3ClientSocket {
     fn push_pdu(&mut self, pdu: SnmpPdu, buf: &mut Buffer) -> SnmpResult<()> {
         //
         let flag_priv = self.priv_key.has_priv();
-        let flag_report = match pdu {
-            SnmpPdu::GetRequest(ref x) => x.vars.is_empty(),
-            _ => false,
-        };
         let scoped_pdu = ScopedPdu {
             engine_id: &self.engine_id,
             pdu,
@@ -226,7 +222,7 @@ impl SnmpSocket for SnmpV3ClientSocket {
             msg_id: self.msg_id.get_next(),
             flag_auth: self.auth_key.has_auth(),
             flag_priv,
-            flag_report,
+            flag_report: true, // Some crazy boxes answer incorrectly if not set
             usm: UsmParameters {
                 engine_id: &self.engine_id,
                 engine_boots: self.engine_boots,
