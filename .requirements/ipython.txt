@@ -1,2 +1,0 @@
-# IPython requrements
-ipython==8.0.1

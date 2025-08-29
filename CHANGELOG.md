@@ -10,9 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 To see unreleased changes, please see the [CHANGELOG on the main branch guide](https://github.com/gufolabs/gufo_snmp/blob/main/CHANGELOG.md).
 
+## [Unreleased]
+
+### Infrastructure
+
 ## 0.8.3 - 2025-07-21
 
-### Changes
+### Changed
 
 * SNMPv3: Always set REPORT flag for improved compatibility with wierd implementations.
 

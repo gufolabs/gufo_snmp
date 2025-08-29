@@ -20,5 +20,5 @@ Install system packages:
 
 Install dependencies:
 ```
-pip install -r .requirements/test.txt -r .requirements/bench.txt gufo-snmp
+pip install -e gufo-snmp[test,bench]
 ```

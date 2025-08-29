@@ -1,5 +1,6 @@
 FROM python:3.13-slim-bullseye AS dev
-COPY .requirements tools/build/setup-rust.sh /tmp
+COPY . /workspaces/gufo_loader
+WORKDIR /workspaces/gufo_loader
 ENV \
     PATH=/usr/local/cargo/bin:$PATH\
     RUSTUP_HOME=/usr/local/rustup\
@@ -15,7 +16,7 @@ RUN \
     libc6-dev\
     curl\
     snmpd\
-    && /tmp/setup-rust.sh \
+    && ./setup-rust.sh \
     && rustup component add\
     rust-analysis\
     rust-src \
@@ -24,9 +25,4 @@ RUN \
     rustfmt\
     && pip install --upgrade pip\
     && pip install --upgrade build\
-    && pip install\
-    -r /tmp/build.txt\
-    -r /tmp/docs.txt\
-    -r /tmp/ipython.txt\
-    -r /tmp/lint.txt\
-    -r /tmp/test.txt
+    && pip install -e .[build,docs,ipython,lint,test]

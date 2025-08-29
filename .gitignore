@@ -4,7 +4,6 @@ syntax: glob
 !.gitkeep
 !.devcontainer/
 !.github/
-!.requirements/
 !.snyk
 *.pyc
 *.pyo

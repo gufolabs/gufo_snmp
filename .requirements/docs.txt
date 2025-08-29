@@ -1,6 +1,0 @@
-# mkdocs requirements
-mkdocs-material==9.6.11
-mkdocstrings[python]==0.29.1
-mkdocs-gen-files==0.5.0
-mkdocs-literate-nav==0.6.2
-mkdocs-section-index==0.3.10

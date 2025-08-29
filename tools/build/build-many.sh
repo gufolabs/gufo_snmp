@@ -116,7 +116,7 @@ do
     elapsed
     section "Setup build dependencies..."
     checkpoint
-    pip install -r ./.requirements/build.txt -r ./.requirements/test.txt
+    pip install -e .[build,test]
     elapsed
     section "Collecting PGO..."
     checkpoint

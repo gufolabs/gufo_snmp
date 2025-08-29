@@ -1,4 +1,0 @@
-# Lint Requirements
-mypy==1.13.0
-ruff==0.11.2
-types-PyYAML==6.0.12.3

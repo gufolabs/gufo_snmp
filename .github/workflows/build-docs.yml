@@ -6,7 +6,7 @@ on:
   push:
     paths:
       - ".github/workflows/build-docs.yml"
-      - ".requirements/docs.txt"
+      - "pyproject.toml"
       - "docs/**"
       - "examples/**"
       - "**.md"
@@ -27,12 +27,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./.pip
-          key: ${{ runner.os }}-docs-${{ hashFiles('./.requirements/docs.txt') }}
+          key: ${{ runner.os }}-docs-${{ hashFiles('pyproject.toml') }}
 
       # Install dependencies
       - name: Install Dependencies
         run: |
-          pip install -IU -r ./.requirements/docs.txt
+          pip install -IU -e .[docs]
 
       # Build documentationn
       - name: Build & Deploy Docs

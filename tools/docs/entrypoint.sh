@@ -26,7 +26,7 @@ apt-get install -y --no-install-recommends\
 echo "Updating pip..."
 pip install --upgrade pip
 echo "Installing requirements..."
-pip install -r .requirements/test.txt -r .requirements/bench.txt
+pip install -e .[test,bench]
 echo "Setting up rust..."
 ./tools/build/setup-rust.sh
 rustup component add llvm-tools-preview
