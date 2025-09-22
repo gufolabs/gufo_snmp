@@ -53,7 +53,7 @@ def test_rps_timeout() -> None:
         assert p._prev == prev
 
 
-def test_rps_flood() -> None:
+def test_rps_flood_async() -> None:
     async def inner() -> None:
         p = RPSPolicer(rps)
         # Emulate flood of requests
@@ -65,6 +65,20 @@ def test_rps_flood() -> None:
     requests = duration * rps + 1
     t0 = perf_counter_ns()
     asyncio.run(inner())
+    delta = perf_counter_ns() - t0
+    # Check duration
+    assert delta >= duration * 1_000_000_000
+
+
+def test_rps_flood_sync() -> None:
+    rps = 10
+    duration = 2
+    requests = duration * rps + 1
+    t0 = perf_counter_ns()
+    p = RPSPolicer(rps)
+    # Emulate flood of requests
+    for _ in range(requests):
+        p.wait_sync()
     delta = perf_counter_ns() - t0
     # Check duration
     assert delta >= duration * 1_000_000_000

@@ -1,0 +1,6 @@
+ignore:
+  - benchmarks/
+  - tests/
+  - "**/*.pyi"
+  - "coverage.xml"
+  - "src/gufo/snmp/snmpd.py"
