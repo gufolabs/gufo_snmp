@@ -12,7 +12,7 @@ use pyo3::types::PyBytes;
 
 // Convert key to master key
 #[pyfunction]
-pub fn get_master_key(py: Python, alg: u8, passwd: &[u8]) -> PyResult<PyObject> {
+pub fn get_master_key(py: Python, alg: u8, passwd: &[u8]) -> PyResult<Py<PyAny>> {
     let auth = AuthKey::new(alg)?;
     let mut out = vec![0u8; auth.get_key_size()];
     auth.password_to_master(passwd, &mut out);
@@ -26,7 +26,7 @@ pub fn get_localized_key(
     alg: u8,
     master_key: &[u8],
     engine_id: &[u8],
-) -> PyResult<PyObject> {
+) -> PyResult<Py<PyAny>> {
     let auth = AuthKey::new(alg)?;
     let ks = auth.get_key_size();
     if master_key.len() != ks {

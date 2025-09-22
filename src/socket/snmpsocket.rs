@@ -122,7 +122,7 @@ where
         Ok(())
     }
 
-    fn _recv_inner<'a, T, V>(&mut self, iter: Option<&mut GetIter>) -> PyResult<PyObject>
+    fn _recv_inner<'a, T, V>(&mut self, iter: Option<&mut GetIter>) -> PyResult<Py<PyAny>>
     where
         T: PyOp<'a, V>,
         V: 'a,
@@ -141,7 +141,7 @@ where
             };
             match self.unwrap_pdu(msg) {
                 Some(ref pdu) => {
-                    return Python::with_gil(|py| Ok(T::to_python(pdu, iter, py)?.into()));
+                    return Python::attach(|py| Ok(T::to_python(pdu, iter, py)?.into()));
                 }
                 None => {
                     buf.reset();
@@ -160,15 +160,19 @@ where
         let request_id = self.get_request_id().get_next();
         let pdu = T::from_python(req, request_id)?;
         // Release GIL
-        py.allow_threads(|| self._send_inner(pdu))
+        py.detach(|| self._send_inner(pdu))
     }
 
-    fn recv_reply<'a, T, V>(&mut self, iter: Option<&mut GetIter>, py: Python) -> PyResult<PyObject>
+    fn recv_reply<'a, T, V>(
+        &mut self,
+        iter: Option<&mut GetIter>,
+        py: Python,
+    ) -> PyResult<Py<PyAny>>
     where
         T: PyOp<'a, V>,
         V: 'a,
     {
-        py.allow_threads(|| self._recv_inner::<T, V>(iter))
+        py.detach(|| self._recv_inner::<T, V>(iter))
     }
 
     fn send_and_recv<'a, T, V>(
@@ -176,14 +180,14 @@ where
         req: V,
         iter: Option<&mut GetIter>,
         py: Python,
-    ) -> PyResult<PyObject>
+    ) -> PyResult<Py<PyAny>>
     where
         T: PyOp<'a, V>,
         V: 'a,
     {
         let request_id = self.get_request_id().get_next();
         let pdu = T::from_python(req, request_id)?;
-        py.allow_threads(|| {
+        py.detach(|| {
             self._send_inner(pdu)?;
             self._recv_inner::<T, V>(iter)
         })

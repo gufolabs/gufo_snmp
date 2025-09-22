@@ -20,6 +20,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 ### Infrastructure
 
 * Rust 1.90.0
+* PyO3 0.26
 
 ## 0.8.4 - 2025-08-29
 
