@@ -1,6 +1,6 @@
-FROM python:3.13-slim-bullseye AS dev
-COPY . /workspaces/gufo_loader
-WORKDIR /workspaces/gufo_loader
+FROM python:3.13-slim-trixie AS dev
+COPY . /workspaces/gufo_snmp
+WORKDIR /workspaces/gufo_snmp
 ENV \
     PATH=/usr/local/cargo/bin:$PATH\
     RUSTUP_HOME=/usr/local/rustup\
