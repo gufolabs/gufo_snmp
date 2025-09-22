@@ -8,7 +8,6 @@
 """SnmpSession implementation."""
 
 # Python modules
-from asyncio import CancelledError as AIOCancelledError
 from asyncio import Future, get_running_loop, wait_for
 from asyncio import TimeoutError as AIOTimeoutError
 from types import TracebackType
@@ -233,8 +232,6 @@ class SnmpSession(object):
         try:
             return await wait_for(get_response(), self._timeout)
         except AIOTimeoutError as e:
-            raise TimeoutError from e  # Remap the error
-        except AIOCancelledError as e:
             raise TimeoutError from e  # Remap the error
 
     async def get(self: "SnmpSession", oid: str) -> ValueType:

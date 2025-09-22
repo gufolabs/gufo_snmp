@@ -18,6 +18,7 @@ import subprocess
 import threading
 from tempfile import (
     NamedTemporaryFile,
+    TemporaryDirectory,
     _TemporaryFileWrapper,
 )
 from types import TracebackType
@@ -105,6 +106,7 @@ class Snmpd(object):
         self._log_packets = log_packets if verbose else False
         self.version: Optional[str] = None
         self._cfg: Optional[_TemporaryFileWrapper[str]] = None
+        self._persistent_dir: Optional[TemporaryDirectory[str]] = None
         self._proc: Optional[subprocess.Popen[str]] = None
         if engine_id:
             self._cfg_engine_id = engine_id
@@ -161,6 +163,7 @@ sysServices 72"""
         self._cfg = NamedTemporaryFile(  # noqa: SIM115
             prefix="snmpd-", suffix=".conf", mode="w"
         )
+        self._persistent_dir = TemporaryDirectory()
         cfg = self.get_config()
         logger.debug("snmpd config:\n%s", cfg)
         self._cfg.write(cfg)
@@ -186,6 +189,7 @@ sysServices 72"""
             stdout=subprocess.PIPE,
             encoding="utf-8",
             text=True,
+            env={"SNMP_PERSISTENT_DIR": self._persistent_dir.name},
         )
         # Wait for snmpd is up
         self._wait()
@@ -255,6 +259,10 @@ sysServices 72"""
             self._proc.kill()
         if self._cfg:
             self._cfg.close()
+            self._cfg = None
+        if self._persistent_dir:
+            self._persistent_dir.cleanup()
+            self._persistent_dir = None
 
     def __enter__(self: "Snmpd") -> "Snmpd":
         """Context manager entry."""
