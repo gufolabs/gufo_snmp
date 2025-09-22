@@ -21,7 +21,6 @@ on:
 jobs:
   build-darwin-arm64:
     runs-on: macos-latest
-    needs: build-sdist
     env:
       RUST_ARCH: aarch64-apple-darwin
     steps:
