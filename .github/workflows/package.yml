@@ -81,38 +81,46 @@ jobs:
           name: wheel-linux-aarch64-${{matrix.image}}
           path: wheelhouse/*.whl
 
-  # build-wheel-macos:
-  #   runs-on: macos-11
-  #   needs: build-sdist
-  #   strategy:
-  #     fail-fast: true
-  #     matrix:
-  #       include:
-  #         - arch: x86_64
-  #           platform: macosx
-  #         # - arch: arm64
-  #         #   platform: macosx
-  #   steps:
-  #     - name: Checkout Repo
-  #       uses: actions/checkout@v4
+  build-darwin-arm64:
+    runs-on: macos-latest
+    needs: build-sdist
+    env:
+      RUST_ARCH: aarch64-apple-darwin
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
 
-  #     - name: Build Packages
-  #       uses: pypa/cibuildwheel@v2.11.2
-  #       env:
-  #         SETUP_RUST_PLATFORM: ${{matrix.platform}}-${{matrix.arch}}
-  #         CIBW_BUILD: cp{38,39,310,311}-${{matrix.platform}}_${{matrix.arch}}
-  #         CIBW_ARCHS: ${{matrix.arch}}
-  #         CIBW_ENVIRONMENT: >-
-  #           PATH=$HOME/.cargo/bin:$PATH
-  #           CARGO_HOME=$HOME/.cargo
-  #           RUSTUP_HOME=$HOME/.rustup
-  #           RUST_ARCH=x86_64-apple-darwin
+      - name: Setup Environment
+        run: |
+          echo "CARGO_HOME=${HOME}/.cargo" >> $GITHUB_ENV
+          echo "RUSTUP_HOME=${HOME}/.rustup" >> $GITHUB_ENV
+          echo "${HOME}/.cargo/bin" >> $GITHUB_PATH
 
-  #     - name: Save Artefacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: wheel_${{ matrix.platform }}_${{ matrix.arch }}
-  #         path: wheelhouse/*.whl
+      - name: Install Rust
+        run: ./tools/build/setup-rust.sh
+
+      - name: Install nginx
+        run: ./tools/build/setup-snmpd.sh
+
+      - name: Set up python
+        uses: actions/setup-python@v5
+
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel==3.1.4
+
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir wheelhouse
+        env:
+          CIBW_BUILD: "cp39-macosx_arm64 cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64 cp313-macosx_arm64"
+          CIBW_ARCHS_MACOS: arm64
+          CIBW_TEST_REQUIRES: pytest
+          CIBW_TEST_COMMAND: "cd {project} && pytest tests"
+
+      - name: Save Artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel-darwin-arm64
+          path: wheelhouse/*.whl
 
   publish:
     runs-on: ubuntu-24.04
@@ -123,6 +131,7 @@ jobs:
       - build-sdist
       - build-linux-amd64
       - build-linux-aarch64
+      - build-darwin-arm64
     steps:
       - name: Download Artefacts
         uses: actions/download-artifact@v4

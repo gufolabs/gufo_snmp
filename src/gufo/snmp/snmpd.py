@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: Snmpd context manager
 # ---------------------------------------------------------------------
-# Copyright (C) 2023, Gufo Labs
+# Copyright (C) 2023-25, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -9,8 +9,10 @@
 
 # Python modules
 import logging
+import os
 import queue
 import random
+import shutil
 import string
 import subprocess
 import threading
@@ -76,7 +78,7 @@ class Snmpd(object):
 
     def __init__(
         self: "Snmpd",
-        path: str = "/usr/sbin/snmpd",
+        path: Optional[str] = None,
         address: str = "127.0.0.1",
         port: int = 10161,
         community: str = "public",
@@ -88,7 +90,7 @@ class Snmpd(object):
         verbose: bool = False,
         log_packets: bool = False,
     ) -> None:
-        self._path = path
+        self._path = path or self._get_snmpd_path()
         self._address = address
         self._port = port
         self._community = community
@@ -289,3 +291,13 @@ sysServices 72"""
     def port(self) -> int:
         """Get listen port."""
         return self._port
+
+    @staticmethod
+    def _get_snmpd_path() -> str:
+        """Detect snmpd's path."""
+        # Default place
+        path = "/usr/sbin/snmpd"
+        # Darwin and others
+        if not os.path.exists(path):
+            path = shutil.which("snmpd") or ""
+        return path

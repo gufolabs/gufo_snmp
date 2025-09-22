@@ -14,6 +14,8 @@ elif [ -f /etc/debian_version ]; then
     OS="debian"
 elif [ -f /etc/alpine-release ]; then
     OS="alpine"
+elif [ "$OSNAME" == "Darwin" ]; then
+    OS="darwin"    
 else
     echo "Cannot detect OS"
     exit 1
@@ -41,6 +43,9 @@ case $OS in
     alpine)
         $SUDO apk add net-snmp
         ;;
+    darwin)
+        brew install net-snmp
+        ;;        
     *)
         echo "Unsupported OS: $OS"
         exit 1
