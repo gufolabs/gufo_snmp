@@ -141,7 +141,7 @@ master agentx
 agentaddress udp:{self._address}:{self._port}
 agentXsocket tcp:{self._address}:{self._port}
 #
-ignoreMibModule host
+disableModule HOST-RESOURCE-MIB
 # SNMPv3 engine id
 engineId {self._cfg_engine_id}
 # Listen address
