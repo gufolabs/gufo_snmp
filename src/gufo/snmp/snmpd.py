@@ -134,10 +134,6 @@ class Snmpd(object):
         """
         rousers = "\n".join(u.snmpd_rouser for u in self._users)
         create_users = "\n".join(u.snmpd_create_user for u in self._users)
-        if not self._perisistent_dir:
-            msg = "no perisitent dir"
-            raise ValueError(msg)
-
         return f"""# Gufo SNMP Test Suite
 master agentx
 agentaddress udp:{self._address}:{self._port}
