@@ -7,8 +7,10 @@ ENV \
     CARGO_HOME=/usr/local/cargo
 RUN \
     set -x \
-    && apt-get clean \
+    && apt-get clean \    
     && apt-get update \
+    && apt-get -y dist-upgrade \
+    && apt-get -y autoremove\      
     && apt-get install -y --no-install-recommends\
     git\
     ca-certificates\
