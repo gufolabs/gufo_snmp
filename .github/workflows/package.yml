@@ -99,7 +99,7 @@ jobs:
       - name: Install Rust
         run: ./tools/build/setup-rust.sh
 
-      - name: Install nginx
+      - name: Install snmpd
         run: ./tools/build/setup-snmpd.sh
 
       - name: Set up python

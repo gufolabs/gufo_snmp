@@ -6,6 +6,7 @@
 # ------------------------------------------------------------------------
 
 set -e
+OSNAME=$(uname -s)
 OS="unknown"
 
 if  [ -f /etc/redhat-release ]; then
