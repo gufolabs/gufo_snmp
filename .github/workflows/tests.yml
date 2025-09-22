@@ -126,8 +126,8 @@ jobs:
       - name: Build Rust module
         run: python -m pip install --editable .
 
-      - name: Install nginx
-        run: ./tools/build/setup-nginx.sh
+      - name: Install snmpd
+        run: ./tools/build/setup-snmpd.sh
 
       - name: Run Tests
         run: pytest -v --cov --cov-branch --cov-report=xml tests/
