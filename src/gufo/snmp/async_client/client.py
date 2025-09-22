@@ -8,7 +8,7 @@
 """SnmpSession implementation."""
 
 # Python modules
-from asyncio import Future, get_running_loop, wait_for
+from asyncio import Future, get_running_loop, shield, wait_for
 from asyncio import TimeoutError as AIOTimeoutError
 from types import TracebackType
 from typing import (
@@ -221,7 +221,7 @@ class SnmpSession(object):
                 fut: Future[None] = loop.create_future()
                 loop.add_reader(self._fd, fut.set_result, None)
                 try:
-                    await fut
+                    await shield(fut)
                     return receiver()
                 except BlockingIOError:
                     continue
