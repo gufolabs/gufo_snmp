@@ -8,7 +8,7 @@
 """SnmpSession implementation."""
 
 # Python modules
-from asyncio import Future, get_running_loop, shield, wait_for
+from asyncio import Future, get_running_loop, wait_for
 from asyncio import TimeoutError as AIOTimeoutError
 from types import TracebackType
 from typing import (
@@ -214,25 +214,19 @@ class SnmpSession(object):
         Args:
             receiver: Function to execute read operation.
         """
-
-        async def get_response() -> T:
-            loop = get_running_loop()
-            while True:
-                fut: Future[None] = loop.create_future()
-                loop.add_reader(self._fd, fut.set_result, None)
-                try:
-                    await shield(fut)
-                    return receiver()
-                except BlockingIOError:
-                    continue
-                finally:
-                    loop.remove_reader(self._fd)
-
-        # Await response or timeout
-        try:
-            return await wait_for(get_response(), self._timeout)
-        except AIOTimeoutError as e:
-            raise TimeoutError from e  # Remap the error
+        loop = get_running_loop()
+        while True:
+            fut: Future[None] = loop.create_future()
+            loop.add_reader(self._fd, fut.set_result, None)
+            try:
+                await wait_for(fut, self._timeout)
+                return receiver()
+            except BlockingIOError:
+                continue
+            except AIOTimeoutError as e:
+                raise TimeoutError from e  # Remap the error
+            finally:
+                loop.remove_reader(self._fd)
 
     async def get(self: "SnmpSession", oid: str) -> ValueType:
         """
