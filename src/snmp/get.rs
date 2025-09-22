@@ -79,7 +79,7 @@ impl BerEncoder for SnmpGet<'_> {
 }
 
 impl SnmpGet<'_> {
-    fn parse_var(i: &[u8]) -> IResult<&[u8], SnmpOid, SnmpError> {
+    fn parse_var(i: &[u8]) -> IResult<&[u8], SnmpOid<'_>, SnmpError> {
         // Parse enclosing sequence
         let (rest, vs) = SnmpSequence::from_ber(i)?;
         // Parse oid

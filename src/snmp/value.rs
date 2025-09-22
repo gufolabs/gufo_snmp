@@ -38,7 +38,7 @@ pub enum SnmpValue<'a> {
 }
 
 impl SnmpValue<'_> {
-    pub fn from_ber(i: &[u8]) -> IResult<&[u8], SnmpValue, SnmpError> {
+    pub fn from_ber(i: &[u8]) -> IResult<&[u8], SnmpValue<'_>, SnmpError> {
         let (tail, hdr) = BerHeader::from_ber(i)?;
         let value = match hdr.constructed {
             // Primitive types

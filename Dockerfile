@@ -18,11 +18,11 @@ RUN \
     libc6-dev\
     curl\
     snmpd\
-    && ./setup-rust.sh \
+    && ./tools/build/setup-rust.sh \
     && rustup component add\
     rust-analysis\
     rust-src \
-    rls\
+    rust-analyzer\
     clippy\
     rustfmt\
     && pip install --upgrade pip\
