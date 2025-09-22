@@ -25,7 +25,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Set Up Python {{ matrix.python-version }}
+      - name: Set Up Python 3.13
         uses: actions/setup-python@v5
         with:
           python-version: "3.13"
@@ -86,9 +86,60 @@ jobs:
       - name: Run Clippy Tests
         run: cargo clippy
 
-  py-test:
+  # First test
+  py-test-coverage:
     runs-on: ubuntu-24.04
     needs: [py-lint, rust-test]
+    env:
+      RUST_ARCH: x86_64-unknown-linux-gnu
+    steps:
+      - name: Setup Environment
+        run: |
+          echo "CARGO_HOME=${HOME}/.cargo" >> $GITHUB_ENV
+          echo "RUSTUP_HOME=${HOME}/.rustup" >> $GITHUB_ENV
+          echo "${HOME}/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Set Up Python {{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      # Cache dependencies
+      - name: Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ./.pip
+          key: ${{ runner.os }}-tests-coverage-{{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+
+      - name: Upgrade Pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install Dependencies
+        run: pip install -IU -e .[build,test]
+
+      - name: Install Rust
+        run: ./tools/build/setup-rust.sh
+
+      - name: Build Rust module
+        run: python -m pip install --editable .
+
+      - name: Install nginx
+        run: ./tools/build/setup-nginx.sh
+
+      - name: Run Tests
+        run: pytest -v --cov --cov-branch --cov-report=xml tests/
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  py-test:
+    runs-on: ubuntu-24.04
+    needs: [py-test-coverage]
     strategy:
       fail-fast: true
       matrix:
@@ -134,7 +185,4 @@ jobs:
         run: ./tools/build/setup-snmpd.sh
 
       - name: Run Tests
-        run: coverage run -m pytest -v tests/
-
-      - name: Coverage Report
-        run: coverage report
+        run: pytest -v tests/
