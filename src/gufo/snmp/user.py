@@ -317,7 +317,7 @@ class User(object):
             level = "auth"
         else:
             level = "noauth"
-        return f"rouser {self.name} {level} -V TestView"
+        return f"rouser {self.name} {level}"
 
     @property
     def snmpd_create_user(self: "User") -> str:

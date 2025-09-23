@@ -15,6 +15,7 @@ import random
 import shutil
 import string
 import subprocess
+import sys
 import threading
 from tempfile import (
     NamedTemporaryFile,
@@ -34,6 +35,8 @@ _NETSNMP_ENGINE_ID_PREFIX = b"\x80\x00\x1f\x88\x04"
 # Length of generated engine id
 # Not including prefix.
 _ENGINE_ID_LENGTH = 8
+
+IS_DARWIN = sys.platform == "darwin"
 
 
 class Snmpd(object):
@@ -140,14 +143,11 @@ class Snmpd(object):
 master agentx
 agentaddress udp:{self._address}:{self._port}
 agentXsocket tcp:{self._address}:{self._port}
-# MIB Views
-view TestView included .1.3.6
-view TestView excluded .1.3.6.1.2.1.25
 # SNMPv3 engine id
 engineId {self._cfg_engine_id}
 # Listen address
 # SNMPv1/SNMPv2c R/O community
-rocommunity {self._community} 127.0.0.1 -V TestView
+rocommunity {self._community} 127.0.0.1
 # SNMPv3 R/O User
 {rousers}
 {create_users}
@@ -181,6 +181,10 @@ sysServices 72"""
             "-f",  # No fork
             "-Lo",  # Log to stdout
         ]
+        if IS_DARWIN:
+            # HOST-RESOURCES-MIB::swRunPath is too large on MacOS
+            # causing packet sending arror and test timeouts.
+            args += ["-I", "-host"]
         if self._verbose:
             args += ["-V"]
         if self._log_packets:
