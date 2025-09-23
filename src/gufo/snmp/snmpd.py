@@ -140,24 +140,20 @@ class Snmpd(object):
 master agentx
 agentaddress udp:{self._address}:{self._port}
 agentXsocket tcp:{self._address}:{self._port}
+# MIB Views
+view TestView included .1.3.6
+view TestView excluded .1.3.6.1.2.1.25
 # SNMPv3 engine id
 engineId {self._cfg_engine_id}
 # Listen address
 # SNMPv1/SNMPv2c R/O community
-rocommunity {self._community} 127.0.0.1
+rocommunity {self._community} 127.0.0.1 -V TestView
 # SNMPv3 R/O User
 {rousers}
 {create_users}
 # System information
 syslocation {self._location}
 syscontact  {self._contact}
-# HOST-RESOURCE-MIB = 1.3.6.1.2.1.25 = HOST-RESOURCES-MIB
-view myview included 1.3 included
-view myview excluded 1.3.6.1.2.1.25  excluded
-group   MyGroup v1           readonly
-group   MyGroup v2c          readonly
-group   MyGroup usm          readonly
-access  MyGroup ""  any       myview     none    none
 #
 sysServices 72"""
 
