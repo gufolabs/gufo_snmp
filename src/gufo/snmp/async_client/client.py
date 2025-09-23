@@ -214,10 +214,15 @@ class SnmpSession(object):
         Args:
             receiver: Function to execute read operation.
         """
+
+        def on_readable() -> None:
+            if not fut.done():
+                fut.set_result(None)
+
         loop = get_running_loop()
         while True:
             fut: Future[None] = loop.create_future()
-            loop.add_reader(self._fd, fut.set_result, None)
+            loop.add_reader(self._fd, on_readable)
             try:
                 await wait_for(fut, self._timeout)
                 return receiver()
