@@ -83,7 +83,6 @@ jobs:
 
   build-darwin-arm64:
     runs-on: macos-latest
-    needs: build-sdist
     env:
       RUST_ARCH: aarch64-apple-darwin
     steps:
@@ -114,13 +113,8 @@ jobs:
           CIBW_BUILD: "cp39-macosx_arm64 cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64 cp313-macosx_arm64"
           CIBW_ARCHS_MACOS: arm64
           CIBW_TEST_REQUIRES: pytest
+          CIBW_BEFORE_TEST: "pip install -e {project}[test]"
           CIBW_TEST_COMMAND: "cd {project} && pytest tests"
-
-      - name: Save Artefacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheel-darwin-arm64
-          path: wheelhouse/*.whl
 
   publish:
     runs-on: ubuntu-24.04
