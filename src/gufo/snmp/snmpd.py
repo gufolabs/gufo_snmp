@@ -184,7 +184,7 @@ sysServices 72"""
         if IS_DARWIN:
             # HOST-RESOURCES-MIB::swRunPath is too large on MacOS
             # causing packet sending arror and test timeouts.
-            args += ["-I", "-host"]
+            args += ["-I", "-hrSWRunTable,hrSWInstalledTable"]
         if self._verbose:
             args += ["-V"]
         if self._log_packets:
