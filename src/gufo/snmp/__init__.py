@@ -24,7 +24,7 @@ from .typing import ValueType
 from .user import Aes128Key, DesKey, Md5Key, Sha1Key, User
 from .version import SnmpVersion
 
-__version__: str = "0.8.4"
+__version__: str = "0.9.0"
 __all__ = [
     "Aes128Key",
     "DesKey",
