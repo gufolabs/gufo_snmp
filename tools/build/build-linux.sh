@@ -43,7 +43,7 @@ build() {
         --user 0\
         --platform ${image_arch}\
         quay.io/pypa/${image}:latest\
-        ./tools/build/build-many.sh 3.9 3.10 3.11 3.12 3.13
+        ./tools/build/build-many.sh 3.9 3.10 3.11 3.12 3.13 3.14
 }
 
 if [ "$#" -eq 0 ]; then

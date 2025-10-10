@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 To see unreleased changes, please see the [CHANGELOG on the main branch guide](https://github.com/gufolabs/gufo_snmp/blob/main/CHANGELOG.md).
 
+## [Unreleased]
+
+### Added
+
+* Python 3.14 support.
+
+### Infrastructure
+
+* Use python:3.14-slim-trixie for devcontainer.
+
 ## 0.9.1 - 2025-09-23
 
 ### Fixed

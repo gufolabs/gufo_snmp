@@ -9,5 +9,5 @@
 docker run --rm\
     -w /workspaces/gufo_snmp\
     -v $PWD:/workspaces/gufo_snmp\
-    python:3.13-slim-bullseye\
+    python:3.14-slim-trixie\
     /workspaces/gufo_snmp/tools/docs/entrypoint.sh

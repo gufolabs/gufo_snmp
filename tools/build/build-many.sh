@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------
 # Build wheel in the manylinux
 # Usage:
-# ./tools/build/build-many 3.9 3.10 3.11 3.11 3.12 3.13
+# ./tools/build/build-many 3.9 3.10 3.11 3.11 3.12 3.13 3.14
 # expects RUST_VERSION and RUST_ARCH
 # ------------------------------------------------------------------------
 # Copyright (C) 2022-25, Gufo Labs
@@ -94,6 +94,7 @@ do
         3.11) ABI=cp311-cp311 ;;
         3.12) ABI=cp312-cp312 ;;
         3.13) ABI=cp313-cp313 ;;
+        3.14) ABI=cp314-cp314 ;;
         *)
             echo "Unknown Python version $1"
             exit 2
