@@ -4,7 +4,7 @@ env:
   PYTHONPATH: src
 on:
   push:
-    paths:
+    paths: &affected-paths
       - ".github/workflows/tests.yml"
       - "examples/**"
       - "tools/build/setup-rust.sh"
@@ -14,10 +14,14 @@ on:
     branches:
       - master
   pull_request:
+    paths: *affected-paths
     branches:
       - master
   release:
     types: ["published"]
+permissions:
+  contents: read
+  pull-requests: write
 jobs:
   py-lint:
     runs-on: ubuntu-24.04
