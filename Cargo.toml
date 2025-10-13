@@ -25,7 +25,7 @@ nom = "7.1"
 pyo3 = {version = "0.26", features = ["extension-module"]}
 rand = "0.9"
 sha1 = "0.10"
-socket2 = {version = "0.5", features = ["all"]}
+socket2 = {version = "0.6", features = ["all"]}
 
 [dev-dependencies]
 criterion = "0.4"

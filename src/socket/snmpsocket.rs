@@ -57,7 +57,7 @@ where
         }
         // Set ToS
         if tos > 0 {
-            io.set_tos(tos)
+            io.set_tos_v4(tos)
                 .map_err(|e| SnmpError::SocketError(e.to_string()))?;
         }
         // Set buffers
