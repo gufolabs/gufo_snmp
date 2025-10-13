@@ -1,6 +1,6 @@
 name: Check vulnerabilities
 on:
-  workflow_dispatch: # allows running manuallyå
+  workflow_dispatch: # allows running manually
 jobs:
   safety:
     name: Run Safety CLI checks
