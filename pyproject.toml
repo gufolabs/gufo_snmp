@@ -65,6 +65,9 @@ test = [
 content-type = "text/markdown"
 file = "README.md"
 
+[project.scripts]
+gufo-snmp = "gufo.snmp.cli:main"
+
 [project.urls]
 "Bug Tracker" = "https://github.com/gufolabs/gufo_snmp/issues"
 Changelog = "https://github.com/gufolabs/gufo_snmp/blob/master/CHANGELOG.md"
