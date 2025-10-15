@@ -6,14 +6,14 @@
 # ---------------------------------------------------------------------
 
 # Python modules
-from typing import List
+from typing import Any, Dict, List
 
 # Third-party modules
 import pytest
 
 # Gufo SNMP modules
 from gufo.snmp import SnmpVersion
-from gufo.snmp.cli import Cli, ExitCode
+from gufo.snmp.cli import Cli, ExitCode, Formatter, StrFormat, main
 from gufo.snmp.snmpd import Snmpd
 
 from .util import SNMP_COMMUNITY, SNMP_LOCATION_OID, SNMPD_ADDRESS, SNMPD_PORT
@@ -118,6 +118,42 @@ def test_is_valid_oid(oid: str, expected: bool) -> None:
 
 
 @pytest.mark.parametrize(
+    ("cfg", "v", "expected"),
+    [
+        # None
+        ({}, None, "null"),
+        # int
+        ({}, 42, "42"),
+        # float
+        ({}, 1.2, "1.2"),
+        # str
+        ({}, "1.3.6", "1.3.6"),
+        # ascii
+        ({"str_format": StrFormat.ASCII}, b"test value\n", "test value."),
+        (
+            {"str_format": StrFormat.HEX},
+            b"test value\n",
+            "74 65 73 74 20 76 61 6C 75 65 0A",
+        ),
+        (
+            {"str_format": StrFormat.ASCII_HEX},
+            b"test value\n",
+            "test value. 74 65 73 74 20 76 61 6C 75 65 0A",
+        ),
+        (
+            {"str_format": StrFormat.REPR},
+            b"test value\n",
+            "b'test value\\n'",
+        ),
+    ],
+)
+def test_format_value(cfg: Dict[str, Any], v: Any, expected: str) -> None:
+    formatter = Formatter(**cfg)
+    r = formatter.format_value(v)
+    assert r == expected
+
+
+@pytest.mark.parametrize(
     "args",
     [
         [
@@ -174,8 +210,7 @@ def test_get(args: List[str], snmpd: Snmpd) -> None:
 def test_get_format(
     fmt: List[str], expected: str, capsys: pytest.CaptureFixture, snmpd: Snmpd
 ) -> None:
-    cli = Cli()
-    r = cli.run(
+    r = main(
         [
             *fmt,
             "-v2c",
@@ -190,4 +225,4 @@ def test_get_format(
     captured = capsys.readouterr()
     out = captured.out.rstrip("\n")
     assert out == expected
-    assert r == ExitCode.OK
+    assert r == ExitCode.OK.value

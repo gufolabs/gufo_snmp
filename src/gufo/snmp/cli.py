@@ -118,20 +118,23 @@ class Formatter(object):
                 sep = ""
         return Formatter(show_key=show_key, sep=sep, str_format=str_format)
 
+    def format_value(self, value: Union[None, int, float, bytes, str]) -> str:
+        """Format value."""
+        if value is None:
+            return "null"
+        if isinstance(value, (int, float)):
+            return str(value)
+        if isinstance(value, str):
+            return value  # OID
+        if isinstance(value, bytes):
+            return self._format_str(value)
+        return self._format_str_repr(value)
+
     def format(
         self, oid: str, value: Union[None, int, float, bytes, str]
     ) -> str:
         """Format line."""
-        if value is None:
-            v = "null"
-        elif isinstance(value, (int, float)):
-            v = str(value)
-        elif isinstance(value, str):
-            v = value  # OID
-        elif isinstance(value, bytes):
-            v = self._format_str(value)
-        else:
-            v = self._format_str_repr(value)
+        v = self.format_value(value)
         return f"{oid if self.show_key else ''}{self.sep}{v}"
 
     @staticmethod
