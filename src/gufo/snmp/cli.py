@@ -16,7 +16,7 @@ import argparse
 import re
 import sys
 from enum import Enum, IntEnum
-from typing import List, NoReturn, Optional, Union
+from typing import Any, List, NoReturn, Optional, Sequence, Union, cast
 
 # Gufo SNMP modules
 from gufo.snmp import SnmpVersion, User
@@ -169,7 +169,7 @@ class CollectOFlags(argparse.Action):
         self,
         parser: argparse.ArgumentParser,
         namespace: argparse.Namespace,
-        values: str,
+        values: Union[str, Sequence[Any], None],
         option_string: Optional[str] = None,
     ) -> None:
         """
@@ -191,8 +191,9 @@ class CollectOFlags(argparse.Action):
         # Get existing flags (if any)
         flags = getattr(namespace, self.dest, set()) or set()
         # Add each character in the new -O value
-        for ch in values:
-            flags.add(ch)
+        if values:
+            for ch in values:
+                flags.add(ch)
         setattr(namespace, self.dest, flags)
 
 
@@ -385,7 +386,7 @@ class Cli(object):
         Returns:
             SNMP community
         """
-        return ns.community
+        return cast(str, ns.community)
 
     def get_user(self, ns: argparse.Namespace) -> User:
         """
@@ -397,7 +398,7 @@ class Cli(object):
         Returns:
             USM configuration
         """
-        return None
+        return User("test")
 
     def get_session(self, ns: argparse.Namespace) -> SnmpSession:
         """
@@ -437,9 +438,9 @@ class Cli(object):
         cmd = self.get_command(ns)
         formatter = Formatter.from_opts(ns.oflags or "")
         with self.get_session(ns) as session:
-            return getattr(self, f"run_{cmd.value}")(
-                session, ns.oids, formatter
-            )
+            if cmd == Command.GET:
+                return self.run_get(session, ns.oids, formatter)
+            return ExitCode.ERR
 
     def run_get(
         self, session: SnmpSession, oids: List[str], formatter: Formatter
