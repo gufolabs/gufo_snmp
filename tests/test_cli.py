@@ -111,7 +111,7 @@ def test_die() -> None:
             "-c",
             "public",
             SNMPD_ADDRESS,
-            ".1.3.6",
+            "1.3.6",
         ],
         # Invalid format
         [
@@ -120,7 +120,7 @@ def test_die() -> None:
             "-c",
             "public",
             SNMPD_ADDRESS,
-            ".1.3.6",
+            "1.3.6",
         ],
         [
             "-v1",
@@ -128,7 +128,41 @@ def test_die() -> None:
             "-c",
             "public",
             SNMPD_ADDRESS,
-            ".1.3.6",
+            "1.3.6",
+        ],
+        # auth/no auth pass
+        ["-v3", "-u", "test", "-a", "MD5", SNMPD_ADDRESS, "1.3.6"],
+        # no auth/auth pass
+        ["-v3", "-u", "test", "-A", "PASS", SNMPD_ADDRESS, "1.3.6"],
+        # priv without auth
+        ["-v3", "-u", "test", "-x", "AES", SNMPD_ADDRESS, "1.3.6"],
+        # priv proto/no pass
+        [
+            "-v3",
+            "-u",
+            "test",
+            "-a",
+            "MD5",
+            "-A",
+            "PASS",
+            "-x",
+            "AES",
+            SNMPD_ADDRESS,
+            "1.3.6",
+        ],
+        # priv pass/no proto
+        [
+            "-v3",
+            "-u",
+            "test",
+            "-a",
+            "MD5",
+            "-A",
+            "PASS",
+            "-X",
+            "PASS",
+            SNMPD_ADDRESS,
+            "1.3.6",
         ],
     ],
 )
