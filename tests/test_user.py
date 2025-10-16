@@ -12,7 +12,9 @@ from typing import Type
 import pytest
 
 # Gufo SNMP modules
-from gufo.snmp.user import BaseAuthKey, KeyType, Md5Key, Sha1Key
+from gufo.snmp.user import BaseAuthKey, KeyType, Md5Key, Sha1Key, User
+
+from .util import SNMP_USERS
 
 AUTH = [Md5Key, Sha1Key]
 
@@ -89,4 +91,17 @@ def test_get_localized_key(
     auth: BaseAuthKey, master_key: bytes, engine_id: bytes, expected: bytes
 ) -> None:
     r = auth.get_localized_key(master_key, engine_id)
+    assert r == expected
+
+
+@pytest.mark.parametrize("user", SNMP_USERS)
+def test_str(user: User) -> None:
+    r = str(user)
+    assert r == user.name
+
+
+@pytest.mark.parametrize("user", SNMP_USERS)
+def test_repr(user: User) -> None:
+    r = repr(user)
+    expected = f"<User {user.name} at {id(user)}>"
     assert r == expected

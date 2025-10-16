@@ -65,6 +65,9 @@ test = [
 content-type = "text/markdown"
 file = "README.md"
 
+[project.scripts]
+gufo-snmp = "gufo.snmp.cli:main"
+
 [project.urls]
 "Bug Tracker" = "https://github.com/gufolabs/gufo_snmp/issues"
 Changelog = "https://github.com/gufolabs/gufo_snmp/blob/master/CHANGELOG.md"
@@ -172,6 +175,7 @@ max-complexity = 15
   "D101", # Missing docstring in public class
   "D103", # Missing docstring in public function
   "D104", # Missing docstring in public package
+  "E501", # Line too long
   "S101", # Use of assert detected
   "PT011", # {exc} is too broad, set the `match` parameter or use a more specific exception.
   "PLR2004", # Magic value used in comparison, consider replacing {value} with a constant variable

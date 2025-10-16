@@ -243,6 +243,14 @@ class User(object):
         ):
             self.priv_key._pad(self.auth_key.KEY_LENGTH)
 
+    def __str__(self) -> str:
+        """str() implementation."""
+        return self.name
+
+    def __repr__(self) -> str:
+        """repr() implementation."""
+        return f"<User {self.name} at {id(self)}>"
+
     @classmethod
     def default(cls: Type["User"]) -> "User":
         """

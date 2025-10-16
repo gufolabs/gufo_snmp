@@ -21,12 +21,22 @@ from ._fast import (
 )
 from .async_client import SnmpSession
 from .typing import ValueType
-from .user import Aes128Key, DesKey, Md5Key, Sha1Key, User
+from .user import (
+    Aes128Key,
+    BaseAuthKey,
+    BasePrivKey,
+    DesKey,
+    Md5Key,
+    Sha1Key,
+    User,
+)
 from .version import SnmpVersion
 
-__version__: str = "0.9.1"
+__version__: str = "0.9.2"
 __all__ = [
     "Aes128Key",
+    "BaseAuthKey",
+    "BasePrivKey",
     "DesKey",
     "Md5Key",
     "NoSuchInstance",
