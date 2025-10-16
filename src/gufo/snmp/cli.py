@@ -15,21 +15,35 @@ Attributes:
 import argparse
 import re
 import sys
+from contextlib import contextmanager
 from enum import Enum, IntEnum
 from operator import itemgetter
 from typing import (
     Any,
     Callable,
+    Dict,
+    Iterator,
     List,
     NoReturn,
     Optional,
     Sequence,
+    Type,
     Union,
     cast,
 )
 
 # Gufo SNMP modules
-from gufo.snmp import SnmpVersion, User, ValueType
+from gufo.snmp import (
+    Aes128Key,
+    BaseAuthKey,
+    BasePrivKey,
+    DesKey,
+    Md5Key,
+    Sha1Key,
+    SnmpVersion,
+    User,
+    ValueType,
+)
 from gufo.snmp.sync_client import SnmpSession
 
 NAME = "gufo-snmp"
@@ -230,6 +244,9 @@ OFLAGS_HELP = {
     "v": "print values only (not OID = value)",
 }
 
+AUTH_PROTOCOL: Dict[str, Type[BaseAuthKey]] = {"MD5": Md5Key, "SHA": Sha1Key}
+PRIV_PROTOCOL: Dict[str, Type[BasePrivKey]] = {"DES": DesKey, "AES": Aes128Key}
+
 
 class Cli(object):
     """`gufo-snmp` utility class."""
@@ -292,7 +309,6 @@ class Cli(object):
         )
         # Command
         parser.add_argument(
-            "-X",
             "--command",
             default="GET",
             choices=["GET", "GETNEXT", "GETBULK"],
@@ -301,9 +317,32 @@ class Cli(object):
         parser.add_argument(
             "-p", "--port", type=int, default=161, help="Argent port"
         )
-        # Auth
+        # v2c
         parser.add_argument("-c", "--community", help="Community (v1/v2c)")
+        # v3
         parser.add_argument("-u", "--user", help="User name (v3)")
+        parser.add_argument(
+            "-a",
+            "--auth-protocol",
+            choices=list(AUTH_PROTOCOL),
+            help="Set authentication protocol (v3)",
+        )
+        parser.add_argument(
+            "-A",
+            "--auth-pass",
+            help="Set authentication protocol pass-phrase (v3)",
+        )
+        parser.add_argument(
+            "-x",
+            "--security-protocol",
+            choices=list(PRIV_PROTOCOL),
+            help="Set security protocol (v3)",
+        )
+        parser.add_argument(
+            "-X",
+            "--security-pass",
+            help="Set security protocol pass-phrase (v3)",
+        )
         # Format
         parser.add_argument(
             "-O",
@@ -362,6 +401,14 @@ class Cli(object):
         """
         if not ns.community:
             parser.error(f"SNMP {ns.version} requires -c/--community")
+        for v, opt in (
+            (ns.auth_protocol, "-A/--auth-protocol"),
+            (ns.auth_pass, "-a/--auth-pass"),
+            (ns.security_protocol, "-x/--security-protocol"),
+            (ns.security_pass, "-X/--security-pass"),
+        ):
+            if v:
+                parser.error(f"SNMP {ns.version} doesn't support {opt} option")
 
     @classmethod
     def _validate_usm(
@@ -376,6 +423,29 @@ class Cli(object):
         """
         if not ns.user:
             parser.error(f"SNMP {ns.version} requires -u/--user")
+        # Auth
+        if ns.auth_protocol and not ns.auth_pass:
+            parser.error("-A/--auth-pass is required for -a/--auth-protocol")
+        if ns.auth_pass and not ns.auth_protocol:
+            parser.error("-a/--auth-protocol is required for -A/--auth-pass")
+        # Priv
+        if ns.security_protocol and not ns.security_pass:
+            parser.error(
+                "-X/--security-pass is required for -x/--security-protocol"
+            )
+        if not ns.security_protocol and ns.security_pass:
+            parser.error(
+                "-x/--security-protocol is required for -X/--security-pass"
+            )
+        # Auth must be set for priv
+        if ns.security_protocol and not ns.auth_protocol:
+            parser.error(
+                "-a/--auth-protocol must be set for -x/--security-protocol"
+            )
+        if ns.community:
+            parser.error(
+                f"SNMP {ns.version} doesn't support -c/--community option"
+            )
 
     def get_version(self, ns: argparse.Namespace) -> SnmpVersion:
         """
@@ -429,7 +499,17 @@ class Cli(object):
         Returns:
             USM configuration
         """
-        return User("test")
+        # Process auth key
+        auth_key = None
+        if ns.auth_pass:
+            auth_key = AUTH_PROTOCOL[ns.auth_protocol](ns.auth_pass.encode())
+        # Process priv key
+        priv_key = None
+        if auth_key and ns.security_pass:
+            priv_key = PRIV_PROTOCOL[ns.security_protocol](
+                ns.security_pass.encode()
+            )
+        return User(ns.user, auth_key=auth_key, priv_key=priv_key)
 
     def get_session(self, ns: argparse.Namespace) -> SnmpSession:
         """
@@ -468,16 +548,19 @@ class Cli(object):
         ns = self.parse_args(args)
         cmd = self.get_command(ns)
         formatter = Formatter.from_opts(ns.oflags or "")
-        with self.get_session(ns) as session:
-            if cmd == Command.GET:
-                return self.run_get(session, ns.oids, formatter)
-            if cmd == Command.GETMANY:
-                return self.run_get_many(session, ns.oids, formatter)
-            if cmd == Command.GETNEXT:
-                return self.run_getnext(session, ns.oids, formatter)
-            if cmd == Command.GETBULK:
-                return self.run_getbulk(session, ns.oids, formatter)
-            return ExitCode.ERR
+        try:
+            with self.get_session(ns) as session:
+                if cmd == Command.GET:
+                    return self.run_get(session, ns.oids, formatter)
+                if cmd == Command.GETMANY:
+                    return self.run_get_many(session, ns.oids, formatter)
+                if cmd == Command.GETNEXT:
+                    return self.run_getnext(session, ns.oids, formatter)
+                if cmd == Command.GETBULK:
+                    return self.run_getbulk(session, ns.oids, formatter)
+                return ExitCode.ERR
+        except TimeoutError:
+            self.die("ERROR: Timed out")
 
     def run_get(
         self, session: SnmpSession, oids: List[str], formatter: Formatter

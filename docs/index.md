@@ -102,6 +102,7 @@ async with Snmpd(), SnmpSession(addr="127.0.0.1", port=10161) as session:
     * Authentication: HMAC-MD5-96, HMAC-SHA-96.
     * Privacy: DES, AES128.
     * Engine ID discovery.
+* Command-line utility which resembles Net-SNMP's get* commands.
 * High-performance.
 * Built with security in mind.
 * Zero-copy BER parsing.

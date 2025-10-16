@@ -15,15 +15,60 @@ import pytest
 from gufo.snmp import SnmpVersion
 from gufo.snmp.cli import Cli, ExitCode, Formatter, StrFormat, main
 from gufo.snmp.snmpd import Snmpd
+from gufo.snmp.user import Aes128Key, DesKey, KeyType, Md5Key, Sha1Key
 
 from .util import (
     SNMP_COMMUNITY,
     SNMP_CONTACT_OID,
     SNMP_LOCATION_OID,
     SNMP_SYSTEM_OID,
+    SNMP_USERS,
     SNMPD_ADDRESS,
     SNMPD_PORT,
 )
+
+users = {u.name: u for u in SNMP_USERS}
+
+
+def user_opts(name: str, oid: str) -> List[str]:
+    """
+    Generate command-line options for user.
+
+    Args:
+        name: user name.
+
+    Returns:
+        user authentication cli options.
+    """
+    user = users[name]
+    r = ["-u", user.name]
+    if user.auth_key:
+        if user.auth_key.key_type != KeyType.Password:
+            msg = f"User {name} auth key must be of password type"
+            raise ValueError(msg)
+        if user.auth_key.AUTH_ALG == Md5Key.AUTH_ALG:
+            r += ["-a", "MD5"]
+        elif user.auth_key.AUTH_ALG == Sha1Key.AUTH_ALG:
+            r += ["-a", "SHA"]
+        else:
+            msg = f"Unknown auth protocol: {user.auth_key.AUTH_ALG}"
+            raise ValueError(msg)
+        r += ["-A", user.auth_key.key.decode()]
+    if user.priv_key:
+        if user.priv_key.key_type != KeyType.Password:
+            msg = f"User {name} security key must be of password type"
+            raise ValueError(msg)
+        if user.priv_key.PRIV_ALG == DesKey.PRIV_ALG:
+            r += ["-x", "DES"]
+        elif user.priv_key.PRIV_ALG == Aes128Key.PRIV_ALG:
+            r += ["-x", "AES"]
+        else:
+            msg = f"Unknown security protocol: {user.priv_key.AUTH_ALG}"
+            raise ValueError(msg)
+        r += ["-X", user.priv_key.key.decode()]
+    # Common options
+    r += ["-v3", "-p", str(SNMPD_PORT), SNMPD_ADDRESS, oid]
+    return r
 
 
 def test_die() -> None:
@@ -42,22 +87,43 @@ def test_die() -> None:
         [SNMPD_ADDRESS, "1.3.6"],
         ["-v1", SNMPD_ADDRESS, "1.3.6"],
         ["-v2c", SNMPD_ADDRESS, "1.3.6"],
+        # -c for v3
+        ["-v3", "-u", "user", "-c", "public", SNMPD_ADDRESS, "1.3.6"],
+        # v3 options for v2c
+        ["-v2c", "-c", "public", "-a", "MD5", SNMPD_ADDRESS, "1.3.6"],
+        ["-v2c", "-c", "public", "-A", "pass", SNMPD_ADDRESS, "1.3.6"],
+        ["-v2c", "-c", "public", "-x", "AES", SNMPD_ADDRESS, "1.3.6"],
+        ["-v2c", "-c", "public", "-X", "pass", SNMPD_ADDRESS, "1.3.6"],
         # No user for v3
         ["-v3", SNMPD_ADDRESS, "1.3.6"],
         # Invalid command
-        ["-X", "GETWHAT", "-c", "public", SNMPD_ADDRESS, "1.3.6"],
+        ["--command", "GETWHAT", "-c", "public", SNMPD_ADDRESS, "1.3.6"],
         # Invalid port
         ["-p", "AAA", SNMPD_ADDRESS, "1.3.6"],
         # Invalid OID
         ["-c", "public", SNMPD_ADDRESS, ".1.3.6"],
         # GETBULK for SNMPv1
-        ["-v1", "-X", "GETBULK", "-c", "public", SNMPD_ADDRESS, ".1.3.6"],
+        [
+            "-v1",
+            "--command",
+            "GETBULK",
+            "-c",
+            "public",
+            SNMPD_ADDRESS,
+            ".1.3.6",
+        ],
         # Invalid format
         [
             "-v1",
             "-OX",
-            "-X",
-            "GETBULK",
+            "-c",
+            "public",
+            SNMPD_ADDRESS,
+            ".1.3.6",
+        ],
+        [
+            "-v1",
+            "-OXYZ",
             "-c",
             "public",
             SNMPD_ADDRESS,
@@ -67,7 +133,7 @@ def test_die() -> None:
 )
 def test_invalid_options(args: List[str]) -> None:
     with pytest.raises(SystemExit):
-        Cli().run(args)
+        main(args)
 
 
 @pytest.mark.parametrize(
@@ -170,6 +236,16 @@ def test_is_valid_oid(oid: str, expected: bool) -> None:
             "b'test value\\n'",
         ),
     ],
+    ids=[
+        "null",
+        "int",
+        "float",
+        "oid",
+        "str-ascii",
+        "str-hex",
+        "str-ascii-hex",
+        "str-repr",
+    ],
 )
 def test_format_value(cfg: Dict[str, Any], v: Any, expected: str) -> None:
     formatter = Formatter(**cfg)
@@ -198,7 +274,25 @@ def test_format_value(cfg: Dict[str, Any], v: Any, expected: str) -> None:
             SNMPD_ADDRESS,
             SNMP_LOCATION_OID,
         ],
-        # @todo: v3
+        # v3
+        user_opts("user0000", SNMP_LOCATION_OID),
+        user_opts("user1000", SNMP_LOCATION_OID),
+        user_opts("user1010", SNMP_LOCATION_OID),
+        user_opts("user1020", SNMP_LOCATION_OID),
+        user_opts("user2000", SNMP_LOCATION_OID),
+        user_opts("user2010", SNMP_LOCATION_OID),
+        user_opts("user2020", SNMP_LOCATION_OID),
+    ],
+    ids=[
+        "v1",
+        "v2c",
+        "v3",
+        "v3-md5",
+        "v3-md5-des",
+        "v3-md5-aes128",
+        "v3-sha1",
+        "v3-sha1-des",
+        "v3-sha1-aes128",
     ],
 )
 def test_get(args: List[str], snmpd: Snmpd) -> None:
@@ -229,6 +323,7 @@ def test_get(args: List[str], snmpd: Snmpd) -> None:
             "Gufo SNMP Test 47 75 66 6F 20 53 4E 4D 50 20 54 65 73 74",
         ),
     ],
+    ids=["default", "a", "x", "T", "q", "Q", "v", "vx", "v-x", "v-T"],
 )
 def test_get_format(
     fmt: List[str], expected: str, capsys: pytest.CaptureFixture, snmpd: Snmpd
@@ -319,6 +414,7 @@ def test_get_format(
             ),
         ),
     ],
+    ids=["default", "a", "x", "T", "q", "Q", "v", "vx", "v-x", "v-T"],
 )
 def test_get_many_format(
     fmt: List[str], expected: str, capsys: pytest.CaptureFixture, snmpd: Snmpd
@@ -349,7 +445,7 @@ def test_get_many_format(
         (
             [
                 "-v1",
-                "-X",
+                "--command",
                 "GETNEXT",
                 "-c",
                 SNMP_COMMUNITY,
@@ -362,7 +458,7 @@ def test_get_many_format(
         (
             [
                 "-v2c",
-                "-X",
+                "--command",
                 "GETNEXT",
                 "-c",
                 SNMP_COMMUNITY,
@@ -375,7 +471,7 @@ def test_get_many_format(
         (
             [
                 "-v2c",
-                "-X",
+                "--command",
                 "GETNEXT",
                 "-Ox",
                 "-c",
@@ -390,7 +486,7 @@ def test_get_many_format(
         (
             [
                 "-v2c",
-                "-X",
+                "--command",
                 "GETBULK",
                 "-c",
                 SNMP_COMMUNITY,
@@ -403,7 +499,7 @@ def test_get_many_format(
         (
             [
                 "-v2c",
-                "-X",
+                "--command",
                 "GETBULK",
                 "-Ox",
                 "-c",
@@ -414,6 +510,13 @@ def test_get_many_format(
                 f"{SNMP_LOCATION_OID} = 47 75 66 6F 20 53 4E 4D 50 20 54 65 73 74\n",
             ],
         ),
+    ],
+    ids=[
+        "v1-GETNEXT",
+        "v2c-GETNEXT",
+        "v2c-x-GETNEXT",
+        "v2c-GETBULK",
+        "v2c-x-GETBULK",
     ],
 )
 def test_get_table(
@@ -428,3 +531,117 @@ def test_get_table(
     for x in expected:
         assert x in out
     assert r == ExitCode.OK.value
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        # GET
+        (
+            "-v2c",
+            "--command",
+            "GET",
+            "-c",
+            "invalid",
+            "-p",
+            str(SNMPD_PORT),
+            SNMPD_ADDRESS,
+            SNMP_LOCATION_OID,
+        ),
+        (
+            "-v3",
+            "--command",
+            "GET",
+            "-u",
+            "invalid",
+            "-p",
+            str(SNMPD_PORT),
+            SNMPD_ADDRESS,
+            SNMP_LOCATION_OID,
+        ),
+        # GET MANY
+        (
+            "-v2c",
+            "--command",
+            "GET",
+            "-c",
+            "invalid",
+            "-p",
+            str(SNMPD_PORT),
+            SNMPD_ADDRESS,
+            SNMP_LOCATION_OID,
+            SNMP_CONTACT_OID,
+        ),
+        (
+            "-v3",
+            "--command",
+            "GET",
+            "-u",
+            "invalid",
+            "-p",
+            str(SNMPD_PORT),
+            SNMPD_ADDRESS,
+            SNMP_LOCATION_OID,
+            SNMP_CONTACT_OID,
+        ),
+        # GETNEXT
+        (
+            "-v2c",
+            "--command",
+            "GETNEXT",
+            "-c",
+            "invalid",
+            "-p",
+            str(SNMPD_PORT),
+            SNMPD_ADDRESS,
+            SNMP_SYSTEM_OID,
+        ),
+        (
+            "-v3",
+            "--command",
+            "GETNEXT",
+            "-u",
+            "invalid",
+            "-p",
+            str(SNMPD_PORT),
+            SNMPD_ADDRESS,
+            SNMP_SYSTEM_OID,
+        ),
+        # GETBULK
+        (
+            "-v2c",
+            "--command",
+            "GETBULK",
+            "-c",
+            "invalid",
+            "-p",
+            str(SNMPD_PORT),
+            SNMPD_ADDRESS,
+            SNMP_SYSTEM_OID,
+        ),
+        (
+            "-v3",
+            "--command",
+            "GETBULK",
+            "-u",
+            "invalid",
+            "-p",
+            str(SNMPD_PORT),
+            SNMPD_ADDRESS,
+            SNMP_SYSTEM_OID,
+        ),
+    ],
+    ids=[
+        "get-v2c",
+        "get-v3",
+        "getmany-v2c",
+        "getmany-v3",
+        "getnext-v2c",
+        "getnext-v3",
+        "getbulk-v2c",
+        "getbulk-v3",
+    ],
+)
+def test_auth_error(args: List[str]) -> None:
+    with pytest.raises(SystemExit):
+        main(args)
