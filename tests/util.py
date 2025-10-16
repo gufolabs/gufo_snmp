@@ -72,6 +72,7 @@ AUTO_V = [{"community": SNMP_COMMUNITY}, {"user": SNMP_USERS[0]}]
 
 ALL = V1 + V2 + V3 + AUTO_V
 
+SNMP_SYSTEM_OID = "1.3.6.1.2.1.1"
 SNMP_LOCATION_OID = "1.3.6.1.2.1.1.6.0"
 SNMP_CONTACT_OID = "1.3.6.1.2.1.1.4.0"
 

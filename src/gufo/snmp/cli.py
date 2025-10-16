@@ -16,10 +16,20 @@ import argparse
 import re
 import sys
 from enum import Enum, IntEnum
-from typing import Any, List, NoReturn, Optional, Sequence, Union, cast
+from operator import itemgetter
+from typing import (
+    Any,
+    Callable,
+    List,
+    NoReturn,
+    Optional,
+    Sequence,
+    Union,
+    cast,
+)
 
 # Gufo SNMP modules
-from gufo.snmp import SnmpVersion, User
+from gufo.snmp import SnmpVersion, User, ValueType
 from gufo.snmp.sync_client import SnmpSession
 
 NAME = "gufo-snmp"
@@ -94,7 +104,20 @@ class Formatter(object):
     ) -> None:
         self.show_key = show_key
         self.sep = sep
-        self._format_str = getattr(self, f"_format_str_{str_format.value}")
+        self._format_str: Callable[[ValueType], str] = getattr(
+            self, f"_format_str_{str_format.value}"
+        )
+
+    @classmethod
+    def validate(cls, parser: argparse.ArgumentParser, opts: str) -> None:
+        """Check options."""
+        if not opts:
+            return
+        invalid = list(set(opts) - set(OFLAGS_HELP))
+        if len(invalid) == 1:
+            parser.error(f"Invalid format option: {invalid[0]}")
+        elif len(invalid) > 1:
+            parser.error(f"Invalid format options: {', '.join(invalid)}")
 
     @classmethod
     def from_opts(cls, opts: str) -> "Formatter":
@@ -118,7 +141,7 @@ class Formatter(object):
                 sep = ""
         return Formatter(show_key=show_key, sep=sep, str_format=str_format)
 
-    def format_value(self, value: Union[None, int, float, bytes, str]) -> str:
+    def format_value(self, value: ValueType) -> str:
         """Format value."""
         if value is None:
             return "null"
@@ -130,9 +153,7 @@ class Formatter(object):
             return self._format_str(value)
         return self._format_str_repr(value)
 
-    def format(
-        self, oid: str, value: Union[None, int, float, bytes, str]
-    ) -> str:
+    def format(self, oid: str, value: ValueType) -> str:
         """Format line."""
         v = self.format_value(value)
         return f"{oid if self.show_key else ''}{self.sep}{v}"
@@ -232,7 +253,11 @@ class Cli(object):
             Parsed namespace.
         """
         # Prepare parser
-        parser = argparse.ArgumentParser(prog=NAME, description="SNMP Client")
+        parser = argparse.ArgumentParser(
+            prog=NAME,
+            description="SNMP Client",
+            formatter_class=argparse.RawTextHelpFormatter,
+        )
         parser.add_argument("address", nargs=1, help="Agent")
         parser.add_argument("oids", nargs=argparse.REMAINDER, help="OIDs")
         # Protocol version
@@ -298,6 +323,9 @@ class Cli(object):
             if not cls.is_valid_oid(oid):
                 parser.error(f"Invalid OID: {oid}")
         # Additional checks
+        Formatter.validate(parser, ns.oflags)
+        if ns.version == "v1" and ns.command == "GETBULK":
+            parser.error("GETBULK is not defined for SNMPv1")
         if ns.version in ("v1", "v2c"):
             cls._validate_community(parser, ns)
         elif ns.version == "v3":
@@ -443,6 +471,12 @@ class Cli(object):
         with self.get_session(ns) as session:
             if cmd == Command.GET:
                 return self.run_get(session, ns.oids, formatter)
+            if cmd == Command.GETMANY:
+                return self.run_get_many(session, ns.oids, formatter)
+            if cmd == Command.GETNEXT:
+                return self.run_getnext(session, ns.oids, formatter)
+            if cmd == Command.GETBULK:
+                return self.run_getbulk(session, ns.oids, formatter)
             return ExitCode.ERR
 
     def run_get(
@@ -459,6 +493,54 @@ class Cli(object):
         oid = oids[0]
         r = session.get(oid)
         print(formatter.format(oid, r))
+        return ExitCode.OK
+
+    def run_get_many(
+        self, session: SnmpSession, oids: List[str], formatter: Formatter
+    ) -> ExitCode:
+        """
+        Perform multi-value GET request.
+
+        Args:
+            session: Configured session.
+            oids: List of oids.
+            formatter: Formatter instance.
+        """
+        r = session.get_many(oids)
+        for k, v in sorted(r.items(), key=itemgetter(0)):
+            print(formatter.format(k, v))
+        return ExitCode.OK
+
+    def run_getnext(
+        self, session: SnmpSession, oids: List[str], formatter: Formatter
+    ) -> ExitCode:
+        """
+        Perform GETNEXT.
+
+        Args:
+            session: Configured session.
+            oids: List of oids.
+            formatter: Formatter instance.
+        """
+        for oid in oids:
+            for k, v in session.getnext(oid):
+                print(formatter.format(k, v))
+        return ExitCode.OK
+
+    def run_getbulk(
+        self, session: SnmpSession, oids: List[str], formatter: Formatter
+    ) -> ExitCode:
+        """
+        Perform GETBULK.
+
+        Args:
+            session: Configured session.
+            oids: List of oids.
+            formatter: Formatter instance.
+        """
+        for oid in oids:
+            for k, v in session.getbulk(oid):
+                print(formatter.format(k, v))
         return ExitCode.OK
 
 
