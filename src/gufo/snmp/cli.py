@@ -38,6 +38,7 @@ from gufo.snmp import (
     DesKey,
     Md5Key,
     Sha1Key,
+    SnmpAuthError,
     SnmpVersion,
     User,
     ValueType,
@@ -532,6 +533,7 @@ class Cli(object):
             version=version,
             community=community,
             user=user,
+            timeout=3.0,
         )
 
     def run(self, args: List[str]) -> ExitCode:
@@ -559,6 +561,8 @@ class Cli(object):
                 return ExitCode.ERR
         except TimeoutError:
             self.die("ERROR: Timed out")
+        except SnmpAuthError:
+            self.die("ERROR: Authentication failed")
 
     def run_get(
         self, session: SnmpSession, oids: List[str], formatter: Formatter

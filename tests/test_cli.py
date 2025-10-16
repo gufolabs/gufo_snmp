@@ -643,6 +643,6 @@ def test_get_table(
         "getbulk-v3",
     ],
 )
-def test_auth_error(args: List[str]) -> None:
+def test_auth_error(args: List[str], snmpd: Snmpd) -> None:
     with pytest.raises(SystemExit):
         main(args)
