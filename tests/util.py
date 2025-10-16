@@ -34,6 +34,9 @@ SNMPD_PATH = "/usr/sbin/snmpd"
 SNMP_COMMUNITY = "public"
 SNMP_LOCATION = "Gufo SNMP Test"
 SNMP_CONTACT = "test <test@example.com>"
+SNMP_SYSTEM_OID = "1.3.6.1.2.1.1"
+SNMP_LOCATION_OID = "1.3.6.1.2.1.1.6.0"
+SNMP_CONTACT_OID = "1.3.6.1.2.1.1.4.0"
 
 
 # User name is defined as:
@@ -136,12 +139,7 @@ V1 = [{"version": SnmpVersion.v1, "community": SNMP_COMMUNITY}]
 V2 = [{"version": SnmpVersion.v2c, "community": SNMP_COMMUNITY}]
 V3 = [{"version": SnmpVersion.v3, "user": u} for u in SNMP_USERS]
 AUTO_V = [{"community": SNMP_COMMUNITY}, {"user": SNMP_USERS[0]}]
-
 ALL = V1 + V2 + V3 + AUTO_V
-
-SNMP_SYSTEM_OID = "1.3.6.1.2.1.1"
-SNMP_LOCATION_OID = "1.3.6.1.2.1.1.6.0"
-SNMP_CONTACT_OID = "1.3.6.1.2.1.1.4.0"
 
 
 def ids(x: Any) -> str:

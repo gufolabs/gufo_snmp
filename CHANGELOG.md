@@ -15,6 +15,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 ### Added
 
 * Python 3.14 support.
+* gufo-snmp command utility.
 
 ### Infrastructure
 
