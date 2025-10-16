@@ -15,14 +15,12 @@ Attributes:
 import argparse
 import re
 import sys
-from contextlib import contextmanager
 from enum import Enum, IntEnum
 from operator import itemgetter
 from typing import (
     Any,
     Callable,
     Dict,
-    Iterator,
     List,
     NoReturn,
     Optional,

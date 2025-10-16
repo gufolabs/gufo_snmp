@@ -36,6 +36,7 @@ def user_opts(name: str, oid: str) -> List[str]:
 
     Args:
         name: user name.
+        oid: Requested oid
 
     Returns:
         user authentication cli options.
