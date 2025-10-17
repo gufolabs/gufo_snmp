@@ -32,7 +32,7 @@ from .user import (
 )
 from .version import SnmpVersion
 
-__version__: str = "0.9.2"
+__version__: str = "0.10.0"
 __all__ = [
     "Aes128Key",
     "BaseAuthKey",

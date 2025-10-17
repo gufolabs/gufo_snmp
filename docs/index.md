@@ -94,6 +94,13 @@ async with Snmpd(), SnmpSession(addr="127.0.0.1", port=10161) as session:
     r = await session.get("1.3.6.1.2.1.1.3.0")
 ```
 
+The `gufo-snmp` command-line utility, closely resembling the Net-SNMP tools, is also provided.
+
+``` shell
+gufo-snmp -v2c -c public 127.0.0.1 1.3.6.1.2.1.1.6.0
+1.3.6.1.2.1.1.6.0 = Gufo SNMP Test
+```
+
 ## Features
 
 * Clean async and blocking API.
