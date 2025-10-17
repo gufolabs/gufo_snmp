@@ -148,6 +148,7 @@ engineId {self._cfg_engine_id}
 # Listen address
 # SNMPv1/SNMPv2c R/O community
 rocommunity {self._community} 127.0.0.1
+rocommunity {self._community} ::1
 # SNMPv3 R/O User
 {rousers}
 {create_users}
