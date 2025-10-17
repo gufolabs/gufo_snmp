@@ -1,6 +1,9 @@
 name: Check vulnerabilities
 on:
   workflow_dispatch: # allows running manually
+permissions:
+  contents: read
+  pull-requests: write
 jobs:
   safety:
     name: Run Safety CLI checks
