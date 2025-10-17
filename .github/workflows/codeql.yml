@@ -6,6 +6,8 @@ on:
     branches: ["master"]
     paths: &on-paths
       - ".github/workflows/*"
+      - "pyproject.toml"
+      - "Cargo.toml"
       - "src/**"
   pull_request:
     branches: ["master"]
