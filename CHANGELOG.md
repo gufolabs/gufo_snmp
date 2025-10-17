@@ -25,6 +25,8 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 * Pytest 8.4.2
 * IPython 9.6.0
 * Codecov integration.
+* socket2 0.6
+* nom 0.8
 
 ## 0.9.1 - 2025-09-23
 
