@@ -574,16 +574,20 @@ def test_get_table(
     [
         # GET
         pytest.param(
-            "-v2c",
-            "--command",
-            "GET",
-            "-c",
-            "invalid",
-            "-p",
-            str(SNMPD_PORT),
-            SNMPD_ADDRESS,
-            SNMP_LOCATION_OID,
-            marks=pytest.mark.skipif(IS_DARWIN),
+            (
+                "-v2c",
+                "--command",
+                "GET",
+                "-c",
+                "invalid",
+                "-p",
+                str(SNMPD_PORT),
+                SNMPD_ADDRESS,
+                SNMP_LOCATION_OID,
+            ),
+            marks=pytest.mark.skipif(
+                IS_DARWIN, reason="Temporary disabled on MacOS"
+            ),
         ),
         (
             "-v3",
@@ -598,17 +602,21 @@ def test_get_table(
         ),
         # GET MANY
         pytest.param(
-            "-v2c",
-            "--command",
-            "GET",
-            "-c",
-            "invalid",
-            "-p",
-            str(SNMPD_PORT),
-            SNMPD_ADDRESS,
-            SNMP_LOCATION_OID,
-            SNMP_CONTACT_OID,
-            marks=pytest.mark.skipif(IS_DARWIN),
+            (
+                "-v2c",
+                "--command",
+                "GET",
+                "-c",
+                "invalid",
+                "-p",
+                str(SNMPD_PORT),
+                SNMPD_ADDRESS,
+                SNMP_LOCATION_OID,
+                SNMP_CONTACT_OID,
+            ),
+            marks=pytest.mark.skipif(
+                IS_DARWIN, reason="Temporary disabled on MacOS"
+            ),
         ),
         (
             "-v3",
@@ -624,16 +632,20 @@ def test_get_table(
         ),
         # GETNEXT
         pytest.param(
-            "-v2c",
-            "--command",
-            "GETNEXT",
-            "-c",
-            "invalid",
-            "-p",
-            str(SNMPD_PORT),
-            SNMPD_ADDRESS,
-            SNMP_SYSTEM_OID,
-            marks=pytest.mark.skipif(IS_DARWIN),
+            (
+                "-v2c",
+                "--command",
+                "GETNEXT",
+                "-c",
+                "invalid",
+                "-p",
+                str(SNMPD_PORT),
+                SNMPD_ADDRESS,
+                SNMP_SYSTEM_OID,
+            ),
+            marks=pytest.mark.skipif(
+                IS_DARWIN, reason="Temporary disabled on MacOS"
+            ),
         ),
         (
             "-v3",
@@ -648,16 +660,20 @@ def test_get_table(
         ),
         # GETBULK
         pytest.param(
-            "-v2c",
-            "--command",
-            "GETBULK",
-            "-c",
-            "invalid",
-            "-p",
-            str(SNMPD_PORT),
-            SNMPD_ADDRESS,
-            SNMP_SYSTEM_OID,
-            marks=pytest.mark.skipif(IS_DARWIN),
+            (
+                "-v2c",
+                "--command",
+                "GETBULK",
+                "-c",
+                "invalid",
+                "-p",
+                str(SNMPD_PORT),
+                SNMPD_ADDRESS,
+                SNMP_SYSTEM_OID,
+            ),
+            marks=pytest.mark.skipif(
+                IS_DARWIN, reason="Temporary disabled on MacOS"
+            ),
         ),
         (
             "-v3",
