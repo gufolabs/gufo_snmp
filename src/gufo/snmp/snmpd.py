@@ -141,13 +141,14 @@ class Snmpd(object):
         create_users = "\n".join(u.snmpd_create_user for u in self._users)
         return f"""# Gufo SNMP Test Suite
 master agentx
+# Listen address
 agentaddress udp:{self._address}:{self._port}
 agentXsocket tcp:{self._address}:{self._port}
 # SNMPv3 engine id
 engineId {self._cfg_engine_id}
-# Listen address
 # SNMPv1/SNMPv2c R/O community
-rocommunity {self._community} 127.0.0.1
+rocommunity {self._community} 127.0.0.1 .1.3.6
+rocommunity6 {self._community} ::1 .1.3.6
 # SNMPv3 R/O User
 {rousers}
 {create_users}
@@ -156,9 +157,6 @@ syslocation {self._location}
 syscontact  {self._contact}
 #
 sysServices 72"""
-
-    # @todo: createUser
-    # http://www.net-snmp.org/docs/man/snmpd.conf.html
 
     def _start(self: "Snmpd") -> None:
         """Run snmpd instance."""
