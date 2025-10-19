@@ -17,10 +17,6 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 * Python 3.14 support.
 * gufo-snmp command utility.
 
-### Fixed
-
-* `Snmpd` on darwin doesn't check community on `::1`.
-
 ### Infrastructure
 
 * Use python:3.14-slim-trixie for devcontainer.
