@@ -21,7 +21,7 @@ pub type Tag = u8;
 // pub const TAG_END_OF_CONTENTS: Tag = 0x0;
 pub const TAG_BOOL: Tag = 0x1;
 pub const TAG_INT: Tag = 0x2;
-// pub const TAG_BIT_STRING: Tag = 0x3;
+pub const TAG_BIT_STRING: Tag = 0x3;
 pub const TAG_OCTET_STRING: Tag = 0x4;
 pub const TAG_NULL: Tag = 0x5;
 pub const TAG_OBJECT_ID: Tag = 0x6;
@@ -45,6 +45,8 @@ pub const TAG_CTX_END_OF_MIB_VIEW: Tag = 2;
 
 pub mod header;
 pub use header::BerHeader;
+pub mod bitstring;
+pub use bitstring::SnmpBitString;
 pub mod r#bool;
 pub use r#bool::SnmpBool;
 pub mod r#int;

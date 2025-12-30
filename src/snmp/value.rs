@@ -6,12 +6,13 @@
 // ------------------------------------------------------------------------
 
 use crate::ber::{
-    BerClass, BerDecoder, BerHeader, SnmpBool, SnmpCounter32, SnmpCounter64, SnmpGauge32, SnmpInt,
-    SnmpIpAddress, SnmpNull, SnmpObjectDescriptor, SnmpOctetString, SnmpOid, SnmpOpaque, SnmpReal,
-    SnmpTimeTicks, SnmpUInteger32, TAG_APP_COUNTER32, TAG_APP_COUNTER64, TAG_APP_GAUGE32,
-    TAG_APP_IPADDRESS, TAG_APP_OPAQUE, TAG_APP_TIMETICKS, TAG_APP_UINTEGER32, TAG_BOOL,
-    TAG_CTX_END_OF_MIB_VIEW, TAG_CTX_NO_SUCH_INSTANCE, TAG_CTX_NO_SUCH_OBJECT, TAG_INT, TAG_NULL,
-    TAG_OBJECT_DESCRIPTOR, TAG_OBJECT_ID, TAG_OCTET_STRING, TAG_REAL,
+    BerClass, BerDecoder, BerHeader, SnmpBitString, SnmpBool, SnmpCounter32, SnmpCounter64,
+    SnmpGauge32, SnmpInt, SnmpIpAddress, SnmpNull, SnmpObjectDescriptor, SnmpOctetString, SnmpOid,
+    SnmpOpaque, SnmpReal, SnmpTimeTicks, SnmpUInteger32, TAG_APP_COUNTER32, TAG_APP_COUNTER64,
+    TAG_APP_GAUGE32, TAG_APP_IPADDRESS, TAG_APP_OPAQUE, TAG_APP_TIMETICKS, TAG_APP_UINTEGER32,
+    TAG_BIT_STRING, TAG_BOOL, TAG_CTX_END_OF_MIB_VIEW, TAG_CTX_NO_SUCH_INSTANCE,
+    TAG_CTX_NO_SUCH_OBJECT, TAG_INT, TAG_NULL, TAG_OBJECT_DESCRIPTOR, TAG_OBJECT_ID,
+    TAG_OCTET_STRING, TAG_REAL,
 };
 use crate::error::SnmpError;
 use nom::{Err, IResult};
@@ -21,6 +22,7 @@ pub enum SnmpValue<'a> {
     Bool(SnmpBool),
     Int(SnmpInt),
     Null,
+    BitString(SnmpBitString),
     OctetString(SnmpOctetString<'a>),
     Oid(SnmpOid<'a>),
     ObjectDescriptor(SnmpObjectDescriptor<'a>),
@@ -47,7 +49,7 @@ impl SnmpValue<'_> {
                     // @todo: TAG_END_OF_CONTENTS
                     TAG_BOOL => SnmpValue::Bool(SnmpBool::decode(tail, &hdr)?),
                     TAG_INT => SnmpValue::Int(SnmpInt::decode(tail, &hdr)?),
-                    // @todo: TAG_BIT_STRING
+                    TAG_BIT_STRING => SnmpValue::BitString(SnmpBitString::decode(tail, &hdr)?),
                     TAG_OCTET_STRING => {
                         SnmpValue::OctetString(SnmpOctetString::decode(tail, &hdr)?)
                     }
@@ -130,6 +132,7 @@ impl<'py> IntoPyObject<'py> for &SnmpValue<'_> {
             SnmpValue::Bool(x) => x.into_pyobject(py)?,
             SnmpValue::Int(x) => x.into_pyobject(py)?,
             SnmpValue::Null => todo!("None"),
+            SnmpValue::BitString(x) => x.into_pyobject(py)?,
             SnmpValue::OctetString(x) => x.into_pyobject(py)?,
             SnmpValue::Oid(x) => x.into_pyobject(py)?,
             SnmpValue::ObjectDescriptor(x) => x.into_pyobject(py)?,
@@ -186,6 +189,20 @@ mod tests {
         let (tail, value) = SnmpValue::from_ber(&data)?;
         assert_eq!(tail.len(), 0);
         if let SnmpValue::Null = value {
+            Ok(())
+        } else {
+            Err(SnmpError::UnexpectedTag)
+        }
+    }
+
+    #[test]
+    fn test_bit_string() -> SnmpResult<()> {
+        let data = [3, 7, 0x04, 0x0A, 0x3B, 0x5F, 0x29, 0x1C, 0xD0];
+        let (tail, value) = SnmpValue::from_ber(&data)?;
+        assert_eq!(tail.len(), 0);
+        if let SnmpValue::BitString(x) = value {
+            let v: u64 = x.into();
+            assert_eq!(v, 0x0A3B5F291CD);
             Ok(())
         } else {
             Err(SnmpError::UnexpectedTag)
