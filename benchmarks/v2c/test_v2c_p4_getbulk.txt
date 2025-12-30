@@ -1,0 +1,23 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.2, pytest-8.3.3, pluggy-1.5.0
+benchmark: 5.1.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=50 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /workspaces/gufo_snmp
+configfile: pyproject.toml
+plugins: benchmark-5.1.0
+collected 3 items
+
+benchmarks/test_v2c_p4_getbulk.py ...                                    [100%]
+
+
+----------------------------------------------------------------------------------------- benchmark: 3 tests ----------------------------------------------------------------------------------------
+Name (time in ms)               Min                   Max                  Mean             StdDev                Median                IQR            Outliers     OPS            Rounds  Iterations
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_gufo_snmp_sync        150.5068 (1.0)        161.4152 (1.0)        155.5240 (1.0)       1.7776 (1.0)        155.5074 (1.0)       1.8687 (1.0)          10;2  6.4299 (1.0)          50           1
+test_gufo_snmp_async       171.8042 (1.14)       193.7454 (1.20)       184.5445 (1.19)      3.9756 (2.24)       185.2006 (1.19)      3.8316 (2.05)         12;4  5.4187 (0.84)         50           1
+test_pysnmp_async        2,203.8696 (14.64)    2,304.7855 (14.28)    2,242.9824 (14.42)    22.8359 (12.85)    2,237.4564 (14.39)    31.9016 (17.07)        12;0  0.4458 (0.07)         50           1
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Legend:
+  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
+  OPS: Operations Per Second, computed as 1 / Mean
+======================== 3 passed in 135.41s (0:02:15) =========================

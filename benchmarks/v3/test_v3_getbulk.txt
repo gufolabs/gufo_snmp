@@ -1,0 +1,33 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.2, pytest-8.3.3, pluggy-1.5.0
+benchmark: 5.1.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=50 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /workspaces/gufo_snmp
+configfile: pyproject.toml
+plugins: benchmark-5.1.0
+collected 3 items
+
+benchmarks/test_v3_getbulk.py ...                                        [100%]
+
+=============================== warnings summary ===============================
+benchmarks/test_v3_getbulk.py: 1248 warnings
+  /usr/local/lib/python3.13/site-packages/pysnmp/smi/mibs/SNMPv2-SMI.py:1259: DeprecationWarning: isFixedLength is deprecated. Please use is_fixed_length instead.
+    if impliedFlag or obj.isFixedLength():
+
+benchmarks/test_v3_getbulk.py: 2808 warnings
+  /usr/local/lib/python3.13/site-packages/pysnmp/smi/mibs/SNMPv2-SMI.py:1231: DeprecationWarning: isFixedLength is deprecated. Please use is_fixed_length instead.
+    elif obj.isFixedLength():
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+------------------------------------------------------------------------------------ benchmark: 3 tests ------------------------------------------------------------------------------------
+Name (time in ms)             Min                 Max                Mean            StdDev              Median               IQR            Outliers      OPS            Rounds  Iterations
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_gufo_snmp_sync       41.6209 (1.0)       52.5063 (1.0)       48.3213 (1.0)      3.2135 (1.69)      49.4517 (1.0)      3.1033 (2.40)         15;7  20.6948 (1.0)          50           1
+test_gufo_snmp_async      50.4980 (1.21)      59.5947 (1.13)      55.8961 (1.16)     1.8984 (1.0)       55.8032 (1.13)     1.2932 (1.0)         14;11  17.8904 (0.86)         50           1
+test_pysnmp_async        635.4062 (15.27)    665.9244 (12.68)    647.6706 (13.40)    5.6292 (2.97)     647.6818 (13.10)    6.8157 (5.27)         15;1   1.5440 (0.07)         50           1
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Legend:
+  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
+  OPS: Operations Per Second, computed as 1 / Mean
+====================== 3 passed, 4056 warnings in 40.18s =======================
