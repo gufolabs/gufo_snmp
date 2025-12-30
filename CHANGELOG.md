@@ -12,7 +12,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ## [Unreleased]
 
-### Added
+### 0.11.0 - 2025-12-30
 
 * BIT STRING support
 
