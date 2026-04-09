@@ -9,7 +9,7 @@ The currently supported types are:
 | ----------------- | ----------- | ------: | ---: | -------------------- | ------------------------------ |
 | BOOLEAN           | Universal   |       P |    1 | bool                 | [X.690][X-690] pp 8.1          |
 | INTEGER           | Universal   |       P |    2 | int                  | [X.690][X-690] pp 8.2          |
-| BITSTRING         | Universal   |     P/C |    3 | :material-close:     | [X.690][X-690] pp 8.6          |
+| BITSTRING         | Universal   |     P/C |    3 | int                  | [X.690][X-690] pp 8.6          |
 | OCTETSTRING       | Universal   |       P |    4 | bytes                | [X.690][X-690] pp 8.7          |
 | NULL              | Universal   |       P |    5 | :material-close:     | [X.690][X-690] pp 8.8          |
 | OBJECT IDENTIFIER | Universal   |       P |    6 | str                  | [X.690][X-690] pp 8.19         |
