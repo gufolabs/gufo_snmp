@@ -30,6 +30,8 @@ impl<'a> PyOp<'a, PyBackedStr> for OpGet {
     ) -> PyResult<Bound<'py, PyAny>> {
         match pdu {
             SnmpPdu::GetResponse(resp) => {
+                // Check for errors
+                resp.check_error()?;
                 // Check varbinds size
                 match resp.vars.len() {
                     // Empty response, return None

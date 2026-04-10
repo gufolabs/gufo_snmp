@@ -12,6 +12,10 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ## [Unreleased]
 
+### Changed
+
+* Raise SnmpAuthError when error status set to proper code.
+
 ### Infrastructure
 
 * Rust 1.94.1

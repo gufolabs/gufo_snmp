@@ -1,10 +1,11 @@
 // ------------------------------------------------------------------------
 // Gufo SNMP: GETRESPONSE PDU Parser
 // ------------------------------------------------------------------------
-// Copyright (C) 2023, Gufo Labs
+// Copyright (C) 2023-26, Gufo Labs
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
+use super::ERR_AUTHORIZATION_ERROR;
 use super::value::SnmpValue;
 use crate::ber::{
     BerDecoder, SnmpInt, SnmpOid, SnmpRelativeOid, SnmpSequence, TAG_OBJECT_ID, TAG_RELATIVE_OID,
@@ -15,8 +16,8 @@ use crate::error::SnmpError;
 #[allow(dead_code)]
 pub struct SnmpGetResponse<'a> {
     pub(crate) request_id: i64,
-    pub(crate) error_status: i64,
-    pub(crate) error_index: i64,
+    pub(crate) error_status: u8,
+    pub(crate) error_index: u8,
     pub(crate) vars: Vec<SnmpVar<'a>>,
 }
 
@@ -74,5 +75,14 @@ impl<'a> TryFrom<&'a [u8]> for SnmpGetResponse<'a> {
             error_index: error_index.into(),
             vars,
         })
+    }
+}
+
+impl<'a> SnmpGetResponse<'a> {
+    pub fn check_error(&self) -> Result<(), SnmpError> {
+        match self.error_status {
+            ERR_AUTHORIZATION_ERROR => Err(SnmpError::AuthenticationFailed),
+            _ => Ok(()),
+        }
     }
 }

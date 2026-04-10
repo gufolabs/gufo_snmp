@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo Labs: Test Gufo SNMP sync client
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-24, Gufo Labs
+# Copyright (C) 2023-26, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -12,7 +12,7 @@ from typing import Any, Dict, Optional, cast
 import pytest
 
 # Gufo Labs modules
-from gufo.snmp import NoSuchInstance, ValueType
+from gufo.snmp import NoSuchInstance, SnmpAuthError, ValueType
 from gufo.snmp.snmpd import Snmpd
 from gufo.snmp.sync_client import SnmpSession
 
@@ -24,6 +24,7 @@ from .util import (
     SNMP_LOCATION_OID,
     SNMPD_ADDRESS,
     SNMPD_PORT,
+    UNAUTH_V3_USER,
     V1,
     V2,
     V3,
@@ -345,3 +346,16 @@ def test_shift(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
                 session.get(SNMP_CONTACT_OID)
             y = session.get(SNMP_LOCATION_OID)
             assert y.decode() == SNMP_LOCATION
+
+
+def test_auth_error() -> None:
+    with (
+        SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            timeout=1.0,
+            user=UNAUTH_V3_USER,
+        ) as session,
+        pytest.raises(SnmpAuthError),
+    ):
+        session.get(SNMP_LOCATION_OID)

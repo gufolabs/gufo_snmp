@@ -13,7 +13,7 @@ from typing import Any, Dict, Optional, cast
 import pytest
 
 # Gufo Labs modules
-from gufo.snmp import NoSuchInstance, ValueType
+from gufo.snmp import NoSuchInstance, SnmpAuthError, ValueType
 from gufo.snmp.async_client import SnmpSession
 from gufo.snmp.snmpd import Snmpd
 
@@ -21,8 +21,10 @@ from .util import (
     ALL,
     SNMP_CONTACT,
     SNMP_LOCATION,
+    SNMP_LOCATION_OID,
     SNMPD_ADDRESS,
     SNMPD_PORT,
+    UNAUTH_V3_USER,
     V1,
     V2,
     V3,
@@ -405,3 +407,17 @@ def test_get_engine_id(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
 
     r = asyncio.run(inner())
     assert r == snmpd.engine_id
+
+
+def test_auth_error() -> None:
+    async def inner() -> None:
+        async with SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            timeout=1.0,
+            user=UNAUTH_V3_USER,
+        ) as session:
+            with pytest.raises(SnmpAuthError):
+                await session.get(SNMP_LOCATION_OID)
+
+    asyncio.run(inner())
