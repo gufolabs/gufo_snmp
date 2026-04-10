@@ -9,7 +9,6 @@ set -e
 
 # Define all valid builds
 VALID_IMAGES="
-manylinux2014_x86_64
 manylinux_2_28_x86_64
 manylinux_2_28_aarch64
 musllinux_1_2_x86_64
