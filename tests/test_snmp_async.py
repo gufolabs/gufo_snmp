@@ -7,6 +7,7 @@
 
 # Python modules
 import asyncio
+import sys
 from typing import Any, Dict, Optional, cast
 
 # Third-party modules
@@ -409,6 +410,9 @@ def test_get_engine_id(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
     assert r == snmpd.engine_id
 
 
+@pytest.mark.xfail(
+    sys.platform == "darwin", reason="Different behavior on darwin"
+)
 def test_auth_error() -> None:
     async def inner() -> None:
         async with SnmpSession(

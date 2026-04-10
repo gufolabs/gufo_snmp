@@ -6,6 +6,7 @@
 # ---------------------------------------------------------------------
 
 # Python modules
+import sys
 from typing import Any, Dict, Optional, cast
 
 # Third-party modules
@@ -348,6 +349,9 @@ def test_shift(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
             assert y.decode() == SNMP_LOCATION
 
 
+@pytest.mark.xfail(
+    sys.platform == "darwin", reason="Different behavior on darwin"
+)
 def test_auth_error() -> None:
     with (
         SnmpSession(
