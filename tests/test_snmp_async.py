@@ -23,6 +23,7 @@ from .util import (
     SNMP_CONTACT,
     SNMP_LOCATION,
     SNMP_LOCATION_OID,
+    SNMP_SYSTEM_OID,
     SNMPD_ADDRESS,
     SNMPD_PORT,
     UNAUTH_V3_USER,
@@ -413,7 +414,7 @@ def test_get_engine_id(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
 @pytest.mark.xfail(
     sys.platform == "darwin", reason="Different behavior on darwin"
 )
-def test_auth_error() -> None:
+def test_get_auth_error() -> None:
     async def inner() -> None:
         async with SnmpSession(
             addr=SNMPD_ADDRESS,
@@ -423,5 +424,22 @@ def test_auth_error() -> None:
         ) as session:
             with pytest.raises(SnmpAuthError):
                 await session.get(SNMP_LOCATION_OID)
+
+    asyncio.run(inner())
+
+
+@pytest.mark.xfail(
+    sys.platform == "darwin", reason="Different behavior on darwin"
+)
+def test_getmany_auth_error() -> None:
+    async def inner() -> None:
+        async with SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            timeout=1.0,
+            user=UNAUTH_V3_USER,
+        ) as session:
+            with pytest.raises(SnmpAuthError):
+                await session.get_many([SNMP_LOCATION_OID, SNMP_SYSTEM_OID])
 
     asyncio.run(inner())
