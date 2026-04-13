@@ -1,18 +1,19 @@
 # ---------------------------------------------------------------------
 # Gufo Labs: Test Gufo SNMP sync client
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-24, Gufo Labs
+# Copyright (C) 2023-26, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
 # Python modules
+import sys
 from typing import Any, Dict, Optional, cast
 
 # Third-party modules
 import pytest
 
 # Gufo Labs modules
-from gufo.snmp import NoSuchInstance, ValueType
+from gufo.snmp import NoSuchInstance, SnmpAuthError, ValueType
 from gufo.snmp.snmpd import Snmpd
 from gufo.snmp.sync_client import SnmpSession
 
@@ -22,8 +23,10 @@ from .util import (
     SNMP_CONTACT_OID,
     SNMP_LOCATION,
     SNMP_LOCATION_OID,
+    SNMP_SYSTEM_OID,
     SNMPD_ADDRESS,
     SNMPD_PORT,
+    UNAUTH_V3_USER,
     V1,
     V2,
     V3,
@@ -345,3 +348,35 @@ def test_shift(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
                 session.get(SNMP_CONTACT_OID)
             y = session.get(SNMP_LOCATION_OID)
             assert y.decode() == SNMP_LOCATION
+
+
+@pytest.mark.xfail(
+    sys.platform == "darwin", reason="Different behavior on darwin"
+)
+def test_get_auth_error() -> None:
+    with (
+        SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            timeout=1.0,
+            user=UNAUTH_V3_USER,
+        ) as session,
+        pytest.raises(SnmpAuthError),
+    ):
+        session.get(SNMP_LOCATION_OID)
+
+
+@pytest.mark.xfail(
+    sys.platform == "darwin", reason="Different behavior on darwin"
+)
+def test_getmany_auth_error() -> None:
+    with (
+        SnmpSession(
+            addr=SNMPD_ADDRESS,
+            port=SNMPD_PORT,
+            timeout=1.0,
+            user=UNAUTH_V3_USER,
+        ) as session,
+        pytest.raises(SnmpAuthError),
+    ):
+        session.get_many([SNMP_LOCATION_OID, SNMP_SYSTEM_OID])

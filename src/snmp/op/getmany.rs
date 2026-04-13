@@ -31,6 +31,8 @@ impl<'a> PyOp<'a, Vec<PyBackedStr>> for OpGetMany {
     ) -> PyResult<Bound<'py, PyAny>> {
         match pdu {
             SnmpPdu::GetResponse(resp) => {
+                // Check for errors
+                resp.check_error()?;
                 // Build resulting dict
                 let dict = PyDict::new(py);
                 for var in resp.vars.iter() {

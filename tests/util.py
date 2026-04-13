@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: User definitions and test utilities.
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-24, Gufo Labs
+# Copyright (C) 2023-26, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -140,6 +140,7 @@ V2 = [{"version": SnmpVersion.v2c, "community": SNMP_COMMUNITY}]
 V3 = [{"version": SnmpVersion.v3, "user": u} for u in SNMP_USERS]
 AUTO_V = [{"community": SNMP_COMMUNITY}, {"user": SNMP_USERS[0]}]
 ALL = V1 + V2 + V3 + AUTO_V
+UNAUTH_V3_USER = User(name="user2121")
 
 
 def ids(x: Any) -> str:

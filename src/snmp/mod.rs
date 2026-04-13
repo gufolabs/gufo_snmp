@@ -19,6 +19,8 @@ const PDU_GET_RESPONSE: Tag = 2;
 const PDU_GET_BULK_REQUEST: Tag = 5;
 const PDU_REPORT: Tag = 8;
 
+const ERR_AUTHORIZATION_ERROR: u8 = 16;
+
 pub mod get;
 pub mod getbulk;
 pub mod getresponse;
