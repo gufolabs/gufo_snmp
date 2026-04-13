@@ -10,7 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 To see unreleased changes, please see the [CHANGELOG on the main branch guide](https://github.com/gufolabs/gufo_snmp/blob/main/CHANGELOG.md).
 
-## [Unreleased]
+## 0.12.0 - 2026-04-13
+
+### Changed
+
+* Raise SnmpAuthError when error status set to proper code.
 
 ### Changed
 
