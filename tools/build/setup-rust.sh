@@ -8,7 +8,7 @@
 set -x
 set -e
 
-RUST_VERSION=${RUST_VERSION:-1.94.1}
+RUST_VERSION=${RUST_VERSION:-1.98.1}
 
 # @todo: Allow override
 export RUSTUP_HOME=${RUSTUP_HOME:-/usr/local/rustup}
