@@ -5,6 +5,7 @@
 [![PyPi version](https://img.shields.io/pypi/v/gufo_snmp.svg)](https://pypi.python.org/pypi/gufo_snmp/)
 ![Downloads](https://img.shields.io/pypi/dw/gufo_snmp)
 ![Python Versions](https://img.shields.io/pypi/pyversions/gufo_snmp)
+[![Discord](https://img.shields.io/discord/1545437404159156304?label=Discord&logo=discord&logoColor=white)](https://discord.gg/D8FWC8Q5R)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 ![Build](https://img.shields.io/github/actions/workflow/status/gufolabs/gufo_snmp/tests.yml?branch=master)
 [![codecov](https://codecov.io/gh/gufolabs/gufo_snmp/graph/badge.svg?token=QZ2OBDX4H2)](https://codecov.io/gh/gufolabs/gufo_snmp)
