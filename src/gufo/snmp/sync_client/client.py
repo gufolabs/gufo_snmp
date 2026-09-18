@@ -21,6 +21,7 @@ from ..policer import BasePolicer, RPSPolicer
 from ..protocol import SnmpClientSocketProtocol
 from ..typing import ValueType
 from ..user import User
+from ..utils import format_sock_addr
 from ..version import SnmpVersion
 from .getbulk import GetBulkIter
 from .getnext import GetNextIter
@@ -98,7 +99,7 @@ class SnmpSession(object):
         timeout_ns = int(timeout * NS)
         if version == SnmpVersion.v1:
             self._sock = SnmpV1ClientSocket(
-                f"{addr}:{port}",
+                format_sock_addr(addr, port),
                 community,
                 tos,
                 send_buffer,
@@ -107,7 +108,7 @@ class SnmpSession(object):
             )
         elif version == SnmpVersion.v2c:
             self._sock = SnmpV2cClientSocket(
-                f"{addr}:{port}",
+                format_sock_addr(addr, port),
                 community,
                 tos,
                 send_buffer,
@@ -123,7 +124,7 @@ class SnmpSession(object):
                 self._deferred_user = user
                 user = User.default()
             self._sock = SnmpV3ClientSocket(
-                f"{addr}:{port}",
+                format_sock_addr(addr, port),
                 engine_id if engine_id else b"",
                 user.name,
                 user.get_auth_alg(),
