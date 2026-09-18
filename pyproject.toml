@@ -71,6 +71,7 @@ gufo-snmp = "gufo.snmp.cli:main"
 [project.urls]
 "Bug Tracker" = "https://github.com/gufolabs/gufo_snmp/issues"
 Changelog = "https://github.com/gufolabs/gufo_snmp/blob/master/CHANGELOG.md"
+Discord = "https://discord.gg/D8FWC8Q5R"
 Documentation = "https://docs.gufolabs.com/gufo_snmp/"
 Homepage = "https://github.com/gufolabs/gufo_snmp/"
 "Source Code" = "https://github.com/gufolabs/gufo_snmp/"
