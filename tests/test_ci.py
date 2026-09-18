@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo Labs: CI test
 # ---------------------------------------------------------------------
-# Copyright (C) 2022-25, Gufo Labs
+# Copyright (C) 2022-23, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -24,11 +24,11 @@ def _get_root() -> str:
 
 
 VERSIONS = [
-    "actions/cache@v4",
-    "actions/checkout@v4",
-    "actions/setup-python@v5",
-    "actions/download-artifact@v4",
-    "actions/upload-artifact@v4",
+    "actions/cache@v5",
+    "actions/checkout@v6",
+    "actions/setup-python@v6",
+    "actions/download-artifact@v8",
+    "actions/upload-artifact@v7",
     "pypa/gh-action-pypi-publish@release/v1",
 ]
 

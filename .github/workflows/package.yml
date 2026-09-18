@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set Up Python 3.13
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
@@ -34,7 +34,7 @@ jobs:
         run: ./tools/build/build-sdist.sh
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sdist
           path: dist/*.tar.gz
@@ -50,13 +50,13 @@ jobs:
           - musllinux_1_2_x86_64
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Build wheels
         run: ./tools/build/build-linux.sh ${{matrix.image}}
 
       - name: Save Artefacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheel-linux-amd64-${{matrix.image}}
           path: wheelhouse/*.whl
@@ -72,13 +72,13 @@ jobs:
           - musllinux_1_2_aarch64
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Build wheels
         run: ./tools/build/build-linux.sh ${{matrix.image}}
 
       - name: Save Artefacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheel-linux-aarch64-${{matrix.image}}
           path: wheelhouse/*.whl
@@ -90,7 +90,7 @@ jobs:
       RUST_ARCH: aarch64-apple-darwin
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Environment
         run: |
@@ -105,7 +105,7 @@ jobs:
         run: ./tools/build/setup-snmpd.sh
 
       - name: Set up python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
 
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel==3.1.4
@@ -120,7 +120,7 @@ jobs:
           CIBW_TEST_COMMAND: "cd {project} && pytest tests"
 
       - name: Save Artefacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheel-darwin-arm64
           path: wheelhouse/*.whl
@@ -137,7 +137,7 @@ jobs:
       - build-darwin-arm64
     steps:
       - name: Download Artefacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: dist/
 
