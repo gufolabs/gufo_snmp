@@ -30,7 +30,7 @@ class KeyType(IntEnum):
     Master = 1
     Localized = 2
 
-    def snmpd_option(self: "KeyType") -> str:
+    def snmpd_option(self) -> str:
         """
         Get key option for snmpd.conf.
 
@@ -47,27 +47,27 @@ class KeyType(IntEnum):
         raise ValueError(msg)
 
     @property
-    def is_password(self: "KeyType") -> bool:
+    def is_password(self) -> bool:
         """Check if key type is a password."""
         return self == self.Password
 
     @property
-    def is_master(self: "KeyType") -> bool:
+    def is_master(self) -> bool:
         """Check if key type is a master."""
         return self == self.Master
 
     @property
-    def is_localized(self: "KeyType") -> bool:
+    def is_localized(self) -> bool:
         """Check if key type is localized."""
         return self == self.Localized
 
     @property
-    def _is_aligned(self: "KeyType") -> bool:
+    def _is_aligned(self) -> bool:
         """Check if the key type has a fixed length."""
         return self.is_master or self.is_localized
 
     @property
-    def _mask(self: "KeyType") -> int:
+    def _mask(self) -> int:
         """Returns algorithm mask."""
         return self.value << 6
 
@@ -85,7 +85,7 @@ class BaseKey(object):
     SNMPD_PREFIX: str
 
     def __init__(
-        self: "BaseKey", key: bytes, /, key_type: KeyType = KeyType.Password
+        self, key: bytes, /, key_type: KeyType = KeyType.Password
     ) -> None:
         self.key = key
         self.key_type = key_type
@@ -119,7 +119,7 @@ class BaseKey(object):
         """
         return get_localized_key(cls.AUTH_ALG, master_key, engine_id)
 
-    def _pad(self: "BaseKey", key_len: int) -> None:
+    def _pad(self, key_len: int) -> None:
         """
         Pad key to given length.
 
@@ -151,7 +151,7 @@ class BaseKey(object):
             return key[:key_len]
         return key + b"\x00" * (key_len - kl)
 
-    def snmpd_key(self: "BaseKey") -> List[str]:
+    def snmpd_key(self) -> List[str]:
         """Returns key and prefix for createUser."""
         if self.key_type.is_password:
             v = self.key.decode()
@@ -167,7 +167,7 @@ class BaseAuthKey(BaseKey):
     KEY_LENGTH: int
 
     def __init__(
-        self: "BaseAuthKey",
+        self,
         key: bytes,
         /,
         key_type: KeyType = KeyType.Password,
@@ -224,7 +224,7 @@ class User(object):
     """
 
     def __init__(
-        self: "User",
+        self,
         name: str,
         *,
         auth_key: Optional[BaseAuthKey] = None,
@@ -261,7 +261,7 @@ class User(object):
         """
         return User(name="")
 
-    def require_auth(self: "User") -> bool:
+    def require_auth(self) -> bool:
         """
         Chech if user requires authentication.
 
@@ -270,7 +270,7 @@ class User(object):
         """
         return self.auth_key is not None
 
-    def get_auth_alg(self: "User") -> int:
+    def get_auth_alg(self) -> int:
         """
         Auth algorithm index with key type mask.
 
@@ -287,7 +287,7 @@ class User(object):
             else 0
         )
 
-    def get_priv_alg(self: "User") -> int:
+    def get_priv_alg(self) -> int:
         """
         Privacy algorithm index.
 
@@ -303,16 +303,16 @@ class User(object):
             else 0
         )
 
-    def get_auth_key(self: "User") -> bytes:
+    def get_auth_key(self) -> bytes:
         """Authentication key."""
         return self.auth_key.key if self.auth_key else b""
 
-    def get_priv_key(self: "User") -> bytes:
+    def get_priv_key(self) -> bytes:
         """Privacy key."""
         return self.priv_key.key if self.priv_key else b""
 
     @property
-    def snmpd_rouser(self: "User") -> str:
+    def snmpd_rouser(self) -> str:
         """
         `rouser` part of snmpd.conf.
 
@@ -328,7 +328,7 @@ class User(object):
         return f"rouser {self.name} {level}"
 
     @property
-    def snmpd_create_user(self: "User") -> str:
+    def snmpd_create_user(self) -> str:
         """
         CreateUser part of snmpd.conf.
 

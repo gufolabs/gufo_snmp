@@ -33,7 +33,7 @@ class BasePolicer(ABC):
     """
 
     @abstractmethod
-    def get_timeout(self: "BasePolicer", ts: int) -> Optional[int]:
+    def get_timeout(self, ts: int) -> Optional[int]:
         """
         Get sleep timeout.
 
@@ -48,7 +48,7 @@ class BasePolicer(ABC):
             * sleep timeout in nanoseconds, otherwise.
         """
 
-    async def wait(self: "BasePolicer") -> None:
+    async def wait(self) -> None:
         """
         Apply policy.
 
@@ -61,7 +61,7 @@ class BasePolicer(ABC):
         if delta and delta > 0:
             await asyncio.sleep(float(delta) / NS)
 
-    def wait_sync(self: "BasePolicer") -> None:
+    def wait_sync(self) -> None:
         """
         Apply policy  (Synchronous version).
 
@@ -87,7 +87,7 @@ class RPSPolicer(BasePolicer):
         rps: Requests per second rate.
     """
 
-    def __init__(self: "RPSPolicer", rps: float) -> None:
+    def __init__(self, rps: float) -> None:
         if rps <= ZERO:
             msg = "Invalid RPS"
             raise ValueError(msg)
@@ -97,7 +97,7 @@ class RPSPolicer(BasePolicer):
             msg = "RPS is too high"
             raise ValueError(msg)
 
-    def get_timeout(self: "RPSPolicer", ts: int) -> Optional[int]:
+    def get_timeout(self, ts: int) -> Optional[int]:
         """
         Get sleep timeout.
 

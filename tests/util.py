@@ -165,14 +165,14 @@ class SyncShiftProxy(object):
     a previous reply and then actual one.
     """
 
-    def __init__(self: "SyncShiftProxy") -> None:
+    def __init__(self) -> None:
         self._listen_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._listen_sock.bind(("127.0.0.1", 0))
         self._addr: Tuple[str, int] = self._listen_sock.getsockname()
         self._proxy_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._thread: Optional[threading.Thread] = None
 
-    def __enter__(self: "SyncShiftProxy") -> "SyncShiftProxy":
+    def __enter__(self) -> "SyncShiftProxy":
         """Context management entry."""
         self._thread = threading.Thread(target=self.run, name="ShiftProxyy")
         self._thread.daemon = True
@@ -180,7 +180,7 @@ class SyncShiftProxy(object):
         return self
 
     def __exit__(
-        self: "SyncShiftProxy",
+        self,
         exc_type: Optional[Type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
@@ -193,7 +193,7 @@ class SyncShiftProxy(object):
             self._thread = None
 
     @property
-    def addr(self: "SyncShiftProxy") -> Tuple[str, int]:
+    def addr(self) -> Tuple[str, int]:
         """
         Get address info.
 
@@ -202,12 +202,12 @@ class SyncShiftProxy(object):
         """
         return self._addr
 
-    def run(self: "SyncShiftProxy") -> None:
+    def run(self) -> None:
         """Run proxy."""
         with suppress(OSError):
             self._run()
 
-    def _run(self: "SyncShiftProxy") -> None:
+    def _run(self) -> None:
         """Run proxy (internal implementation)."""
         BUFF_SIZE = 4096
         # Receive request
@@ -238,7 +238,7 @@ class SyncShiftProxy(object):
         self._listen_sock.sendto(reply, addr)
         print("CLIENT <- PROXY    SERVER")
 
-    def close(self: "SyncShiftProxy") -> None:
+    def close(self) -> None:
         """Close sockets."""
         self._listen_sock.close()
         self._proxy_sock.close()
