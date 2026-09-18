@@ -1,14 +1,11 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: GetBulkIter
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-25, Gufo Labs
+# Copyright (C) 2023-26, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
 """GetBulkIter iterator."""
-
-# Python modules
-from typing import List, Optional, Tuple, Union
 
 # Gufo Labs Modules
 from .._fast import GetIter as _Iter
@@ -17,7 +14,7 @@ from ..protocol import SnmpClientSocketProtocol
 from ..typing import ValueType
 
 
-class GetBulkIter(object):
+class GetBulkIter:
     """Wrap the series of the GetBulk requests.
 
     Args:
@@ -32,22 +29,22 @@ class GetBulkIter(object):
         sock: SnmpClientSocketProtocol,
         oid: str,
         max_repetitions: int,
-        policer: Optional[BasePolicer] = None,
+        policer: BasePolicer | None = None,
     ) -> None:
         self._sock = sock
         self._ctx = _Iter(oid, max_repetitions)
         self._max_repetitions = max_repetitions
-        self._buffer: List[Union[Tuple[str, ValueType], None]] = []
+        self._buffer: list[tuple[str, ValueType] | None] = []
         self._policer = policer
 
     def __iter__(self) -> "GetBulkIter":
         """Return asynchronous iterator."""
         return self
 
-    def __next__(self) -> Tuple[str, ValueType]:
+    def __next__(self) -> tuple[str, ValueType]:
         """Get next value."""
 
-        def pop_or_stop() -> Tuple[str, ValueType]:
+        def pop_or_stop() -> tuple[str, ValueType]:
             v = self._buffer.pop(0)
             if v is None:
                 raise StopIteration

@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: Async SnmpSession
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-25, Gufo Labs
+# Copyright (C) 2023-26, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -10,19 +10,9 @@
 # Python modules
 from asyncio import Future, get_running_loop, wait_for
 from asyncio import TimeoutError as AIOTimeoutError
+from collections.abc import AsyncIterator, Callable, Iterable
 from types import TracebackType
-from typing import (
-    AsyncIterator,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import TypeVar
 
 # Gufo Labs modules
 from .._fast import (
@@ -41,7 +31,7 @@ from ..version import SnmpVersion
 T = TypeVar("T")
 
 
-class SnmpSession(object):
+class SnmpSession:
     """
     SNMP client session.
 
@@ -90,24 +80,24 @@ class SnmpSession(object):
         addr: str,
         port: int = 161,
         community: str = "public",
-        engine_id: Optional[bytes] = None,
-        user: Optional[User] = None,
-        version: Optional[SnmpVersion] = None,
+        engine_id: bytes | None = None,
+        user: User | None = None,
+        version: SnmpVersion | None = None,
         timeout: float = 10.0,
         tos: int = 0,
         send_buffer: int = 0,
         recv_buffer: int = 0,
         max_repetitions: int = 20,
         allow_bulk: bool = True,
-        policer: Optional[BasePolicer] = None,
-        limit_rps: Optional[Union[int, float]] = None,
+        policer: BasePolicer | None = None,
+        limit_rps: int | float | None = None,
     ) -> None:
         # Detect version
         if version is None:
             version = SnmpVersion.v2c if user is None else SnmpVersion.v3
         self._sock: SnmpClientSocketProtocol
         self._to_refresh = False
-        self._deferred_user: Optional[User] = None
+        self._deferred_user: User | None = None
         if version == SnmpVersion.v1:
             self._sock = SnmpV1ClientSocket(
                 format_sock_addr(addr, port),
@@ -158,7 +148,7 @@ class SnmpSession(object):
             self._allow_bulk = False
         else:
             self._allow_bulk = allow_bulk
-        self._policer: Optional[BasePolicer] = None
+        self._policer: BasePolicer | None = None
         if policer:
             self._policer = policer
         elif limit_rps:
@@ -171,9 +161,9 @@ class SnmpSession(object):
 
     async def __aexit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> None:
         """Asynchronous context manager exit."""
 
@@ -258,7 +248,7 @@ class SnmpSession(object):
         await self._send(sender)
         return await self._recv(self._sock.recv_get)
 
-    async def get_many(self, oids: Iterable[str]) -> Dict[str, ValueType]:
+    async def get_many(self, oids: Iterable[str]) -> dict[str, ValueType]:
         """
         Send SNMP GET request for multiple oids and await for response.
 
@@ -287,7 +277,7 @@ class SnmpSession(object):
         await self._send(sender)
         return await self._recv(self._sock.recv_get_many)
 
-    def getnext(self, oid: str) -> AsyncIterator[Tuple[str, ValueType]]:
+    def getnext(self, oid: str) -> AsyncIterator[tuple[str, ValueType]]:
         """
         Iterate over oids.
 
@@ -306,8 +296,8 @@ class SnmpSession(object):
         return GetNextIter(self, oid)
 
     def getbulk(
-        self, oid: str, max_repetitions: Optional[int] = None
-    ) -> AsyncIterator[Tuple[str, ValueType]]:
+        self, oid: str, max_repetitions: int | None = None
+    ) -> AsyncIterator[tuple[str, ValueType]]:
         """
         Iterate over oids.
 
@@ -331,7 +321,7 @@ class SnmpSession(object):
             max_repetitions or self._max_repetitions,
         )
 
-    def fetch(self, oid: str) -> AsyncIterator[Tuple[str, ValueType]]:
+    def fetch(self, oid: str) -> AsyncIterator[tuple[str, ValueType]]:
         """
         Iterate over oids using fastest method available.
 
@@ -405,7 +395,7 @@ class SnmpSession(object):
         return self._sock.get_engine_id()
 
 
-class GetNextIter(object):
+class GetNextIter:
     """Wrap the series of the GetNext requests.
 
     Args:
@@ -426,20 +416,20 @@ class GetNextIter(object):
         """Return asynchronous iterator."""
         return self
 
-    async def __anext__(self) -> Tuple[str, ValueType]:
+    async def __anext__(self) -> tuple[str, ValueType]:
         """Get next value."""
 
         def sender() -> None:
             self._sock.send_get_next(self._ctx)
 
-        def receiver() -> Tuple[str, ValueType]:
+        def receiver() -> tuple[str, ValueType]:
             return self._sock.recv_get_next(self._ctx)
 
         await self._session._send(sender)
         return await self._session._recv(receiver)
 
 
-class GetBulkIter(object):
+class GetBulkIter:
     """Wrap the series of the GetBulk requests.
 
     Args:
@@ -458,22 +448,22 @@ class GetBulkIter(object):
         self._sock = session._sock
         self._ctx = GetIter(oid, max_repetitions)
         self._max_repetitions = max_repetitions
-        self._buffer: List[Union[Tuple[str, ValueType], None]] = []
+        self._buffer: list[tuple[str, ValueType] | None] = []
 
     def __aiter__(self) -> "GetBulkIter":
         """Return asynchronous iterator."""
         return self
 
-    async def __anext__(self) -> Tuple[str, ValueType]:
+    async def __anext__(self) -> tuple[str, ValueType]:
         """Get next value."""
 
         def sender() -> None:
             self._sock.send_get_bulk(self._ctx)
 
-        def receiver() -> List[Union[Tuple[str, ValueType], None]]:
+        def receiver() -> list[tuple[str, ValueType] | None]:
             return self._sock.recv_get_bulk(self._ctx)
 
-        def pop_or_stop() -> Tuple[str, ValueType]:
+        def pop_or_stop() -> tuple[str, ValueType]:
             v = self._buffer.pop(0)
             if v is None:
                 raise StopAsyncIteration

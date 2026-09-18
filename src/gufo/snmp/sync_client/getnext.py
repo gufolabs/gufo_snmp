@@ -1,14 +1,11 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: GetNextIter
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-24, Gufo Labs
+# Copyright (C) 2023-26, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
 """GetNextIter iterator."""
-
-# Python modules
-from typing import Optional, Tuple
 
 # Gufo Labs Modules
 from .._fast import GetIter as _Iter
@@ -17,7 +14,7 @@ from ..protocol import SnmpClientSocketProtocol
 from ..typing import ValueType
 
 
-class GetNextIter(object):
+class GetNextIter:
     """Wrap the series of the GetNext requests.
 
     Args:
@@ -31,7 +28,7 @@ class GetNextIter(object):
         self,
         sock: SnmpClientSocketProtocol,
         oid: str,
-        policer: Optional[BasePolicer] = None,
+        policer: BasePolicer | None = None,
     ) -> None:
         self._sock = sock
         self._ctx = _Iter(oid)
@@ -41,7 +38,7 @@ class GetNextIter(object):
         """Return iterator."""
         return self
 
-    def __next__(self) -> Tuple[str, ValueType]:
+    def __next__(self) -> tuple[str, ValueType]:
         """Get next value."""
         if self._policer:
             self._policer.wait_sync()

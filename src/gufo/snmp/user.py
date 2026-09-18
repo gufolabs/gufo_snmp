@@ -1,14 +1,14 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: SNMPv3 users
 # ---------------------------------------------------------------------
-# Copyright (C) 2023, Gufo Labs
+# Copyright (C) 2023-26, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 """User structure definition."""
 
 # Python modules
 from enum import IntEnum
-from typing import List, Optional, Type, TypeVar
+from typing import TypeVar
 
 # Gufo SNMP modules
 from ._fast import get_localized_key, get_master_key
@@ -72,7 +72,7 @@ class KeyType(IntEnum):
         return self.value << 6
 
 
-class BaseKey(object):
+class BaseKey:
     """
     Basic key class.
 
@@ -91,7 +91,7 @@ class BaseKey(object):
         self.key_type = key_type
 
     @classmethod
-    def get_master_key(cls: Type["BaseKey"], passwd: bytes) -> bytes:
+    def get_master_key(cls: type["BaseKey"], passwd: bytes) -> bytes:
         """
         Convert password to master key.
 
@@ -105,7 +105,7 @@ class BaseKey(object):
 
     @classmethod
     def get_localized_key(
-        cls: Type["BaseKey"], master_key: bytes, engine_id: bytes
+        cls: type["BaseKey"], master_key: bytes, engine_id: bytes
     ) -> bytes:
         """
         Convert master key to localized key.
@@ -132,7 +132,7 @@ class BaseKey(object):
         self.key = self._padded(self.key, key_len)
 
     @classmethod
-    def _padded(cls: Type["BaseKey"], key: bytes, key_len: int) -> bytes:
+    def _padded(cls: type["BaseKey"], key: bytes, key_len: int) -> bytes:
         """
         Returns string aligned to given length.
 
@@ -151,7 +151,7 @@ class BaseKey(object):
             return key[:key_len]
         return key + b"\x00" * (key_len - kl)
 
-    def snmpd_key(self) -> List[str]:
+    def snmpd_key(self) -> list[str]:
         """Returns key and prefix for createUser."""
         if self.key_type.is_password:
             v = self.key.decode()
@@ -213,7 +213,7 @@ class Aes128Key(BasePrivKey):
     SNMPD_PREFIX = "AES"
 
 
-class User(object):
+class User:
     """
     SNMPv3 user.
 
@@ -227,8 +227,8 @@ class User(object):
         self,
         name: str,
         *,
-        auth_key: Optional[BaseAuthKey] = None,
-        priv_key: Optional[BasePrivKey] = None,
+        auth_key: BaseAuthKey | None = None,
+        priv_key: BasePrivKey | None = None,
     ) -> None:
         self.name = name
         self.auth_key = auth_key
@@ -252,7 +252,7 @@ class User(object):
         return f"<User {self.name} at {id(self)}>"
 
     @classmethod
-    def default(cls: Type["User"]) -> "User":
+    def default(cls: type["User"]) -> "User":
         """
         Default user without name and keys.
 

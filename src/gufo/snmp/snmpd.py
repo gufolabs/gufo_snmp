@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: Snmpd context manager
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-25, Gufo Labs
+# Copyright (C) 2023-26, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -23,7 +23,6 @@ from tempfile import (
     _TemporaryFileWrapper,
 )
 from types import TracebackType
-from typing import List, Optional, Type
 
 # Gufo SNMP modules
 from .user import User
@@ -39,7 +38,7 @@ _ENGINE_ID_LENGTH = 8
 IS_DARWIN = sys.platform == "darwin"
 
 
-class Snmpd(object):
+class Snmpd:
     """
     snmpd context manager for testing.
 
@@ -85,14 +84,14 @@ class Snmpd(object):
 
     def __init__(
         self,
-        path: Optional[str] = None,
+        path: str | None = None,
         address: str = "127.0.0.1",
         port: int = 10161,
         community: str = "public",
         location: str = "Test",
         contact: str = "test <test@example.com>",
-        engine_id: Optional[str] = None,
-        users: Optional[List[User]] = None,
+        engine_id: str | None = None,
+        users: list[User] | None = None,
         start_timeout: float = 5.0,
         verbose: bool = False,
         log_packets: bool = False,
@@ -107,10 +106,10 @@ class Snmpd(object):
         self._start_timeout = start_timeout
         self._verbose = verbose
         self._log_packets = log_packets if verbose else False
-        self.version: Optional[str] = None
-        self._cfg: Optional[_TemporaryFileWrapper[str]] = None
-        self._persistent_dir: Optional[TemporaryDirectory[str]] = None
-        self._proc: Optional[subprocess.Popen[str]] = None
+        self.version: str | None = None
+        self._cfg: _TemporaryFileWrapper[str] | None = None
+        self._persistent_dir: TemporaryDirectory[str] | None = None
+        self._proc: subprocess.Popen[str] | None = None
         if engine_id:
             self._cfg_engine_id = engine_id
         else:
@@ -200,7 +199,7 @@ sysServices 72"""
         self._wait()
         self._consume_stdout()
 
-    def _wait_inner(self, q: "queue.Queue[Optional[str]]") -> None:
+    def _wait_inner(self, q: "queue.Queue[str | None]") -> None:
         """
         Inner implementation of snmpd waiter.
 
@@ -232,7 +231,7 @@ sysServices 72"""
         if not self._proc.stdout:
             msg = "stdout is not piped"
             raise RuntimeError(msg)
-        q: queue.Queue[Optional[str]] = queue.Queue()
+        q: queue.Queue[str | None] = queue.Queue()
         t = threading.Thread(target=self._wait_inner, args=[q])
         t.daemon = True
         t.start()
@@ -276,9 +275,9 @@ sysServices 72"""
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> None:
         """Context manager exit."""
         self._stop()
@@ -290,9 +289,9 @@ sysServices 72"""
 
     async def __aexit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> None:
         """Asynchronous context manager exit."""
         self._stop()

@@ -1,15 +1,15 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: SyncSnmpSession
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-24, Gufo Labs
+# Copyright (C) 2023-26, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
 """SyncSnmpSession implementation."""
 
 # Python modules
+from collections.abc import Iterable, Iterator
 from types import TracebackType
-from typing import Dict, Iterable, Iterator, Optional, Tuple, Type, Union
 
 # Gufo Labs modules
 from .._fast import (
@@ -29,7 +29,7 @@ from .getnext import GetNextIter
 NS = 1_000_000_000.0
 
 
-class SnmpSession(object):
+class SnmpSession:
     """
     Synchronous SNMP client session.
 
@@ -78,24 +78,24 @@ class SnmpSession(object):
         addr: str,
         port: int = 161,
         community: str = "public",
-        engine_id: Optional[bytes] = None,
-        user: Optional[User] = None,
-        version: Optional[SnmpVersion] = None,
+        engine_id: bytes | None = None,
+        user: User | None = None,
+        version: SnmpVersion | None = None,
         timeout: float = 10.0,
         tos: int = 0,
         send_buffer: int = 0,
         recv_buffer: int = 0,
         max_repetitions: int = 20,
         allow_bulk: bool = True,
-        policer: Optional[BasePolicer] = None,
-        limit_rps: Optional[Union[int, float]] = None,
+        policer: BasePolicer | None = None,
+        limit_rps: int | float | None = None,
     ) -> None:
         # Detect version
         if version is None:
             version = SnmpVersion.v2c if user is None else SnmpVersion.v3
         self._sock: SnmpClientSocketProtocol
         self._to_refresh = False
-        self._deferred_user: Optional[User] = None
+        self._deferred_user: User | None = None
         timeout_ns = int(timeout * NS)
         if version == SnmpVersion.v1:
             self._sock = SnmpV1ClientSocket(
@@ -147,7 +147,7 @@ class SnmpSession(object):
             self._allow_bulk = False
         else:
             self._allow_bulk = allow_bulk
-        self._policer: Optional[BasePolicer] = None
+        self._policer: BasePolicer | None = None
         if policer:
             self._policer = policer
         elif limit_rps:
@@ -160,9 +160,9 @@ class SnmpSession(object):
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> None:
         """Asynchronous context manager exit."""
 
@@ -190,7 +190,7 @@ class SnmpSession(object):
         except BlockingIOError as e:
             raise TimeoutError from e
 
-    def get_many(self, oids: Iterable[str]) -> Dict[str, ValueType]:
+    def get_many(self, oids: Iterable[str]) -> dict[str, ValueType]:
         """
         Send SNMP GET request for multiple oids and await for response.
 
@@ -219,7 +219,7 @@ class SnmpSession(object):
         except BlockingIOError as e:
             raise TimeoutError from e
 
-    def getnext(self, oid: str) -> Iterator[Tuple[str, ValueType]]:
+    def getnext(self, oid: str) -> Iterator[tuple[str, ValueType]]:
         """
         Iterate over oids.
 
@@ -238,8 +238,8 @@ class SnmpSession(object):
         return GetNextIter(self._sock, oid, self._policer)
 
     def getbulk(
-        self, oid: str, max_repetitions: Optional[int] = None
-    ) -> Iterator[Tuple[str, ValueType]]:
+        self, oid: str, max_repetitions: int | None = None
+    ) -> Iterator[tuple[str, ValueType]]:
         """
         Iterate over oids.
 
@@ -264,7 +264,7 @@ class SnmpSession(object):
             self._policer,
         )
 
-    def fetch(self, oid: str) -> Iterator[Tuple[str, ValueType]]:
+    def fetch(self, oid: str) -> Iterator[tuple[str, ValueType]]:
         """
         Iterate over oids using fastest method available.
 

@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: Types definitions
 # ---------------------------------------------------------------------
-# Copyright (C) 2023, Gufo Labs
+# Copyright (C) 2023-26, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -11,7 +11,4 @@ Attributes:
     ValueType: Return type for SNMP query operations.
 """
 
-# Python modules
-from typing import Union
-
-ValueType = Union[None, str, bytes, int, float]
+ValueType = None | str | bytes | int | float
