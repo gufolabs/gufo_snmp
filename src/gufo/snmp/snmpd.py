@@ -84,7 +84,7 @@ class Snmpd(object):
     """
 
     def __init__(
-        self: "Snmpd",
+        self,
         path: Optional[str] = None,
         address: str = "127.0.0.1",
         port: int = 10161,
@@ -130,7 +130,7 @@ class Snmpd(object):
         chars = string.ascii_letters + string.digits
         return "".join(random.choices(chars, k=_ENGINE_ID_LENGTH))  # noqa:S311
 
-    def get_config(self: "Snmpd") -> str:
+    def get_config(self) -> str:
         """
         Generate snmpd config.
 
@@ -158,7 +158,7 @@ syscontact  {self._contact}
 #
 sysServices 72"""
 
-    def _start(self: "Snmpd") -> None:
+    def _start(self) -> None:
         """Run snmpd instance."""
         logger.info("Starting snmpd instance")
         self._cfg = NamedTemporaryFile(  # noqa: SIM115
@@ -200,7 +200,7 @@ sysServices 72"""
         self._wait()
         self._consume_stdout()
 
-    def _wait_inner(self: "Snmpd", q: "queue.Queue[Optional[str]]") -> None:
+    def _wait_inner(self, q: "queue.Queue[Optional[str]]") -> None:
         """
         Inner implementation of snmpd waiter.
 
@@ -224,7 +224,7 @@ sysServices 72"""
             return
         q.put("snmpd is not active")
 
-    def _wait(self: "Snmpd") -> None:
+    def _wait(self) -> None:
         """Wait until snmpd is ready."""
         if self._proc is None:
             msg = "_wait() must not be started directly"
@@ -247,7 +247,7 @@ sysServices 72"""
             msg = "snmpd failed to start"
             raise TimeoutError(msg)
 
-    def _consume_stdout(self: "Snmpd") -> None:
+    def _consume_stdout(self) -> None:
         def inner() -> None:
             if self._proc and self._proc.stdout:
                 for line in self._proc.stdout:
@@ -257,7 +257,7 @@ sysServices 72"""
         t.daemon = True
         t.start()
 
-    def _stop(self: "Snmpd") -> None:
+    def _stop(self) -> None:
         """Terminate snmpd instance."""
         if self._proc:
             logger.info("Stopping snmpd")
@@ -269,13 +269,13 @@ sysServices 72"""
             self._persistent_dir.cleanup()
             self._persistent_dir = None
 
-    def __enter__(self: "Snmpd") -> "Snmpd":
+    def __enter__(self) -> "Snmpd":
         """Context manager entry."""
         self._start()
         return self
 
     def __exit__(
-        self: "Snmpd",
+        self,
         exc_type: Optional[Type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
@@ -283,13 +283,13 @@ sysServices 72"""
         """Context manager exit."""
         self._stop()
 
-    async def __aenter__(self: "Snmpd") -> "Snmpd":
+    async def __aenter__(self) -> "Snmpd":
         """Asynchronous context manager entry."""
         self._start()
         return self
 
     async def __aexit__(
-        self: "Snmpd",
+        self,
         exc_type: Optional[Type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],

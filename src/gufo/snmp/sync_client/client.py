@@ -73,7 +73,7 @@ class SnmpSession(object):
     """
 
     def __init__(
-        self: "SnmpSession",
+        self,
         addr: str,
         port: int = 161,
         community: str = "public",
@@ -152,20 +152,20 @@ class SnmpSession(object):
         elif limit_rps:
             self._policer = RPSPolicer(float(limit_rps))
 
-    def __enter__(self: "SnmpSession") -> "SnmpSession":
+    def __enter__(self) -> "SnmpSession":
         """Asynchronous context manager entry."""
         self.refresh()
         return self
 
     def __exit__(
-        self: "SnmpSession",
+        self,
         exc_type: Optional[Type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> None:
         """Asynchronous context manager exit."""
 
-    def get(self: "SnmpSession", oid: str) -> ValueType:
+    def get(self, oid: str) -> ValueType:
         """
         Send SNMP GET request and await for response.
 
@@ -189,9 +189,7 @@ class SnmpSession(object):
         except BlockingIOError as e:
             raise TimeoutError from e
 
-    def get_many(
-        self: "SnmpSession", oids: Iterable[str]
-    ) -> Dict[str, ValueType]:
+    def get_many(self, oids: Iterable[str]) -> Dict[str, ValueType]:
         """
         Send SNMP GET request for multiple oids and await for response.
 
@@ -220,9 +218,7 @@ class SnmpSession(object):
         except BlockingIOError as e:
             raise TimeoutError from e
 
-    def getnext(
-        self: "SnmpSession", oid: str
-    ) -> Iterator[Tuple[str, ValueType]]:
+    def getnext(self, oid: str) -> Iterator[Tuple[str, ValueType]]:
         """
         Iterate over oids.
 
@@ -241,7 +237,7 @@ class SnmpSession(object):
         return GetNextIter(self._sock, oid, self._policer)
 
     def getbulk(
-        self: "SnmpSession", oid: str, max_repetitions: Optional[int] = None
+        self, oid: str, max_repetitions: Optional[int] = None
     ) -> Iterator[Tuple[str, ValueType]]:
         """
         Iterate over oids.
@@ -267,9 +263,7 @@ class SnmpSession(object):
             self._policer,
         )
 
-    def fetch(
-        self: "SnmpSession", oid: str
-    ) -> Iterator[Tuple[str, ValueType]]:
+    def fetch(self, oid: str) -> Iterator[Tuple[str, ValueType]]:
         """
         Iterate over oids using fastest method available.
 
@@ -293,7 +287,7 @@ class SnmpSession(object):
             return self.getbulk(oid)
         return self.getnext(oid)
 
-    def refresh(self: "SnmpSession") -> None:
+    def refresh(self) -> None:
         """
         Send and receive REPORT to refresh authentication state.
 
@@ -328,7 +322,7 @@ class SnmpSession(object):
         # Refresh engine boots and time
         self._sock.refresh()
 
-    def get_engine_id(self: "SnmpSession") -> bytes:
+    def get_engine_id(self) -> bytes:
         """
         Get effective engine id.
 

@@ -85,7 +85,7 @@ class SnmpSession(object):
     """
 
     def __init__(
-        self: "SnmpSession",
+        self,
         addr: str,
         port: int = 161,
         community: str = "public",
@@ -163,13 +163,13 @@ class SnmpSession(object):
         elif limit_rps:
             self._policer = RPSPolicer(float(limit_rps))
 
-    async def __aenter__(self: "SnmpSession") -> "SnmpSession":
+    async def __aenter__(self) -> "SnmpSession":
         """Asynchronous context manager entry."""
         await self.refresh()
         return self
 
     async def __aexit__(
-        self: "SnmpSession",
+        self,
         exc_type: Optional[Type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
@@ -233,7 +233,7 @@ class SnmpSession(object):
             finally:
                 loop.remove_reader(self._fd)
 
-    async def get(self: "SnmpSession", oid: str) -> ValueType:
+    async def get(self, oid: str) -> ValueType:
         """
         Send SNMP GET request and await for response.
 
@@ -257,9 +257,7 @@ class SnmpSession(object):
         await self._send(sender)
         return await self._recv(self._sock.recv_get)
 
-    async def get_many(
-        self: "SnmpSession", oids: Iterable[str]
-    ) -> Dict[str, ValueType]:
+    async def get_many(self, oids: Iterable[str]) -> Dict[str, ValueType]:
         """
         Send SNMP GET request for multiple oids and await for response.
 
@@ -288,9 +286,7 @@ class SnmpSession(object):
         await self._send(sender)
         return await self._recv(self._sock.recv_get_many)
 
-    def getnext(
-        self: "SnmpSession", oid: str
-    ) -> AsyncIterator[Tuple[str, ValueType]]:
+    def getnext(self, oid: str) -> AsyncIterator[Tuple[str, ValueType]]:
         """
         Iterate over oids.
 
@@ -309,7 +305,7 @@ class SnmpSession(object):
         return GetNextIter(self, oid)
 
     def getbulk(
-        self: "SnmpSession", oid: str, max_repetitions: Optional[int] = None
+        self, oid: str, max_repetitions: Optional[int] = None
     ) -> AsyncIterator[Tuple[str, ValueType]]:
         """
         Iterate over oids.
@@ -334,9 +330,7 @@ class SnmpSession(object):
             max_repetitions or self._max_repetitions,
         )
 
-    def fetch(
-        self: "SnmpSession", oid: str
-    ) -> AsyncIterator[Tuple[str, ValueType]]:
+    def fetch(self, oid: str) -> AsyncIterator[Tuple[str, ValueType]]:
         """
         Iterate over oids using fastest method available.
 
@@ -360,7 +354,7 @@ class SnmpSession(object):
             return self.getbulk(oid)
         return self.getnext(oid)
 
-    async def refresh(self: "SnmpSession") -> None:
+    async def refresh(self) -> None:
         """
         Send and receive REPORT to refresh authentication state.
 
@@ -397,7 +391,7 @@ class SnmpSession(object):
         await self._send(self._sock.send_refresh)
         await self._recv(self._sock.recv_refresh)
 
-    def get_engine_id(self: "SnmpSession") -> bytes:
+    def get_engine_id(self) -> bytes:
         """
         Get effective engine id.
 
@@ -419,7 +413,7 @@ class GetNextIter(object):
     """
 
     def __init__(
-        self: "GetNextIter",
+        self,
         session: SnmpSession,
         oid: str,
     ) -> None:
@@ -427,11 +421,11 @@ class GetNextIter(object):
         self._sock = session._sock
         self._ctx = GetIter(oid)
 
-    def __aiter__(self: "GetNextIter") -> "GetNextIter":
+    def __aiter__(self) -> "GetNextIter":
         """Return asynchronous iterator."""
         return self
 
-    async def __anext__(self: "GetNextIter") -> Tuple[str, ValueType]:
+    async def __anext__(self) -> Tuple[str, ValueType]:
         """Get next value."""
 
         def sender() -> None:
@@ -454,7 +448,7 @@ class GetBulkIter(object):
     """
 
     def __init__(
-        self: "GetBulkIter",
+        self,
         session: SnmpSession,
         oid: str,
         max_repetitions: int,
@@ -465,11 +459,11 @@ class GetBulkIter(object):
         self._max_repetitions = max_repetitions
         self._buffer: List[Union[Tuple[str, ValueType], None]] = []
 
-    def __aiter__(self: "GetBulkIter") -> "GetBulkIter":
+    def __aiter__(self) -> "GetBulkIter":
         """Return asynchronous iterator."""
         return self
 
-    async def __anext__(self: "GetBulkIter") -> Tuple[str, ValueType]:
+    async def __anext__(self) -> Tuple[str, ValueType]:
         """Get next value."""
 
         def sender() -> None:

@@ -28,7 +28,7 @@ class GetNextIter(object):
     """
 
     def __init__(
-        self: "GetNextIter",
+        self,
         sock: SnmpClientSocketProtocol,
         oid: str,
         policer: Optional[BasePolicer] = None,
@@ -37,11 +37,11 @@ class GetNextIter(object):
         self._ctx = _Iter(oid)
         self._policer = policer
 
-    def __iter__(self: "GetNextIter") -> "GetNextIter":
+    def __iter__(self) -> "GetNextIter":
         """Return iterator."""
         return self
 
-    def __next__(self: "GetNextIter") -> Tuple[str, ValueType]:
+    def __next__(self) -> Tuple[str, ValueType]:
         """Get next value."""
         if self._policer:
             self._policer.wait_sync()

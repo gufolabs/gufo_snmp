@@ -28,7 +28,7 @@ class GetBulkIter(object):
     """
 
     def __init__(
-        self: "GetBulkIter",
+        self,
         sock: SnmpClientSocketProtocol,
         oid: str,
         max_repetitions: int,
@@ -40,11 +40,11 @@ class GetBulkIter(object):
         self._buffer: List[Union[Tuple[str, ValueType], None]] = []
         self._policer = policer
 
-    def __iter__(self: "GetBulkIter") -> "GetBulkIter":
+    def __iter__(self) -> "GetBulkIter":
         """Return asynchronous iterator."""
         return self
 
-    def __next__(self: "GetBulkIter") -> Tuple[str, ValueType]:
+    def __next__(self) -> Tuple[str, ValueType]:
         """Get next value."""
 
         def pop_or_stop() -> Tuple[str, ValueType]:
