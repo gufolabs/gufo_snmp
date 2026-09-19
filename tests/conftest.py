@@ -21,7 +21,6 @@ from .util import (
     SNMP_LOCATION,
     SNMP_USERS,
     SNMPD_ADDRESS,
-    SNMPD_PATH,
     SNMPD_PORT,
 )
 
@@ -31,7 +30,6 @@ def snmpd() -> Iterator[Snmpd]:
     logger = logging.getLogger("gufo.snmp.snmpd")
     logger.setLevel(logging.DEBUG)
     with Snmpd(
-        path=SNMPD_PATH,
         address=SNMPD_ADDRESS,
         port=SNMPD_PORT,
         community=SNMP_COMMUNITY,
