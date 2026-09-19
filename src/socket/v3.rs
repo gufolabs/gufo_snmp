@@ -59,13 +59,13 @@ impl SnmpV3ClientSocket {
         timeout_ns: u64,
     ) -> PyResult<Self> {
         // Auth key
-        let mut auth = AuthKey::new(auth_alg)?;
+        let mut auth = AuthKey::try_from(auth_alg)?;
         auth.as_key_type(auth_alg, auth_key, &engine_id)?;
         // Priv key
-        let mut pk = PrivKey::new(priv_alg)?;
+        let mut pk = PrivKey::try_from(priv_alg)?;
         if pk.has_priv() {
             // Localize key
-            let mut pk_auth = AuthKey::new(auth_alg)?;
+            let mut pk_auth = AuthKey::try_from(auth_alg)?;
             pk_auth.as_key_type(priv_alg, priv_key, &engine_id)?;
             pk.as_localized(pk_auth.get_key())?;
         }
@@ -94,13 +94,13 @@ impl SnmpV3ClientSocket {
         // Replace user
         self.user_name = user_name;
         // Auth key
-        let mut auth = AuthKey::new(auth_alg)?;
+        let mut auth = AuthKey::try_from(auth_alg)?;
         auth.as_key_type(auth_alg, auth_key, &self.engine_id)?;
         // Priv key
-        let mut pk = PrivKey::new(priv_alg)?;
+        let mut pk = PrivKey::try_from(priv_alg)?;
         if pk.has_priv() {
             // Localize key
-            let mut pk_auth = AuthKey::new(auth_alg)?;
+            let mut pk_auth = AuthKey::try_from(auth_alg)?;
             pk_auth.as_key_type(priv_alg, priv_key, &self.engine_id)?;
             pk.as_localized(pk_auth.get_key())?;
         }

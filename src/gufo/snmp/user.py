@@ -72,6 +72,32 @@ class KeyType(IntEnum):
         return self.value << 6
 
 
+class KeyExpansion(IntEnum):
+    """
+    Key expansion policy for AES-192/256 privacy keys.
+
+    Specifies how a localized authentication key is expanded when it is
+    shorter than the key required by AES-192 or AES-256. This is relevant
+    primarily for MD5 and SHA-1 authentication, whose localized keys are
+    shorter than the required AES key.
+
+    Different SNMP implementations use different expansion schemes:
+
+    * ``Blumenthal`` — Blumenthal AES-192/256 key expansion.
+    * ``Cisco`` — Cisco/Reeder AES-192/256 key expansion.
+
+    The policy has no effect when the localized key is already long enough
+    or when a different privacy protocol is used.
+
+    Attributes:
+        Blumenthal: Use the Blumenthal key-expansion scheme.
+        Cisco: Use the Cisco/Reeder key-expansion scheme.
+    """
+
+    Blumenthal = 1
+    Cisco = 2
+
+
 class BaseKey:
     """
     Basic key class.
@@ -180,7 +206,7 @@ class BaseAuthKey(BaseKey):
 class Md5Key(BaseAuthKey):
     """MD5 Key."""
 
-    AUTH_ALG = 1
+    AUTH_ALG = 1  # 2 - Blumenthal, 3 - Cisco
     KEY_LENGTH = 16
     SNMPD_PREFIX = "MD5"
 
@@ -188,7 +214,7 @@ class Md5Key(BaseAuthKey):
 class Sha1Key(BaseAuthKey):
     """SHA-1 Key."""
 
-    AUTH_ALG = 2
+    AUTH_ALG = 4  #  5 - Blumenthal, 6 - Cisco
     KEY_LENGTH = 20
     SNMPD_PREFIX = "SHA"
 
@@ -197,6 +223,7 @@ class BasePrivKey(BaseKey):
     """Privacy key base class."""
 
     PRIV_ALG: int
+    KEY_LENGTH: int
 
 
 class DesKey(BasePrivKey):
@@ -204,6 +231,7 @@ class DesKey(BasePrivKey):
 
     PRIV_ALG = 1
     SNMPD_PREFIX = "DES"
+    KEY_LENGTH = 16
 
 
 class Aes128Key(BasePrivKey):
@@ -211,6 +239,23 @@ class Aes128Key(BasePrivKey):
 
     PRIV_ALG = 2
     SNMPD_PREFIX = "AES"
+    KEY_LENGTH = 16
+
+
+class Aes192Key(BasePrivKey):
+    """AES-192 Key."""
+
+    PRIV_ALG = 3
+    SNMPD_PREFIX = "AES192"
+    KEY_LENGTH = 24
+
+
+class Aes256Key(BasePrivKey):
+    """AES-256 Key."""
+
+    PRIV_ALG = 4
+    SNMPD_PREFIX = "AES256"
+    KEY_LENGTH = 32
 
 
 class User:
@@ -221,6 +266,7 @@ class User:
         name: user name.
         auth_key: Optional authentication key.
         priv_key: Optional privacy key.
+        key_expansion: Key expansion policy for AES-192/256 privacy keys.
     """
 
     def __init__(
@@ -229,10 +275,12 @@ class User:
         *,
         auth_key: BaseAuthKey | None = None,
         priv_key: BasePrivKey | None = None,
+        key_expansion: KeyExpansion = KeyExpansion.Blumenthal,
     ) -> None:
         self.name = name
         self.auth_key = auth_key
         self.priv_key = priv_key
+        self.key_expansion = key_expansion
         if self.priv_key and not self.auth_key:
             msg = "auth_key must be set to use priv_key"
             raise ValueError(msg)
@@ -271,21 +319,37 @@ class User:
         return self.auth_key is not None
 
     def get_auth_alg(self) -> int:
-        """
-        Auth algorithm index with key type mask.
+        """Return the authentication algorithm index with the key type mask.
 
-        Algorithms:
-            * 0 - No auth
-            * 1 - MD5
-            * 2 - SHA1
+        When the privacy key requires more key material than the
+        authentication algorithm provides, the configured key expansion
+        policy is encoded into the algorithm index.
 
-        KeyType.mask applied
+        Algorithm indexes:
+
+        * 0 - No auth
+        * 1 - MD5
+        * 2 - MD5 with Blumenthal key expansion
+        * 3 - MD5 with Cisco key expansion
+        * 4 - SHA-1
+        * 5 - SHA-1 with Blumenthal key expansion
+        * 6 - SHA-1 with Cisco key expansion
+
+        The expansion policy only affects algorithms whose key is shorter
+        than the selected privacy key.
+
+        Returns:
+        Authentication algorithm index with the key type mask applied.
         """
-        return (
-            self.auth_key.AUTH_ALG | self.auth_key.key_type._mask
-            if self.auth_key
-            else 0
-        )
+        if not self.auth_key:
+            return 0
+        alg = self.auth_key.AUTH_ALG
+        if (
+            self.priv_key
+            and self.priv_key.KEY_LENGTH > self.auth_key.KEY_LENGTH
+        ):
+            alg += self.key_expansion.value
+        return alg | self.auth_key.key_type._mask
 
     def get_priv_alg(self) -> int:
         """
@@ -295,6 +359,8 @@ class User:
             * 0 - No privacy
             * 1 - DES
             * 2 - AES-128
+            * 3 - AES-192
+            * 4 - AES-256
         KeyType.mask applied
         """
         return (
@@ -340,4 +406,10 @@ class User:
             r += self.auth_key.snmpd_key()
         if self.priv_key:
             r += self.priv_key.snmpd_key()
+            if (
+                self.auth_key is not None
+                and self.priv_key.KEY_LENGTH > self.auth_key.KEY_LENGTH
+                and self.key_expansion == KeyExpansion.Cisco
+            ):
+                r[-3] = f"{r[-3]}C"
         return " ".join(r)

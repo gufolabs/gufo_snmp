@@ -76,6 +76,8 @@ Gufo SNMP supports the following SNMPv3 privacy protocols:
 
 * **DES**
 * **AES-128**
+* **AES-192** (Blumenthal and Cisco/Reeder)
+* **AES-256** (Blumenthal and Cisco/Reeder)
 
 ### Does Gufo SNMP support GET, GETNEXT, and GETBULK?
 
@@ -305,6 +307,35 @@ Yes. Gufo SNMP accepts localized keys directly. You don't need to convert them b
 
 Yes. Gufo SNMP can derive the required SNMPv3 key from a password automatically. You can provide a password, master key, or localized key, and Gufo SNMP handles the required conversion automatically.
 
+### Is Blumenthal key expansion supported?
+
+Yes. Gufo SNMP supports the Blumenthal key expansion scheme for AES-192 and AES-256 privacy keys.
+
+```python
+from gufo.snmp import KeyExpansion, User
+
+user = User(
+    "myuser",
+    auth_key=...,
+    priv_key=...,
+    key_expansion=KeyExpansion.Blumenthal,
+)
+```
+
+### Is Cisco/Reeder key expansion supported?
+
+Yes. Gufo SNMP supports the Cisco/Reeder key expansion scheme for AES-192 and AES-256 privacy keys.
+
+```python
+from gufo.snmp import KeyExpansion, User
+
+user = User(
+    "myuser",
+    auth_key=...,
+    priv_key=...,
+    key_expansion=KeyExpansion.Cisco,
+)
+```
 ### What are noAuthNoPriv, authNoPriv, and authPriv?
 
 These are the three SNMPv3 security levels:

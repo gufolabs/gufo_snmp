@@ -5,12 +5,12 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
-mod aes128;
+mod aes;
 mod des;
 mod nopriv;
 use crate::error::{SnmpError, SnmpResult};
 use crate::snmp::msg::v3::{ScopedPdu, UsmParameters};
-use aes128::Aes128Key;
+use aes::{Aes128Key, Aes192Key, Aes256Key};
 use des::DesKey;
 use enum_dispatch::enum_dispatch;
 use nopriv::NoPriv;
@@ -20,6 +20,8 @@ pub enum PrivKey {
     NoPriv(NoPriv),
     Des(DesKey),
     Aes128(Aes128Key),
+    Aes192(Aes192Key),
+    Aes256(Aes256Key),
 }
 
 #[enum_dispatch]
@@ -54,19 +56,20 @@ fn get_padded_len(buf_len: usize, block_size: usize) -> usize {
     }
 }
 
-const NO_PRIV: u8 = 0;
-const DES: u8 = 1;
-const AES128: u8 = 2;
 // - - X X    X X X X
 const KT_ALG_MASK: u8 = 0x3f;
 
-impl PrivKey {
-    pub fn new(code: u8) -> SnmpResult<PrivKey> {
-        Ok(match code & KT_ALG_MASK {
-            NO_PRIV => PrivKey::NoPriv(NoPriv),
-            DES => PrivKey::Des(DesKey::default()),
-            AES128 => PrivKey::Aes128(Aes128Key::default()),
-            _ => return Err(SnmpError::InvalidVersion(code)),
+impl TryFrom<u8> for PrivKey {
+    type Error = SnmpError;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        Ok(match value & KT_ALG_MASK {
+            0 => PrivKey::NoPriv(NoPriv),
+            1 => PrivKey::Des(DesKey::default()),
+            2 => PrivKey::Aes128(Aes128Key::default()),
+            3 => PrivKey::Aes192(Aes192Key::default()),
+            4 => PrivKey::Aes256(Aes256Key::default()),
+            _ => return Err(SnmpError::InvalidVersion(value)),
         })
     }
 }
