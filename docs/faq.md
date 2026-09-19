@@ -86,7 +86,7 @@ Yes. Gufo SNMP supports the standard SNMP GET, GETNEXT, and GETBULK operations.
 Yes. Gufo SNMP supports walking an SNMP tree using GETNEXT or GETBULK. The high-level API handles the iteration for you:
 
 ```python
-for oid, value in session.walk("1.3.6.1.2.1"):
+for oid, value in session.fetch("1.3.6.1.2.1"):
     print(oid, value)
 ```
 
@@ -122,7 +122,7 @@ Yes. Gufo SNMP is designed to provide the highest practical performance for a Py
 
 ### Why is Gufo SNMP implemented in Rust?
 
-Gufo SNMP is implemented in Rust to move performance-critical operations out of Python. This reduces CPU and memory overhead while keeping the public API simple and Python-native.
+Gufo SNMP uses Rust for performance, memory safety, and efficient memory management. Performance-critical operations are implemented in Rust and exposed through a simple, Python-native API. This includes a zero-copy BER parser that minimizes memory allocations and avoids unnecessary data copying while processing SNMP messages, significantly reducing CPU and memory overhead.
 
 ### Can Gufo SNMP handle large SNMP walks?
 
@@ -312,7 +312,7 @@ These are the three SNMPv3 security levels:
 - `noAuthNoPriv` — authentication and encryption are disabled.
 - `authNoPriv` — authentication is enabled, but encryption is disabled.
 - `authPriv` — both authentication and encryption are enabled.
-- 
+
 Gufo SNMP selects the corresponding security level based on the authentication and privacy keys provided in the User.
 
 ### What happens if SNMPv3 authentication fails?
@@ -373,10 +373,6 @@ The Gufo SNMP source code is available on GitHub. See the [Gufo SNMP repository]
 ### How is Gufo SNMP structured?
 
 Gufo SNMP is organized into several components, including the Python API and the Rust-powered core. See the [Project's Code Base](dev/codebase.md) for an overview of the project structure and the role of its main components.
-
-### Why is Gufo SNMP implemented in Rust?
-
-Gufo SNMP uses Rust for its performance, memory safety, and efficient memory management. Rust allows us to implement a zero-copy BER parser, reducing memory allocations and avoiding unnecessary data copying while processing SNMP messages.
 
 ### How do I build Gufo SNMP from source?
 
