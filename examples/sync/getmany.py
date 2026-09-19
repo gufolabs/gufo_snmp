@@ -1,10 +1,9 @@
 import sys
-from typing import List
 
 from gufo.snmp.sync_client import SnmpSession
 
 
-def main(addr: str, community: str, oids: List[str]) -> None:
+def main(addr: str, community: str, oids: list[str]) -> None:
     with SnmpSession(addr=addr, community=community) as session:
         r = session.get_many(oids)
         for k, v in r.items():

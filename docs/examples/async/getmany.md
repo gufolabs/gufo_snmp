@@ -28,20 +28,13 @@ Import `sys` module to parse the CLI argument.
     We use `sys.argv` only for demonstration purposes. Use `argsparse` or alternatives
     in real-world applications.
 
-``` py title="getmany.py" linenums="1" hl_lines="3"
---8<-- "examples/async/getmany.py"
-```
-*Gufo SNMP* is a typed library and it is good practice
-to place type hints in your code, so we import
-required type hints from Python's `typing` module.
-
-``` py title="getmany.py" linenums="1" hl_lines="5"
+``` py title="getmany.py" linenums="1" hl_lines="4"
 --8<-- "examples/async/getmany.py"
 ```
 
 `SnmpSession` object holds all necessary API, so import it from `gufo.snmp`.
 
-``` py title="getmany.py" linenums="1" hl_lines="8"
+``` py title="getmany.py" linenums="1" hl_lines="7"
 --8<-- "examples/async/getmany.py"
 ```
 
@@ -52,7 +45,7 @@ So we define our function as `async`. We expect the following arguments:
 * SNMP community to authorize.
 * List of OIDs to query.
 
-``` py title="getmany.py" linenums="1" hl_lines="9"
+``` py title="getmany.py" linenums="1" hl_lines="8"
 --8<-- "examples/async/getmany.py"
 ```
 
@@ -67,7 +60,7 @@ so its lifetime is defined explicitly.
 for further details. In our example, we set the agent's address and SNMP community
 to the given values.
 
-``` py title="getmany.py" linenums="1" hl_lines="10"
+``` py title="getmany.py" linenums="1" hl_lines="9"
 --8<-- "examples/async/getmany.py"
 ```
 
@@ -81,14 +74,14 @@ must be awaited. See [SnmpSession.get() reference][gufo.snmp.async_client.SnmpSe
     `get_many()` ignores non-existent OIDs, so it is up to the application to check
     the resulting dict for missed keys.
 
-``` py title="getmany.py" linenums="1" hl_lines="11 12"
+``` py title="getmany.py" linenums="1" hl_lines="10 11"
 --8<-- "examples/async/getmany.py"
 ```
 
 It is up to the application how to deal with the result.
 In our example we just print all the items.
 
-``` py title="getmany.py" linenums="1" hl_lines="15"
+``` py title="getmany.py" linenums="1" hl_lines="14"
 --8<-- "examples/async/getmany.py"
 ```
 

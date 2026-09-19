@@ -2,12 +2,13 @@
 
 # Python modules
 import sys
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, List, Optional
+from typing import List, Optional
 
 
 @dataclass
-class Bench(object):
+class Bench:
     name: str
     inst: int
     l1: int
@@ -27,8 +28,8 @@ class Bench(object):
         )
 
 
-def iter_blocks() -> Iterable[List[str]]:
-    r: List[str] = []
+def iter_blocks() -> Iterable[list[str]]:
+    r: list[str] = []
     for line in sys.stdin:
         line = line.strip()
         if not line:
@@ -40,7 +41,7 @@ def iter_blocks() -> Iterable[List[str]]:
         yield r
 
 
-def is_valid(v: List[str]) -> bool:
+def is_valid(v: list[str]) -> bool:
     return len(v) == 6
 
 
@@ -67,7 +68,7 @@ def iter_benches() -> Iterable[Bench]:
 
 def main() -> None:
     benches = list(iter_benches())
-    buf_default: Optional[Bench] = None
+    buf_default: Bench | None = None
     print(
         "| Name | Inst.[^1] | L1 Acc.[^2] | L2 Acc.[^3] | "
         "RAM Acc.[^4] | Est. Cycles [^5] |"
