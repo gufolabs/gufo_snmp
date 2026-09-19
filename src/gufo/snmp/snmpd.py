@@ -327,7 +327,7 @@ sysServices 72"""
                 yield path
                 return
             if IS_DARWIN:
-                # Darwin/Homebrew, ovverade old macos' snmpd
+                # Darwin/Homebrew, ovveride old macos' snmpd
                 yield Path("/opt/homebrew/opt/net-snmp/bin/snmpd")
             # Default
             yield Path("/usr/sbin/snmpd")
