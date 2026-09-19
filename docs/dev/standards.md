@@ -14,6 +14,11 @@ Gufo SNMP implements and is guided by the following standards:
 * [RFC-3414][RFC-3414]: User-based Security Model (USM) for version 3 of the Simple Network Management Protocol (SNMPv3)
 * [RFC-3826][RFC-3826]: The Advanced Encryption Standard (AES) Cipher Algorithm in the SNMP User-based Security Model
 
+## IETF Internet-Drafts
+
+* [draft-blumenthal-aes-usm-04][draft-blumenthal-aes-usm-04]: The AES Cipher Algorithm in the SNMP's User-based Security Model.
+* [draft-reeder-snmpv3-usm-3desede-00][draft-reeder-snmpv3-usm-3desede-00]: Extension to the User-Based Security Model (USM) to Support Triple-DES EDE in "Outside" CBC Mode.
+
 ## ITU-T
 
 * [X-690][X-690]: Information technology – ASN.1 encoding rules: Specification of Basic Encoding Rules (BER), Canonical Encoding Rules (CER) and Distinguished Encoding Rules (DER).
@@ -33,6 +38,8 @@ Gufo SNMP implements and is guided by the following standards:
 [RFC-3412]: https://www.rfc-editor.org/rfc/rfc3412.html
 [RFC-3414]: https://www.rfc-editor.org/rfc/rfc3414.html
 [RFC-3826]: https://www.rfc-editor.org/rfc/rfc3826.html
+[draft-blumenthal-aes-usm-04]: [https://datatracker.ietf.org/doc/draft-blumenthal-aes-usm-04/](https://datatracker.ietf.org/doc/draft-blumenthal-aes-usm-04/)
+[draft-reeder-snmpv3-usm-3desede-00]: [https://datatracker.ietf.org/doc/draft-reeder-snmpv3-usm-3desede-00/](https://datatracker.ietf.org/doc/draft-reeder-snmpv3-usm-3desede-00/)
 [PEP8]: https://peps.python.org/pep-0008/
 [PEP484]: https://peps.python.org/pep-0484/
 [PEP561]: https://peps.python.org/pep-0561/

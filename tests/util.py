@@ -20,9 +20,12 @@ from typing import Any
 from gufo.snmp import SnmpVersion
 from gufo.snmp.user import (
     Aes128Key,
+    Aes192Key,
+    Aes256Key,
     BaseAuthKey,
     BasePrivKey,
     DesKey,
+    KeyExpansion,
     KeyType,
     Md5Key,
     Sha1Key,
@@ -39,45 +42,68 @@ SNMP_LOCATION_OID = "1.3.6.1.2.1.1.6.0"
 SNMP_CONTACT_OID = "1.3.6.1.2.1.1.4.0"
 
 
-# User name is defined as:
-# <user><auth alg><auth key type><priv alg><priv key type>
-# Where:
-# <auth alg> - authentication algorithm. Matches BaseAuthKey.AUTH_ALG
-# * 0 - No auth
-# * 1 - MD5
-# * 2 - SHA1
-# <auth key type> - key type for auth. Matches KeyType
-# 0 - Password or not applicabile
-# 1 - Master
-# 2 - Localized (not used in tests)
-# <priv alg> - privacy algorithm. Matches BasePrivKey.KEY_ALG
-# 0 - No priv
-# 1 - DES
-# 2 - AES128
-# <priv key type> - key type for priv.
-# 0 - Password or not applicabile
-# 1 - Master
-# 2 - Localized (not used in tests)
-# Examples
-# * `user0000` - no auth, no priv
-# * `user1000` - MD5 auth given as password, no priv
-# * `user2120` - SHA1 auth given as master, AES128 given as password.
-# Auth key is set as:
-# * `<username>pass` - for passwords
-# * `<username>key` - for keys
-# Priv key is an auth key in uppercase.
-# Example:
-# `user2121` has auth key `user2121pass` and priv key `USER2121PASS`
 def _get_user(name: str) -> User:
-    """Generate user from username."""
+    """Generate user from username.
+
+    User name is defined as:
+
+    ```
+    <user><auth alg><auth key type><priv alg><priv key type>
+    ```
+
+    Where:
+    - `<auth alg>` - authentication algorithm. Matches BaseAuthKey.AUTH_ALG
+
+        * `0` - No auth
+        * `1` - MD5
+        * `2` - SHA1
+
+    - `<auth key type>` - key type for auth. Matches KeyType
+
+        * `0` - Password or not applicabile
+        * `1` - Master
+        * `2` - Localized (not used in tests)
+
+    - `<priv alg>` - privacy algorithm. Matches BasePrivKey.KEY_ALG
+
+        `0` - No priv
+        `1` - DES
+        `2` - AES128
+        `3` - AES192 + Blumethal
+        `4` - AES192 + Cisco
+        `5` - AES256 + Blumenthal
+        `6` - AES256 + Cisco
+
+    - `<priv key type>` - key type for priv.
+
+        `0` - Password or not applicabile
+        `1` - Master
+        `2` - Localized (not used in tests)
+
+    Examples:
+        * `user0000` - no auth, no priv
+        * `user1000` - MD5 auth given as password, no priv
+        * `user2120` - SHA1 auth given as master, AES128 given as password.
+
+    Auth key is set as:
+
+    * `<username>pass` - for passwords
+    * `<username>key` - for keys
+    Priv key is an auth key in uppercase.
+
+    Example:
+        `user2121` has auth key `user2121pass` and priv key `USER2121PASS`
+    """
 
     def get_key_type(code: str) -> KeyType:
-        if code == "0":
-            return KeyType.Password
-        if code == "1":
-            return KeyType.Master
-        msg = f"Invalid key type: {code}"
-        raise ValueError(msg)
+        match code:
+            case "0":
+                return KeyType.Password
+            case "1":
+                return KeyType.Master
+            case _:
+                msg = f"Invalid key type: {code}"
+                raise ValueError(msg)
 
     def get_auth_key(name: str) -> BaseAuthKey | None:
         alg_code = name[4]
@@ -85,14 +111,16 @@ def _get_user(name: str) -> User:
         secret = (
             f"{name}pass" if key_type == KeyType.Password else f"{name}key"
         ).encode()
-        if alg_code == "0":
-            return None
-        if alg_code == "1":
-            return Md5Key(secret, key_type=key_type)
-        if alg_code == "2":
-            return Sha1Key(secret, key_type=key_type)
-        msg = f"Invalid auth protocol: {alg_code}"
-        raise ValueError(msg)
+        match alg_code:
+            case "0":
+                return None
+            case "1":
+                return Md5Key(secret, key_type=key_type)
+            case "2":
+                return Sha1Key(secret, key_type=key_type)
+            case _:
+                msg = f"Invalid auth protocol: {alg_code}"
+                raise ValueError(msg)
 
     def get_priv_key(name: str) -> BasePrivKey | None:
         alg_code = name[6]
@@ -102,17 +130,32 @@ def _get_user(name: str) -> User:
             .upper()
             .encode()
         )
-        if alg_code == "0":
-            return None
-        if alg_code == "1":
-            return DesKey(secret, key_type=key_type)
-        if alg_code == "2":
-            return Aes128Key(secret, key_type=key_type)
-        msg = f"Invalid priv protocol: {alg_code}"
-        raise ValueError(msg)
+        match alg_code:
+            case "0":
+                return None
+            case "1":
+                return DesKey(secret, key_type=key_type)
+            case "2":
+                return Aes128Key(secret, key_type=key_type)
+            case "3" | "4":
+                return Aes192Key(secret, key_type=key_type)
+            case "5" | "6":
+                return Aes256Key(secret, key_type=key_type)
+            case _:
+                msg = f"Invalid priv protocol: {alg_code}"
+                raise ValueError(msg)
+
+    def get_key_expansion(name) -> KeyExpansion:
+        alg_code = name[6]
+        if alg_code in {"4", "6"}:
+            return KeyExpansion.Cisco
+        return KeyExpansion.Blumenthal
 
     return User(
-        name=name, auth_key=get_auth_key(name), priv_key=get_priv_key(name)
+        name=name,
+        auth_key=get_auth_key(name),
+        priv_key=get_priv_key(name),
+        key_expansion=get_key_expansion(name),
     )
 
 
@@ -120,7 +163,7 @@ def _iter_users() -> Iterable[User]:
     """Generate all users."""
     key_types = "01"
     for auth_alg, auth_key_type, priv_alg, priv_key_type in product(
-        "012", key_types, "012", key_types
+        "012", key_types, "0123456", key_types
     ):
         if auth_alg == "0" and (
             auth_key_type != "0" or priv_alg != "0" or priv_key_type != "0"
@@ -146,13 +189,24 @@ UNAUTH_V3_USER = User(name="user2121")
 def ids(x: Any) -> str:
     if isinstance(x, dict) and "version" in x:
         r = [x["version"].name]
-        user = x.get("user")
+        user: User | None = x.get("user")
         if user:
-            r += [user.name]
+            r.append(user.name)
             if user.auth_key:
-                r += [user.auth_key.__class__.__name__]
+                r.append(user.auth_key.__class__.__name__)
             if user.priv_key:
-                r += [user.priv_key.__class__.__name__]
+                r.append(user.priv_key.__class__.__name__)
+                if (
+                    user.auth_key
+                    and user.priv_key.KEY_LENGTH > user.auth_key.KEY_LENGTH
+                ):
+                    match user.key_expansion:
+                        case KeyExpansion.Blumenthal:
+                            r.append("BLU")
+                        case KeyExpansion.Cisco:
+                            r.append("CIS")
+                        case _:
+                            pass
         return "-".join(r)
     return str(x)
 

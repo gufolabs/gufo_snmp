@@ -118,7 +118,8 @@ gufo-snmp -v2c -c public 127.0.0.1 1.3.6.1.2.1.1.6.0
 * SNMP v1/v2c/v3 support.
 * SNMP v3 User Security Model:
     * Authentication: HMAC-MD5-96, HMAC-SHA-96.
-    * Privacy: DES, AES128.
+    * Privacy: DES, AES128, AES-192, AES-256.
+    * AES-192/256 key expansion: Blumenthal, Cisco/Reeder.
     * Engine ID discovery.
 * Command-line utility which resembles Net-SNMP's get* commands.
 * High-performance.

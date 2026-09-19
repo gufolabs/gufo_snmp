@@ -5,6 +5,8 @@
 // See LICENSE.md for details
 // ------------------------------------------------------------------------
 
+mod blumenthal;
+mod cisco;
 mod digest;
 mod noauth;
 use enum_dispatch::enum_dispatch;
@@ -12,21 +14,27 @@ use md5::Md5;
 use sha1::Sha1;
 
 pub use crate::error::{SnmpError, SnmpResult};
+pub use blumenthal::DigestAuthWithBlumenthal;
+pub use cisco::DigestAuthWithCisco;
 pub use digest::DigestAuth;
 pub use noauth::NoAuth;
 
-pub const NO_AUTH: u8 = 0;
-pub const MD5_AUTH: u8 = 1;
-pub const SHA1_AUTH: u8 = 2;
-
 pub type Md5AuthKey = DigestAuth<Md5, 16, 12>;
+pub type Md5BlumenthalAuthKey = DigestAuthWithBlumenthal<Md5, 16, 12, 32>;
+pub type Md5CiscoAuthKey = DigestAuthWithCisco<Md5, 16, 12, 32>;
 pub type Sha1AuthKey = DigestAuth<Sha1, 20, 12>;
+pub type Sha1BlumenthalAuthKey = DigestAuthWithBlumenthal<Sha1, 20, 12, 32>;
+pub type Sha1CiscoAuthKey = DigestAuthWithCisco<Sha1, 20, 12, 32>;
 
 #[enum_dispatch(SnmpAuth)]
 pub enum AuthKey {
     NoAuth(NoAuth),
     Md5(Md5AuthKey),
+    Md5Blumenthal(Md5BlumenthalAuthKey),
+    Md5Cisco(Md5CiscoAuthKey),
     Sha1(Sha1AuthKey),
+    Sha1Blumenthal(Sha1BlumenthalAuthKey),
+    Sha1Cisco(Sha1CiscoAuthKey),
 }
 
 #[enum_dispatch]
@@ -65,14 +73,6 @@ const KT_MASTER: u8 = 0x40;
 const KT_LOCALIZED: u8 = 0x80;
 
 impl AuthKey {
-    pub fn new(code: u8) -> SnmpResult<AuthKey> {
-        Ok(match code & KT_ALG_MASK {
-            NO_AUTH => AuthKey::NoAuth(NoAuth),
-            MD5_AUTH => AuthKey::Md5(Md5AuthKey::default()),
-            SHA1_AUTH => AuthKey::Sha1(Sha1AuthKey::default()),
-            _ => return Err(SnmpError::InvalidVersion(code)),
-        })
-    }
     pub fn as_key_type(&mut self, alg: u8, key: &[u8], engine_id: &[u8]) -> SnmpResult<()> {
         if self.has_auth() {
             match alg & KT_TYPE_MASK {
@@ -86,9 +86,59 @@ impl AuthKey {
     }
 }
 
+impl TryFrom<u8> for AuthKey {
+    type Error = SnmpError;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        Ok(match value & KT_ALG_MASK {
+            0 => AuthKey::NoAuth(NoAuth),
+            1 => AuthKey::Md5(Md5AuthKey::default()),
+            2 => AuthKey::Md5Blumenthal(Md5BlumenthalAuthKey::default()),
+            3 => AuthKey::Md5Cisco(Md5CiscoAuthKey::default()),
+            4 => AuthKey::Sha1(Sha1AuthKey::default()),
+            5 => AuthKey::Sha1Blumenthal(Sha1BlumenthalAuthKey::default()),
+            6 => AuthKey::Sha1Cisco(Sha1CiscoAuthKey::default()),
+            _ => return Err(SnmpError::InvalidVersion(value)),
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_auth_key_try_from() {
+        assert!(matches!(AuthKey::try_from(0), Ok(AuthKey::NoAuth(_))));
+        assert!(matches!(AuthKey::try_from(1), Ok(AuthKey::Md5(_))));
+        assert!(matches!(
+            AuthKey::try_from(2),
+            Ok(AuthKey::Md5Blumenthal(_))
+        ));
+        assert!(matches!(AuthKey::try_from(3), Ok(AuthKey::Md5Cisco(_))));
+        assert!(matches!(AuthKey::try_from(4), Ok(AuthKey::Sha1(_))));
+        assert!(matches!(
+            AuthKey::try_from(5),
+            Ok(AuthKey::Sha1Blumenthal(_))
+        ));
+        assert!(matches!(AuthKey::try_from(6), Ok(AuthKey::Sha1Cisco(_))));
+    }
+
+    #[test]
+    fn test_auth_key_try_from_with_key_type() {
+        for value in 0..=6 {
+            for key_type in [KT_PASSWORD, KT_MASTER, KT_LOCALIZED] {
+                assert!(AuthKey::try_from(value | key_type).is_ok());
+            }
+        }
+    }
+
+    #[test]
+    fn test_auth_key_try_from_invalid() {
+        for value in 7..=KT_ALG_MASK {
+            assert!(AuthKey::try_from(value).is_err());
+        }
+    }
 
     #[test]
     fn test_md5_sign() -> SnmpResult<()> {
@@ -186,5 +236,97 @@ mod tests {
         auth_key.localize(&out1, &engine_id, &mut out2);
         assert_eq!(out2, expected2);
         Ok(())
+    }
+    #[test]
+    fn test_md5_blumenthal_key_expansion() -> SnmpResult<()> {
+        let auth_key = Md5BlumenthalAuthKey::default();
+        let localized_key = [
+            0x52, 0x6f, 0x5e, 0xed, 0x9f, 0xcc, 0xe2, 0x6f, 0x89, 0x64, 0xc2, 0x93, 0x07, 0x87,
+            0xd8, 0x2b,
+        ];
+        let expected = [
+            0x52, 0x6f, 0x5e, 0xed, 0x9f, 0xcc, 0xe2, 0x6f, 0x89, 0x64, 0xc2, 0x93, 0x07, 0x87,
+            0xd8, 0x2b, 0xfa, 0x24, 0xa9, 0x24, 0x67, 0x42, 0x6c, 0x2f, 0x4b, 0x09, 0x19, 0x2b,
+            0xe1, 0x0d, 0xfa, 0xec,
+        ];
+        let mut auth_key = auth_key;
+        auth_key.as_localized(&localized_key);
+        assert_eq!(auth_key.get_key_size(), 32);
+        assert_eq!(auth_key.get_key(), expected);
+        Ok(())
+    }
+
+    #[test]
+    fn test_sha1_blumenthal_key_expansion() -> SnmpResult<()> {
+        let mut auth_key = Sha1BlumenthalAuthKey::default();
+        let localized_key = [
+            0x66, 0x95, 0xfe, 0xbc, 0x92, 0x88, 0xe3, 0x62, 0x82, 0x23, 0x5f, 0xc7, 0x15, 0x1f,
+            0x12, 0x84, 0x97, 0xb3, 0x8f, 0x3f,
+        ];
+        let expected = [
+            0x66, 0x95, 0xfe, 0xbc, 0x92, 0x88, 0xe3, 0x62, 0x82, 0x23, 0x5f, 0xc7, 0x15, 0x1f,
+            0x12, 0x84, 0x97, 0xb3, 0x8f, 0x3f, 0x50, 0x5e, 0x07, 0xeb, 0x9a, 0xf2, 0x55, 0x68,
+            0xfa, 0x1f, 0x5d, 0xbe,
+        ];
+        auth_key.as_localized(&localized_key);
+        assert_eq!(auth_key.get_key_size(), 32);
+        assert_eq!(auth_key.get_key(), expected);
+        Ok(())
+    }
+    #[test]
+    fn test_blumenthal_auth_key_dispatch() -> SnmpResult<()> {
+        let mut md5 = AuthKey::try_from(2)?;
+        let mut sha1 = AuthKey::try_from(5)?;
+        let md5_key = [
+            0x52, 0x6f, 0x5e, 0xed, 0x9f, 0xcc, 0xe2, 0x6f, 0x89, 0x64, 0xc2, 0x93, 0x07, 0x87,
+            0xd8, 0x2b,
+        ];
+        let sha1_key = [
+            0x66, 0x95, 0xfe, 0xbc, 0x92, 0x88, 0xe3, 0x62, 0x82, 0x23, 0x5f, 0xc7, 0x15, 0x1f,
+            0x12, 0x84, 0x97, 0xb3, 0x8f, 0x3f,
+        ];
+        md5.as_localized(&md5_key);
+        sha1.as_localized(&sha1_key);
+        assert_eq!(md5.get_key_size(), 32);
+        assert_eq!(sha1.get_key_size(), 32);
+        Ok(())
+    }
+    #[test]
+    fn test_md5_cisco_key_expansion() {
+        let mut auth = Md5CiscoAuthKey::default();
+        let engine_id = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2];
+        auth.as_password(b"maplesyrup", &engine_id);
+        assert_eq!(
+            auth.get_key(),
+            &[
+                0x52, 0x6f, 0x5e, 0xed, 0x9f, 0xcc, 0xe2, 0x6f, 0x89, 0x64, 0xc2, 0x93, 0x07, 0x87,
+                0xd8, 0x2b, 0x79, 0xef, 0xf4, 0x4a, 0x90, 0x65, 0x0e, 0xe0, 0xa3, 0xa4, 0x0a, 0xbf,
+                0xac, 0x5a, 0xcc, 0x12,
+            ]
+        );
+    }
+
+    #[test]
+    fn test_sha1_cisco_key_expansion() {
+        let mut auth = Sha1CiscoAuthKey::default();
+        let engine_id = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2];
+        auth.as_password(b"maplesyrup", &engine_id);
+        assert_eq!(
+            auth.get_key(),
+            &[
+                0x66, 0x95, 0xfe, 0xbc, 0x92, 0x88, 0xe3, 0x62, 0x82, 0x23, 0x5f, 0xc7, 0x15, 0x1f,
+                0x12, 0x84, 0x97, 0xb3, 0x8f, 0x3f, 0x9b, 0x8b, 0x6d, 0x78, 0x93, 0x6b, 0xa6, 0xe7,
+                0xd1, 0x9d, 0xfd, 0x9c,
+            ]
+        );
+    }
+
+    #[test]
+    fn test_cisco_auth_key_dispatch() {
+        let auth = AuthKey::try_from(3).unwrap();
+        assert!(matches!(auth, AuthKey::Md5Cisco(_)));
+
+        let auth = AuthKey::try_from(6).unwrap();
+        assert!(matches!(auth, AuthKey::Sha1Cisco(_)));
     }
 }
