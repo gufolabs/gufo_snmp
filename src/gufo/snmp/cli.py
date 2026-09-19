@@ -216,7 +216,7 @@ class CollectOFlags(argparse.Action):
                 e.g., "-O" (may be None when called programmatically).
         """
         # Get existing flags (if any)
-        flags = getattr(namespace, self.dest, set()) or set()
+        flags: set[str] = getattr(namespace, self.dest, set()) or set()
         # Add each character in the new -O value
         if values:
             for ch in values:
