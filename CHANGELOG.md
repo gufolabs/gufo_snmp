@@ -16,6 +16,11 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 * #64 - BUG: IPv6 requires bracketed address in Gufo
 
+### Added
+
+* AES-192 and AES-256 privacy algorithms.
+* Blumenthal and Cisco/Reeder key expansion schemes.
+
 ### Changed
 
 * Prefer Homebrew-installed snmpd on macOS when available.
