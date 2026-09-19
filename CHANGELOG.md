@@ -19,6 +19,7 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 ### Added
 
 * AES-192 and AES-256 privacy algorithms.
+* SHA-224, SHA-256, SHA-384, and SHA-512 auth algorithms.
 * Blumenthal and Cisco/Reeder key expansion schemes.
 
 ### Changed

@@ -6,6 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::SnmpAuth;
+use super::ZEROES;
 use crate::error::SnmpResult;
 use digest::Digest;
 use std::marker::PhantomData;
@@ -13,13 +14,20 @@ use std::marker::PhantomData;
 // KS  - authentication key size
 // SS  - signature size
 // PKS - expanded privacy key size
-pub struct DigestAuthWithCisco<D: Digest, const KS: usize, const SS: usize, const PKS: usize> {
+// BS  - HMAC block size
+pub struct DigestAuthWithCisco<
+    D: Digest,
+    const KS: usize,
+    const SS: usize,
+    const PKS: usize,
+    const BS: usize,
+> {
     key: [u8; PKS],
     _pd: PhantomData<D>,
 }
 
-impl<D: Digest, const KS: usize, const SS: usize, const PKS: usize> Default
-    for DigestAuthWithCisco<D, KS, SS, PKS>
+impl<D: Digest, const KS: usize, const SS: usize, const PKS: usize, const BS: usize> Default
+    for DigestAuthWithCisco<D, KS, SS, PKS, BS>
 {
     fn default() -> Self {
         Self {
@@ -29,16 +37,12 @@ impl<D: Digest, const KS: usize, const SS: usize, const PKS: usize> Default
     }
 }
 
-const PADDED_LENGTH: usize = 64;
-const ZEROES: [u8; PADDED_LENGTH] = [0; PADDED_LENGTH];
 const IPAD_VALUE: u8 = 0x36;
 const OPAD_VALUE: u8 = 0x5c;
-const IPAD_MASK: [u8; PADDED_LENGTH] = [IPAD_VALUE; PADDED_LENGTH];
-const OPAD_MASK: [u8; PADDED_LENGTH] = [OPAD_VALUE; PADDED_LENGTH];
 const MEGABYTE: usize = 1_048_576;
 
-impl<D: Digest, const KS: usize, const SS: usize, const PKS: usize>
-    DigestAuthWithCisco<D, KS, SS, PKS>
+impl<D: Digest, const KS: usize, const SS: usize, const PKS: usize, const BS: usize>
+    DigestAuthWithCisco<D, KS, SS, PKS, BS>
 {
     fn expand(&mut self, locality: &[u8]) {
         if PKS <= KS {
@@ -74,28 +78,10 @@ impl<D: Digest, const KS: usize, const SS: usize, const PKS: usize>
         let digest = hasher.finalize();
         out.copy_from_slice(&digest[..out.len()]);
     }
-
-    fn sign_with_key(&self, key: &[u8], data: &mut [u8], offset: usize) -> SnmpResult<()> {
-        let rest_len = PADDED_LENGTH - key.len();
-        let mut ctx1 = D::new();
-        let k1: Vec<u8> = key.iter().map(|&x| x ^ IPAD_VALUE).collect();
-        ctx1.update(k1);
-        ctx1.update(&IPAD_MASK[..rest_len]);
-        ctx1.update(&*data);
-        let d1 = ctx1.finalize();
-        let mut ctx2 = D::new();
-        let k2: Vec<u8> = key.iter().map(|&x| x ^ OPAD_VALUE).collect();
-        ctx2.update(k2);
-        ctx2.update(&OPAD_MASK[..rest_len]);
-        ctx2.update(&d1[..key.len()]);
-        let d2 = ctx2.finalize();
-        data[offset..offset + SS].copy_from_slice(&d2[..SS]);
-        Ok(())
-    }
 }
 
-impl<D: Digest, const KS: usize, const SS: usize, const PKS: usize> SnmpAuth
-    for DigestAuthWithCisco<D, KS, SS, PKS>
+impl<D: Digest, const KS: usize, const SS: usize, const PKS: usize, const BS: usize> SnmpAuth
+    for DigestAuthWithCisco<D, KS, SS, PKS, BS>
 {
     fn as_localized(&mut self, key: &[u8]) {
         self.key[..KS].copy_from_slice(&key[..KS]);
@@ -139,6 +125,42 @@ impl<D: Digest, const KS: usize, const SS: usize, const PKS: usize> SnmpAuth
     }
 
     fn sign(&self, data: &mut [u8], offset: usize) -> SnmpResult<()> {
-        self.sign_with_key(&self.key[..KS], data, offset)
+        let mut ipad = [IPAD_VALUE; BS];
+        let mut opad = [OPAD_VALUE; BS];
+        // RFC-3414, pp. 6.3.1. Processing an outgoing message
+        // a) extend the authKey to 64 octets by appending 48 zero octets;
+        //    save it as extendedAuthKey
+        //    >>> Really not necessary
+        // b) obtain IPAD by replicating the octet 0x36 64 times;
+        //    >>> need only rest
+        // c) obtain K1 by XORing extendedAuthKey with IPAD;
+        // 3) Prepend K1 to the wholeMsg and calculate MD5 digest over it according to [RFC1321].
+        // Instead:
+        // * XOR the key with IPAD
+        // d) obtain OPAD by replicating the octet 0x5C 64 times;
+        //    >>> Really not necessary
+        // e) obtain K2 by XORing extendedAuthKey with OPAD.
+        // 4) Prepend K2 to the result of the step 3 and calculate MD5 digest
+        //    over it according to [RFC1321]. Take the first 12 octets of the
+        //    final digest - this is Message Authentication Code (MAC).
+        // Instead:
+        // * XOR the key with OPAD
+        for i in 0..KS {
+            ipad[i] ^= self.key[i];
+            opad[i] ^= self.key[i];
+        }
+        // * append whole message
+        let mut ctx1 = D::new();
+        ctx1.update(ipad);
+        ctx1.update(&data);
+        // get digest
+        let d1 = ctx1.finalize();
+        // * append previous digest
+        let mut ctx2 = D::new();
+        ctx2.update(opad);
+        ctx2.update(d1);
+        let d2 = ctx2.finalize();
+        data[offset..offset + SS].copy_from_slice(&d2[..SS]);
+        Ok(())
     }
 }

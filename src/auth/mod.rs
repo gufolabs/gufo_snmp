@@ -12,6 +12,7 @@ mod noauth;
 use enum_dispatch::enum_dispatch;
 use md5::Md5;
 use sha1::Sha1;
+use sha2::{Sha224, Sha256, Sha384, Sha512};
 
 pub use crate::error::{SnmpError, SnmpResult};
 pub use blumenthal::DigestAuthWithBlumenthal;
@@ -19,12 +20,20 @@ pub use cisco::DigestAuthWithCisco;
 pub use digest::DigestAuth;
 pub use noauth::NoAuth;
 
-pub type Md5AuthKey = DigestAuth<Md5, 16, 12>;
-pub type Md5BlumenthalAuthKey = DigestAuthWithBlumenthal<Md5, 16, 12, 32>;
-pub type Md5CiscoAuthKey = DigestAuthWithCisco<Md5, 16, 12, 32>;
-pub type Sha1AuthKey = DigestAuth<Sha1, 20, 12>;
-pub type Sha1BlumenthalAuthKey = DigestAuthWithBlumenthal<Sha1, 20, 12, 32>;
-pub type Sha1CiscoAuthKey = DigestAuthWithCisco<Sha1, 20, 12, 32>;
+pub type Md5AuthKey = DigestAuth<Md5, 16, 12, 64>;
+pub type Md5BlumenthalAuthKey = DigestAuthWithBlumenthal<Md5, 16, 12, 32, 64>;
+pub type Md5CiscoAuthKey = DigestAuthWithCisco<Md5, 16, 12, 32, 64>;
+pub type Sha1AuthKey = DigestAuth<Sha1, 20, 12, 64>;
+pub type Sha1BlumenthalAuthKey = DigestAuthWithBlumenthal<Sha1, 20, 12, 32, 64>;
+pub type Sha1CiscoAuthKey = DigestAuthWithCisco<Sha1, 20, 12, 32, 64>;
+pub type Sha224AuthKey = DigestAuth<Sha224, 28, 16, 64>;
+pub type Sha224BlumenthalAuthKey = DigestAuthWithBlumenthal<Sha224, 28, 16, 32, 64>;
+pub type Sha224CiscoAuthKey = DigestAuthWithCisco<Sha224, 28, 16, 32, 64>;
+pub type Sha256AuthKey = DigestAuth<Sha256, 32, 24, 64>;
+pub type Sha384AuthKey = DigestAuth<Sha384, 48, 32, 128>;
+pub type Sha512AuthKey = DigestAuth<Sha512, 64, 48, 128>;
+
+const ZEROES: [u8; 128] = [0; 128];
 
 #[enum_dispatch(SnmpAuth)]
 pub enum AuthKey {
@@ -35,6 +44,12 @@ pub enum AuthKey {
     Sha1(Sha1AuthKey),
     Sha1Blumenthal(Sha1BlumenthalAuthKey),
     Sha1Cisco(Sha1CiscoAuthKey),
+    Sha224(Sha224AuthKey),
+    Sha224Blumenthal(Sha224BlumenthalAuthKey),
+    Sha224Cisco(Sha224CiscoAuthKey),
+    Sha256(Sha256AuthKey),
+    Sha384(Sha384AuthKey),
+    Sha512(Sha512AuthKey),
 }
 
 #[enum_dispatch]
@@ -98,6 +113,12 @@ impl TryFrom<u8> for AuthKey {
             4 => AuthKey::Sha1(Sha1AuthKey::default()),
             5 => AuthKey::Sha1Blumenthal(Sha1BlumenthalAuthKey::default()),
             6 => AuthKey::Sha1Cisco(Sha1CiscoAuthKey::default()),
+            7 => AuthKey::Sha224(Sha224AuthKey::default()),
+            8 => AuthKey::Sha224Blumenthal(Sha224BlumenthalAuthKey::default()),
+            9 => AuthKey::Sha224Cisco(Sha224CiscoAuthKey::default()),
+            10 => AuthKey::Sha256(Sha256AuthKey::default()),
+            11 => AuthKey::Sha384(Sha384AuthKey::default()),
+            12 => AuthKey::Sha512(Sha512AuthKey::default()),
             _ => return Err(SnmpError::InvalidVersion(value)),
         })
     }
@@ -122,11 +143,20 @@ mod tests {
             Ok(AuthKey::Sha1Blumenthal(_))
         ));
         assert!(matches!(AuthKey::try_from(6), Ok(AuthKey::Sha1Cisco(_))));
+        assert!(matches!(AuthKey::try_from(7), Ok(AuthKey::Sha224(_))));
+        assert!(matches!(
+            AuthKey::try_from(8),
+            Ok(AuthKey::Sha224Blumenthal(_))
+        ));
+        assert!(matches!(AuthKey::try_from(9), Ok(AuthKey::Sha224Cisco(_))));
+        assert!(matches!(AuthKey::try_from(10), Ok(AuthKey::Sha256(_))));
+        assert!(matches!(AuthKey::try_from(11), Ok(AuthKey::Sha384(_))));
+        assert!(matches!(AuthKey::try_from(12), Ok(AuthKey::Sha512(_))));
     }
 
     #[test]
     fn test_auth_key_try_from_with_key_type() {
-        for value in 0..=6 {
+        for value in 0..=12 {
             for key_type in [KT_PASSWORD, KT_MASTER, KT_LOCALIZED] {
                 assert!(AuthKey::try_from(value | key_type).is_ok());
             }
@@ -135,7 +165,7 @@ mod tests {
 
     #[test]
     fn test_auth_key_try_from_invalid() {
-        for value in 7..=KT_ALG_MASK {
+        for value in 13..=KT_ALG_MASK {
             assert!(AuthKey::try_from(value).is_err());
         }
     }

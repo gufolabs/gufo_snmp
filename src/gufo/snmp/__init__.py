@@ -29,6 +29,10 @@ from .user import (
     KeyExpansion,
     Md5Key,
     Sha1Key,
+    Sha224Key,
+    Sha256Key,
+    Sha384Key,
+    Sha512Key,
     User,
 )
 from .version import SnmpVersion
@@ -43,6 +47,10 @@ __all__ = [
     "Md5Key",
     "NoSuchInstance",
     "Sha1Key",
+    "Sha224Key",
+    "Sha256Key",
+    "Sha384Key",
+    "Sha512Key",
     "SnmpAuthError",
     "SnmpDecodeError",
     "SnmpEncodeError",

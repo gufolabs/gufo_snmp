@@ -29,6 +29,10 @@ from gufo.snmp.user import (
     KeyType,
     Md5Key,
     Sha1Key,
+    Sha224Key,
+    Sha256Key,
+    Sha384Key,
+    Sha512Key,
     User,
 )
 
@@ -53,7 +57,7 @@ def _get_key_type(code: str) -> KeyType:
             raise ValueError(msg)
 
 
-def _get_auth_key(name: str) -> BaseAuthKey | None:
+def _get_auth_key(name: str) -> BaseAuthKey | None:  # noqa: PLR0911
     alg_code = name[4]
     key_type = _get_key_type(name[5])
     secret = (
@@ -66,6 +70,14 @@ def _get_auth_key(name: str) -> BaseAuthKey | None:
             return Md5Key(secret, key_type=key_type)
         case "2":
             return Sha1Key(secret, key_type=key_type)
+        case "3":
+            return Sha224Key(secret, key_type=key_type)
+        case "4":
+            return Sha256Key(secret, key_type=key_type)
+        case "5":
+            return Sha384Key(secret, key_type=key_type)
+        case "6":
+            return Sha512Key(secret, key_type=key_type)
         case _:
             msg = f"Invalid auth protocol: {alg_code}"
             raise ValueError(msg)
@@ -117,6 +129,10 @@ def _get_user(name: str) -> User:
         * `0` - No auth
         * `1` - MD5
         * `2` - SHA1
+        * `3` - SHA-224
+        * `4` - SHA-256
+        * `5` - SHA-384
+        * `6` - SHA-512
 
     - `<auth key type>` - key type for auth. Matches KeyType
 
@@ -166,7 +182,7 @@ def _iter_users() -> Iterable[User]:
     """Generate all users."""
     key_types = "01"
     for auth_alg, auth_key_type, priv_alg, priv_key_type in product(
-        "012", key_types, "0123456", key_types
+        "0123456", key_types, "0123456", key_types
     ):
         if auth_alg == "0" and (
             auth_key_type != "0" or priv_alg != "0" or priv_key_type != "0"
