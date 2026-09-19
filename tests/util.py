@@ -42,6 +42,66 @@ SNMP_LOCATION_OID = "1.3.6.1.2.1.1.6.0"
 SNMP_CONTACT_OID = "1.3.6.1.2.1.1.4.0"
 
 
+def _get_key_type(code: str) -> KeyType:
+    match code:
+        case "0":
+            return KeyType.Password
+        case "1":
+            return KeyType.Master
+        case _:
+            msg = f"Invalid key type: {code}"
+            raise ValueError(msg)
+
+
+def _get_auth_key(name: str) -> BaseAuthKey | None:
+    alg_code = name[4]
+    key_type = _get_key_type(name[5])
+    secret = (
+        f"{name}pass" if key_type == KeyType.Password else f"{name}key"
+    ).encode()
+    match alg_code:
+        case "0":
+            return None
+        case "1":
+            return Md5Key(secret, key_type=key_type)
+        case "2":
+            return Sha1Key(secret, key_type=key_type)
+        case _:
+            msg = f"Invalid auth protocol: {alg_code}"
+            raise ValueError(msg)
+
+
+def _get_priv_key(name: str) -> BasePrivKey | None:
+    alg_code = name[6]
+    key_type = _get_key_type(name[7])
+    secret = (
+        (f"{name}pass" if key_type == KeyType.Password else f"{name}key")
+        .upper()
+        .encode()
+    )
+    match alg_code:
+        case "0":
+            return None
+        case "1":
+            return DesKey(secret, key_type=key_type)
+        case "2":
+            return Aes128Key(secret, key_type=key_type)
+        case "3" | "4":
+            return Aes192Key(secret, key_type=key_type)
+        case "5" | "6":
+            return Aes256Key(secret, key_type=key_type)
+        case _:
+            msg = f"Invalid priv protocol: {alg_code}"
+            raise ValueError(msg)
+
+
+def _get_key_expansion(name: str) -> KeyExpansion:
+    alg_code = name[6]
+    if alg_code in {"4", "6"}:
+        return KeyExpansion.Cisco
+    return KeyExpansion.Blumenthal
+
+
 def _get_user(name: str) -> User:
     """Generate user from username.
 
@@ -94,68 +154,11 @@ def _get_user(name: str) -> User:
     Example:
         `user2121` has auth key `user2121pass` and priv key `USER2121PASS`
     """
-
-    def get_key_type(code: str) -> KeyType:
-        match code:
-            case "0":
-                return KeyType.Password
-            case "1":
-                return KeyType.Master
-            case _:
-                msg = f"Invalid key type: {code}"
-                raise ValueError(msg)
-
-    def get_auth_key(name: str) -> BaseAuthKey | None:
-        alg_code = name[4]
-        key_type = get_key_type(name[5])
-        secret = (
-            f"{name}pass" if key_type == KeyType.Password else f"{name}key"
-        ).encode()
-        match alg_code:
-            case "0":
-                return None
-            case "1":
-                return Md5Key(secret, key_type=key_type)
-            case "2":
-                return Sha1Key(secret, key_type=key_type)
-            case _:
-                msg = f"Invalid auth protocol: {alg_code}"
-                raise ValueError(msg)
-
-    def get_priv_key(name: str) -> BasePrivKey | None:
-        alg_code = name[6]
-        key_type = get_key_type(name[7])
-        secret = (
-            (f"{name}pass" if key_type == KeyType.Password else f"{name}key")
-            .upper()
-            .encode()
-        )
-        match alg_code:
-            case "0":
-                return None
-            case "1":
-                return DesKey(secret, key_type=key_type)
-            case "2":
-                return Aes128Key(secret, key_type=key_type)
-            case "3" | "4":
-                return Aes192Key(secret, key_type=key_type)
-            case "5" | "6":
-                return Aes256Key(secret, key_type=key_type)
-            case _:
-                msg = f"Invalid priv protocol: {alg_code}"
-                raise ValueError(msg)
-
-    def get_key_expansion(name) -> KeyExpansion:
-        alg_code = name[6]
-        if alg_code in {"4", "6"}:
-            return KeyExpansion.Cisco
-        return KeyExpansion.Blumenthal
-
     return User(
         name=name,
-        auth_key=get_auth_key(name),
-        priv_key=get_priv_key(name),
-        key_expansion=get_key_expansion(name),
+        auth_key=_get_auth_key(name),
+        priv_key=_get_priv_key(name),
+        key_expansion=_get_key_expansion(name),
     )
 
 
