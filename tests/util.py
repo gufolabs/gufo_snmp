@@ -31,7 +31,6 @@ from gufo.snmp.user import (
 
 SNMPD_ADDRESS = "127.0.0.1"
 SNMPD_PORT = random.randint(52000, 53999)
-SNMPD_PATH = "/usr/sbin/snmpd"
 SNMP_COMMUNITY = "public"
 SNMP_LOCATION = "Gufo SNMP Test"
 SNMP_CONTACT = "test <test@example.com>"

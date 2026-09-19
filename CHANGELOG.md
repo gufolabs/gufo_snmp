@@ -16,6 +16,10 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 * #64 - BUG: IPv6 requires bracketed address in Gufo
 
+### Added
+
+* Prefer Homebrew-installed snmpd on macOS when available.
+
 ### Removed
 
 * Python 3.9 support.

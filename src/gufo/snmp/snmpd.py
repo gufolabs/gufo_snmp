@@ -9,7 +9,6 @@
 
 # Python modules
 import logging
-import os
 import queue
 import random
 import shutil
@@ -17,6 +16,8 @@ import string
 import subprocess
 import sys
 import threading
+from collections.abc import Iterable
+from pathlib import Path
 from tempfile import (
     NamedTemporaryFile,
     TemporaryDirectory,
@@ -84,7 +85,7 @@ class Snmpd:
 
     def __init__(
         self,
-        path: str | None = None,
+        path: Path | None = None,
         address: str = "127.0.0.1",
         port: int = 10161,
         community: str = "public",
@@ -96,7 +97,7 @@ class Snmpd:
         verbose: bool = False,
         log_packets: bool = False,
     ) -> None:
-        self._path = path or self._get_snmpd_path()
+        self._path = self._get_snmpd_path(path)
         self._address = address
         self._port = port
         self._community = community
@@ -171,7 +172,7 @@ sysServices 72"""
         self._cfg.flush()
         # Run snmpd
         args = [
-            self._path,
+            str(self._path),
             "-C",  # Ignore default configs
             "-c",  # Read our config
             self._cfg.name,
@@ -307,11 +308,36 @@ sysServices 72"""
         return self._port
 
     @staticmethod
-    def _get_snmpd_path() -> str:
-        """Detect snmpd's path."""
-        # Default place
-        path = "/usr/sbin/snmpd"
-        # Darwin and others
-        if not os.path.exists(path):
-            path = shutil.which("snmpd") or ""
-        return path
+    def _get_snmpd_path(path: Path | None) -> Path:
+        """Detect snmpd's path.
+
+        Args:
+            path: Explicit path to snmpd, or None to auto-detect.
+
+        Returns:
+            Path to the snmpd executable.
+
+        Raises:
+            RuntimeError: If snmpd is not found.
+        """
+
+        def _iter_path() -> Iterable[Path]:
+            if path:
+                # Explicitly set
+                yield path
+                return
+            if IS_DARWIN:
+                # Darwin/Homebrew, ovverade old macos' snmpd
+                yield Path("/opt/homebrew/opt/net-snmp/bin/snmpd")
+            # Default
+            yield Path("/usr/sbin/snmpd")
+            # On path
+            p = shutil.which("snmpd")
+            if p:
+                yield Path(p)
+
+        for p in _iter_path():
+            if p.exists():
+                return p
+        msg = "snmpd is not found"
+        raise RuntimeError(msg)
