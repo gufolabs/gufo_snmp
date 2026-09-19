@@ -1,0 +1,4549 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Gufo SNMP Documentation">
+      
+      
+        <meta name="author" content="Gufo Labs">
+      
+      
+        <link rel="canonical" href="https://docs.gufolabs.com/gufo_snmp/faq/">
+      
+      
+        <link rel="prev" href="../dev/types/">
+      
+      
+        <link rel="next" href="../CHANGELOG/">
+      
+      
+      <link rel="icon" href="../assets/logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.11">
+    
+    
+      
+        <title>FAQ - Gufo SNMP</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.4af4bdda.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-GW3X378HNJ"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-GW3X378HNJ",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-GW3X378HNJ",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#faq" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Gufo SNMP" class="md-header__button md-logo" aria-label="Gufo SNMP" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Gufo SNMP
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              FAQ
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/gufolabs/gufo_snmp/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    gufolabs/gufo_snmp
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../installation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Installation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../examples/" class="md-tabs__link">
+          
+  
+  
+  Examples
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../reference/gufo/snmp/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../man/" class="md-tabs__link">
+          
+  
+  
+  Man
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../benchmarks/" class="md-tabs__link">
+          
+  
+  
+  Benchmarks
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../dev/" class="md-tabs__link">
+          
+  
+  
+  Developers' Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../CHANGELOG/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../LICENSE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  License
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" hidden>
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Gufo SNMP" class="md-nav__button md-logo" aria-label="Gufo SNMP" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    Gufo SNMP
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/gufolabs/gufo_snmp/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    gufolabs/gufo_snmp
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Examples
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Sync Mode
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            Sync Mode
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/sync/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/sync/get/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Single Item Get Request
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/sync/getmany/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Multi Items Get Request
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/sync/getnext/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GetNext Request
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/sync/getbulk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GetBulk Request
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/sync/fetch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Fetch
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/sync/get-v3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SNMPv3 Get Request
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/sync/engine-id-discovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SNMPv3 Engine ID Discovery
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/sync/ratelimit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Rate Limiting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/sync/debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Debugging
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Async Mode
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Async Mode
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/async/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/async/get/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Single Item Get Request
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/async/getmany/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Multi Items Get Request
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/async/getnext/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GetNext Request
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/async/getbulk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GetBulk Request
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/async/fetch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Fetch
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/async/get-v3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SNMPv3 Get Request
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/async/engine-id-discovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SNMPv3 Engine ID Discovery
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/async/ratelimit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Rate Limiting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/async/debugging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Debugging
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../reference/gufo/snmp/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    gufo.snmp
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            gufo.snmp
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../reference/gufo/snmp/async_client/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    async_client
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_1_1" id="__nav_4_1_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_1_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_1">
+            <span class="md-nav__icon md-icon"></span>
+            async_client
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/gufo/snmp/async_client/client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    client
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/gufo/snmp/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    cli
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/gufo/snmp/policer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    policer
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/gufo/snmp/protocol/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    protocol
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/gufo/snmp/snmpd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    snmpd
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../reference/gufo/snmp/sync_client/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    sync_client
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_1_6" id="__nav_4_1_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_1_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1_6">
+            <span class="md-nav__icon md-icon"></span>
+            sync_client
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/gufo/snmp/sync_client/client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    client
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/gufo/snmp/sync_client/getbulk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    getbulk
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/gufo/snmp/sync_client/getnext/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    getnext
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/gufo/snmp/typing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    typing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/gufo/snmp/user/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    user
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/gufo/snmp/utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    utils
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/gufo/snmp/version/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    version
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Man
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Man
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../man/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../man/gufo-snmp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    gufo-snmp
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Benchmarks
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Benchmarks
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/preparing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Preparing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    SNMP v2c
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            SNMP v2c
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/v2c/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/v2c/getnext/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GETNEXT
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/v2c/getbulk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GETBULK
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/v2c/getnext_p/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parallel GETNEXT
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/v2c/getbulk_p/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parallel GETBULK
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    SNMP v3
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_4">
+            <span class="md-nav__icon md-icon"></span>
+            SNMP v3
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/v3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/v3/getnext/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GETNEXT
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/v3/getbulk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GETBULK
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/v3/getnext_p/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parallel GETNEXT
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/v3/getbulk_p/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parallel GETBULK
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/conclusions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Conclusions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/feedback/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Feedback
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developers' Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Developers' Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Developer's Environment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building and Testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/common/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Common Tasks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/codequality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Code Quality
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/codebase/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Code Base
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/CODE_OF_CONDUCT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Code of Conduct
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Supported Standards
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Supported BER Types
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Started
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting Started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-gufo-snmp" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is Gufo SNMP?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-should-i-use-gufo-snmp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why should I use Gufo SNMP?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#who-is-gufo-snmp-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      Who is Gufo SNMP for?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is-gufo-snmp-a-replacement-for-net-snmp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Is Gufo SNMP a replacement for Net-SNMP?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-work-with-existing-snmp-devices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP work with existing SNMP devices?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#which-versions-of-snmp-are-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      Which versions of SNMP are supported?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-install-gufo-snmp" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I install Gufo SNMP?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#do-you-provide-pre-built-binary-wheels" class="md-nav__link">
+    <span class="md-ellipsis">
+      Do you provide pre-built binary wheels?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-perform-my-first-snmp-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I perform my first SNMP request?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#snmp-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      SNMP Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SNMP Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-snmpv3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support SNMPv3?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#which-snmpv3-authentication-methods-are-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      Which SNMPv3 authentication methods are supported?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#which-snmpv3-privacy-protocols-are-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      Which SNMPv3 privacy protocols are supported?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-get-getnext-and-getbulk" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support GET, GETNEXT, and GETBULK?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-walk-an-snmp-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I walk an SNMP tree?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-snmp-traps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support SNMP traps?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-informs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support INFORMs?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-ipv6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support IPv6?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-udp-and-tcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use UDP and TCP?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-query-multiple-oids-in-one-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I query multiple OIDs in one request?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-snmpv3-engine-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support SNMPv3 engine discovery?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#is-gufo-snmp-fast" class="md-nav__link">
+    <span class="md-ellipsis">
+      Is Gufo SNMP fast?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-is-gufo-snmp-implemented-in-rust" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why is Gufo SNMP implemented in Rust?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-gufo-snmp-handle-large-snmp-walks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can Gufo SNMP handle large SNMP walks?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-asynchronous-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support asynchronous operation?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-run-many-snmp-requests-concurrently" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I run many SNMP requests concurrently?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-does-gufo-snmp-compare-to-python-snmp-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      How does Gufo SNMP compare to Python SNMP libraries?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-release-the-gil" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP release the GIL?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-gufo-snmp-handle-large-and-heterogeneous-networks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can Gufo SNMP handle large and heterogeneous networks?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-python-free-threading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support Python free-threading?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is-gufo-snmp-used-in-large-scale-production-environments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Is Gufo SNMP used in large-scale production environments?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python API
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Python API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#is-gufo-snmp-synchronous-or-asynchronous" class="md-nav__link">
+    <span class="md-ellipsis">
+      Is Gufo SNMP synchronous or asynchronous?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-gufo-snmp-with-asyncio" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use Gufo SNMP with asyncio?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-gufo-snmp-from-synchronous-python-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use Gufo SNMP from synchronous Python code?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-create-an-snmp-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I create an SNMP session?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-specify-snmp-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I specify SNMP credentials?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-specify-a-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I specify a timeout?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-handle-snmp-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I handle SNMP errors?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-are-snmp-values-represented-in-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      How are SNMP values represented in Python?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-are-oids-represented" class="md-nav__link">
+    <span class="md-ellipsis">
+      How are OIDs represented?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-reuse-an-snmp-session-for-multiple-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I reuse an SNMP session for multiple requests?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-one-snmp-session-with-multiple-devices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use one SNMP session with multiple devices?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#snmpv3" class="md-nav__link">
+    <span class="md-ellipsis">
+      SNMPv3
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SNMPv3">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-configure-snmpv3" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I configure SNMPv3?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-snmpv3-without-authentication-or-encryption" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use SNMPv3 without authentication or encryption?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-can-i-specify-snmpv3-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      How can I specify SNMPv3 keys?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-the-difference-between-a-password-a-master-key-and-a-localized-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is the difference between a password, a master key, and a localized key?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-a-pre-localized-snmpv3-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use a pre-localized SNMPv3 key?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-gufo-snmp-derive-a-key-from-a-password" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can Gufo SNMP derive a key from a password?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is-blumenthal-key-expansion-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      Is Blumenthal key expansion supported?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is-ciscoreeder-key-expansion-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      Is Cisco/Reeder key expansion supported?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-are-noauthnopriv-authnopriv-and-authpriv" class="md-nav__link">
+    <span class="md-ellipsis">
+      What are noAuthNoPriv, authNoPriv, and authPriv?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-happens-if-snmpv3-authentication-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      What happens if SNMPv3 authentication fails?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-do-i-get-a-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why do I get a timeout?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-can-i-check-whether-the-snmp-agent-is-reachable" class="md-nav__link">
+    <span class="md-ellipsis">
+      How can I check whether the SNMP agent is reachable?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-does-get-work-but-getbulk-fail" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why does GET work but GETBULK fail?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-does-an-snmpv3-request-fail-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why does an SNMPv3 request fail authentication?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-troubleshoot-snmpv3-encryption-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I troubleshoot SNMPv3 encryption errors?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-handle-an-snmp-error-status-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I handle an SNMP error-status response?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-does-gufo-snmp-handle-nosuchobject" class="md-nav__link">
+    <span class="md-ellipsis">
+      How does Gufo SNMP handle noSuchObject?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-does-gufo-snmp-handle-nosuchinstance" class="md-nav__link">
+    <span class="md-ellipsis">
+      How does Gufo SNMP handle noSuchInstance?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-does-gufo-snmp-handle-endofmibview" class="md-nav__link">
+    <span class="md-ellipsis">
+      How does Gufo SNMP handle endOfMibView?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-is-the-gufo-snmp-source-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Where is the Gufo SNMP source code?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-is-gufo-snmp-structured" class="md-nav__link">
+    <span class="md-ellipsis">
+      How is Gufo SNMP structured?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-build-gufo-snmp-from-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I build Gufo SNMP from source?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-run-the-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I run the tests?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-run-the-benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I run the benchmarks?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-can-i-contribute-to-gufo-snmp" class="md-nav__link">
+    <span class="md-ellipsis">
+      How can I contribute to Gufo SNMP?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-can-i-report-a-bug" class="md-nav__link">
+    <span class="md-ellipsis">
+      How can I report a bug?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-can-i-request-a-feature" class="md-nav__link">
+    <span class="md-ellipsis">
+      How can I request a feature?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#about-gufo" class="md-nav__link">
+    <span class="md-ellipsis">
+      About Gufo
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="About Gufo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-does-gufo-mean" class="md-nav__link">
+    <span class="md-ellipsis">
+      What does "Gufo" mean?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-the-owls" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why the owls?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-gufo-labs" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is "Gufo Labs"?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-gufo-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is "Gufo Stack"?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CHANGELOG/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Changelog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../LICENSE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    License
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Started
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting Started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-gufo-snmp" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is Gufo SNMP?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-should-i-use-gufo-snmp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why should I use Gufo SNMP?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#who-is-gufo-snmp-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      Who is Gufo SNMP for?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is-gufo-snmp-a-replacement-for-net-snmp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Is Gufo SNMP a replacement for Net-SNMP?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-work-with-existing-snmp-devices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP work with existing SNMP devices?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#which-versions-of-snmp-are-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      Which versions of SNMP are supported?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-install-gufo-snmp" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I install Gufo SNMP?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#do-you-provide-pre-built-binary-wheels" class="md-nav__link">
+    <span class="md-ellipsis">
+      Do you provide pre-built binary wheels?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-perform-my-first-snmp-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I perform my first SNMP request?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#snmp-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      SNMP Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SNMP Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-snmpv3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support SNMPv3?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#which-snmpv3-authentication-methods-are-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      Which SNMPv3 authentication methods are supported?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#which-snmpv3-privacy-protocols-are-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      Which SNMPv3 privacy protocols are supported?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-get-getnext-and-getbulk" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support GET, GETNEXT, and GETBULK?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-walk-an-snmp-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I walk an SNMP tree?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-snmp-traps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support SNMP traps?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-informs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support INFORMs?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-ipv6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support IPv6?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-udp-and-tcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use UDP and TCP?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-query-multiple-oids-in-one-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I query multiple OIDs in one request?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-snmpv3-engine-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support SNMPv3 engine discovery?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#is-gufo-snmp-fast" class="md-nav__link">
+    <span class="md-ellipsis">
+      Is Gufo SNMP fast?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-is-gufo-snmp-implemented-in-rust" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why is Gufo SNMP implemented in Rust?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-gufo-snmp-handle-large-snmp-walks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can Gufo SNMP handle large SNMP walks?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-asynchronous-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support asynchronous operation?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-run-many-snmp-requests-concurrently" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I run many SNMP requests concurrently?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-does-gufo-snmp-compare-to-python-snmp-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      How does Gufo SNMP compare to Python SNMP libraries?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-release-the-gil" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP release the GIL?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-gufo-snmp-handle-large-and-heterogeneous-networks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can Gufo SNMP handle large and heterogeneous networks?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#does-gufo-snmp-support-python-free-threading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Does Gufo SNMP support Python free-threading?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is-gufo-snmp-used-in-large-scale-production-environments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Is Gufo SNMP used in large-scale production environments?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python API
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Python API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#is-gufo-snmp-synchronous-or-asynchronous" class="md-nav__link">
+    <span class="md-ellipsis">
+      Is Gufo SNMP synchronous or asynchronous?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-gufo-snmp-with-asyncio" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use Gufo SNMP with asyncio?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-gufo-snmp-from-synchronous-python-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use Gufo SNMP from synchronous Python code?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-create-an-snmp-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I create an SNMP session?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-specify-snmp-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I specify SNMP credentials?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-specify-a-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I specify a timeout?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-handle-snmp-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I handle SNMP errors?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-are-snmp-values-represented-in-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      How are SNMP values represented in Python?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-are-oids-represented" class="md-nav__link">
+    <span class="md-ellipsis">
+      How are OIDs represented?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-reuse-an-snmp-session-for-multiple-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I reuse an SNMP session for multiple requests?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-one-snmp-session-with-multiple-devices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use one SNMP session with multiple devices?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#snmpv3" class="md-nav__link">
+    <span class="md-ellipsis">
+      SNMPv3
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SNMPv3">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-configure-snmpv3" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I configure SNMPv3?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-snmpv3-without-authentication-or-encryption" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use SNMPv3 without authentication or encryption?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-can-i-specify-snmpv3-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      How can I specify SNMPv3 keys?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-the-difference-between-a-password-a-master-key-and-a-localized-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is the difference between a password, a master key, and a localized key?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-i-use-a-pre-localized-snmpv3-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can I use a pre-localized SNMPv3 key?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#can-gufo-snmp-derive-a-key-from-a-password" class="md-nav__link">
+    <span class="md-ellipsis">
+      Can Gufo SNMP derive a key from a password?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is-blumenthal-key-expansion-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      Is Blumenthal key expansion supported?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is-ciscoreeder-key-expansion-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      Is Cisco/Reeder key expansion supported?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-are-noauthnopriv-authnopriv-and-authpriv" class="md-nav__link">
+    <span class="md-ellipsis">
+      What are noAuthNoPriv, authNoPriv, and authPriv?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-happens-if-snmpv3-authentication-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      What happens if SNMPv3 authentication fails?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-do-i-get-a-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why do I get a timeout?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-can-i-check-whether-the-snmp-agent-is-reachable" class="md-nav__link">
+    <span class="md-ellipsis">
+      How can I check whether the SNMP agent is reachable?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-does-get-work-but-getbulk-fail" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why does GET work but GETBULK fail?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-does-an-snmpv3-request-fail-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why does an SNMPv3 request fail authentication?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-troubleshoot-snmpv3-encryption-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I troubleshoot SNMPv3 encryption errors?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-handle-an-snmp-error-status-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I handle an SNMP error-status response?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-does-gufo-snmp-handle-nosuchobject" class="md-nav__link">
+    <span class="md-ellipsis">
+      How does Gufo SNMP handle noSuchObject?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-does-gufo-snmp-handle-nosuchinstance" class="md-nav__link">
+    <span class="md-ellipsis">
+      How does Gufo SNMP handle noSuchInstance?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-does-gufo-snmp-handle-endofmibview" class="md-nav__link">
+    <span class="md-ellipsis">
+      How does Gufo SNMP handle endOfMibView?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-is-the-gufo-snmp-source-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Where is the Gufo SNMP source code?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-is-gufo-snmp-structured" class="md-nav__link">
+    <span class="md-ellipsis">
+      How is Gufo SNMP structured?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-build-gufo-snmp-from-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I build Gufo SNMP from source?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-run-the-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I run the tests?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-do-i-run-the-benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      How do I run the benchmarks?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-can-i-contribute-to-gufo-snmp" class="md-nav__link">
+    <span class="md-ellipsis">
+      How can I contribute to Gufo SNMP?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-can-i-report-a-bug" class="md-nav__link">
+    <span class="md-ellipsis">
+      How can I report a bug?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-can-i-request-a-feature" class="md-nav__link">
+    <span class="md-ellipsis">
+      How can I request a feature?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#about-gufo" class="md-nav__link">
+    <span class="md-ellipsis">
+      About Gufo
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="About Gufo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-does-gufo-mean" class="md-nav__link">
+    <span class="md-ellipsis">
+      What does "Gufo" mean?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-the-owls" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why the owls?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-gufo-labs" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is "Gufo Labs"?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-gufo-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is "Gufo Stack"?
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+
+
+
+  
+    <a href="https://github.com/gufolabs/gufo_snmp/edit/master/docs/faq.md" title="Edit this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h1>
+<h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
+<h3 id="what-is-gufo-snmp">What is Gufo SNMP?<a class="headerlink" href="#what-is-gufo-snmp" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP is a modern, high-performance SNMP library for Python. It provides a simple Python API for working with SNMP devices while using Rust for performance-critical operations.</p>
+<h3 id="why-should-i-use-gufo-snmp">Why should I use Gufo SNMP?<a class="headerlink" href="#why-should-i-use-gufo-snmp" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP combines the simplicity of Python with the performance of Rust. It is a good fit for applications that need to communicate with many SNMP devices efficiently without giving up a convenient Python API.</p>
+<h3 id="who-is-gufo-snmp-for">Who is Gufo SNMP for?<a class="headerlink" href="#who-is-gufo-snmp-for" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP is for network engineers, system administrators, and Python developers building network monitoring, management, automation, and observability applications. It is particularly useful for applications that need to communicate with many SNMP devices efficiently.</p>
+<h3 id="is-gufo-snmp-a-replacement-for-net-snmp">Is Gufo SNMP a replacement for Net-SNMP?<a class="headerlink" href="#is-gufo-snmp-a-replacement-for-net-snmp" title="Permanent link">&para;</a></h3>
+<p>While Net-SNMP is a comprehensive framework covering virtually every aspect of SNMP, Gufo SNMP takes a different approach. It hides the complexity of the protocol from the developer behind a simple, clean API, while delivering high performance through its Rust-powered core.</p>
+<h3 id="does-gufo-snmp-work-with-existing-snmp-devices">Does Gufo SNMP work with existing SNMP devices?<a class="headerlink" href="#does-gufo-snmp-work-with-existing-snmp-devices" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP works with existing SNMP-enabled devices. If a device supports SNMP, Gufo SNMP can communicate with it.</p>
+<h3 id="which-versions-of-snmp-are-supported">Which versions of SNMP are supported?<a class="headerlink" href="#which-versions-of-snmp-are-supported" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP supports SNMPv1, SNMPv2c, and SNMPv3.</p>
+<h3 id="how-do-i-install-gufo-snmp">How do I install Gufo SNMP?<a class="headerlink" href="#how-do-i-install-gufo-snmp" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP can be installed using standard Python package managers such as pip or uv</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>gufo-snmp
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>uv<span class="w"> </span>add<span class="w"> </span>gufo-snmp
+</code></pre></div>
+<h3 id="do-you-provide-pre-built-binary-wheels">Do you provide pre-built binary wheels?<a class="headerlink" href="#do-you-provide-pre-built-binary-wheels" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP provides pre-built binary wheels for supported platforms. You don't need to install Rust or compile anything from source for a regular installation.</p>
+<h3 id="how-do-i-perform-my-first-snmp-request">How do I perform my first SNMP request?<a class="headerlink" href="#how-do-i-perform-my-first-snmp-request" title="Permanent link">&para;</a></h3>
+<p>Create an SnmpSession with the device address and community, then use <code>get()</code> to retrieve an OID:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">gufo.snmp.sync_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">SnmpSession</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">with</span> <span class="n">SnmpSession</span><span class="p">(</span><span class="n">addr</span><span class="o">=</span><span class="s2">"192.0.2.1"</span><span class="p">,</span> <span class="n">community</span><span class="o">=</span><span class="s2">"public"</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"1.3.6.1.2.1.1.1.0"</span><span class="p">))</span>
+</code></pre></div>
+<h2 id="snmp-features">SNMP Features<a class="headerlink" href="#snmp-features" title="Permanent link">&para;</a></h2>
+<h3 id="does-gufo-snmp-support-snmpv3">Does Gufo SNMP support SNMPv3?<a class="headerlink" href="#does-gufo-snmp-support-snmpv3" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP provides support for SNMPv3, including authentication and privacy (encryption). Supported authentication and privacy protocols are described below.</p>
+<h3 id="which-snmpv3-authentication-methods-are-supported">Which SNMPv3 authentication methods are supported?<a class="headerlink" href="#which-snmpv3-authentication-methods-are-supported" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP supports the following SNMPv3 authentication methods:</p>
+<ul>
+<li><strong>MD5</strong></li>
+<li><strong>SHA-1</strong></li>
+</ul>
+<h3 id="which-snmpv3-privacy-protocols-are-supported">Which SNMPv3 privacy protocols are supported?<a class="headerlink" href="#which-snmpv3-privacy-protocols-are-supported" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP supports the following SNMPv3 privacy protocols:</p>
+<ul>
+<li><strong>DES</strong></li>
+<li><strong>AES-128</strong></li>
+<li><strong>AES-192</strong> (Blumenthal and Cisco/Reeder)</li>
+<li><strong>AES-256</strong> (Blumenthal and Cisco/Reeder)</li>
+</ul>
+<h3 id="does-gufo-snmp-support-get-getnext-and-getbulk">Does Gufo SNMP support GET, GETNEXT, and GETBULK?<a class="headerlink" href="#does-gufo-snmp-support-get-getnext-and-getbulk" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP supports the standard SNMP GET, GETNEXT, and GETBULK operations.</p>
+<h3 id="can-i-walk-an-snmp-tree">Can I walk an SNMP tree?<a class="headerlink" href="#can-i-walk-an-snmp-tree" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP supports walking an SNMP tree using GETNEXT or GETBULK. The high-level API handles the iteration for you:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">for</span> <span class="n">oid</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">session</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">"1.3.6.1.2.1"</span><span class="p">):</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">oid</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="does-gufo-snmp-support-snmp-traps">Does Gufo SNMP support SNMP traps?<a class="headerlink" href="#does-gufo-snmp-support-snmp-traps" title="Permanent link">&para;</a></h3>
+<p>Not yet. SNMP trap support is planned for a future release.</p>
+<h3 id="does-gufo-snmp-support-informs">Does Gufo SNMP support INFORMs?<a class="headerlink" href="#does-gufo-snmp-support-informs" title="Permanent link">&para;</a></h3>
+<p>Not yet. SNMP INFORM support is planned for a future release.</p>
+<h3 id="does-gufo-snmp-support-ipv6">Does Gufo SNMP support IPv6?<a class="headerlink" href="#does-gufo-snmp-support-ipv6" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP supports SNMP over IPv6.</p>
+<h3 id="can-i-use-udp-and-tcp">Can I use UDP and TCP?<a class="headerlink" href="#can-i-use-udp-and-tcp" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP currently supports SNMP over UDP. TCP support is not currently available.</p>
+<h3 id="can-i-query-multiple-oids-in-one-request">Can I query multiple OIDs in one request?<a class="headerlink" href="#can-i-query-multiple-oids-in-one-request" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP supports querying multiple OIDs in a single request using <code>get_many()</code></p>
+<h3 id="does-gufo-snmp-support-snmpv3-engine-discovery">Does Gufo SNMP support SNMPv3 engine discovery?<a class="headerlink" href="#does-gufo-snmp-support-snmpv3-engine-discovery" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP automatically discovers the SNMPv3 engine ID when required, so you don't need to configure it manually.</p>
+<h2 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h2>
+<h3 id="is-gufo-snmp-fast">Is Gufo SNMP fast?<a class="headerlink" href="#is-gufo-snmp-fast" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP is designed to provide the highest practical performance for a Python SNMP library. Performance-critical operations are implemented in Rust, while the Python API remains simple and convenient to use.</p>
+<h3 id="why-is-gufo-snmp-implemented-in-rust">Why is Gufo SNMP implemented in Rust?<a class="headerlink" href="#why-is-gufo-snmp-implemented-in-rust" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP uses Rust for performance, memory safety, and efficient memory management. Performance-critical operations are implemented in Rust and exposed through a simple, Python-native API. This includes a zero-copy BER parser that minimizes memory allocations and avoids unnecessary data copying while processing SNMP messages, significantly reducing CPU and memory overhead.</p>
+<h3 id="can-gufo-snmp-handle-large-snmp-walks">Can Gufo SNMP handle large SNMP walks?<a class="headerlink" href="#can-gufo-snmp-handle-large-snmp-walks" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP can handle SNMP walks of any practical size. It does not accumulate the entire walk result in memory. Results are returned to the application as they are received, allowing the application to process or store them incrementally.</p>
+<h3 id="does-gufo-snmp-support-asynchronous-operation">Does Gufo SNMP support asynchronous operation?<a class="headerlink" href="#does-gufo-snmp-support-asynchronous-operation" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP provides both synchronous and asynchronous APIs, allowing you to use it with standard Python code or asyncio applications.</p>
+<h3 id="can-i-run-many-snmp-requests-concurrently">Can I run many SNMP requests concurrently?<a class="headerlink" href="#can-i-run-many-snmp-requests-concurrently" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP supports running SNMP requests concurrently using separate sessions. It has been tested with several hundred concurrent sessions, making it suitable for applications communicating with large numbers of devices in parallel.</p>
+<h3 id="how-does-gufo-snmp-compare-to-python-snmp-libraries">How does Gufo SNMP compare to Python SNMP libraries?<a class="headerlink" href="#how-does-gufo-snmp-compare-to-python-snmp-libraries" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP is designed to be one of the fastest SNMP libraries available for Python. It combines a simple, Python-native API with a Rust-powered core for performance-critical operations and is optimized for working with large numbers of SNMP devices.</p>
+<h3 id="does-gufo-snmp-release-the-gil">Does Gufo SNMP release the GIL?<a class="headerlink" href="#does-gufo-snmp-release-the-gil" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP releases the Python GIL whenever possible. Performance-critical operations are executed outside the GIL, allowing other Python threads to run concurrently.</p>
+<h3 id="can-gufo-snmp-handle-large-and-heterogeneous-networks">Can Gufo SNMP handle large and heterogeneous networks?<a class="headerlink" href="#can-gufo-snmp-handle-large-and-heterogeneous-networks" title="Permanent link">&para;</a></h3>
+<p>Yes. Large-scale and heterogeneous networks are Gufo SNMP's native environment. It is designed to communicate efficiently with large numbers of devices from different vendors, using different SNMP versions and capabilities.</p>
+<h3 id="does-gufo-snmp-support-python-free-threading">Does Gufo SNMP support Python free-threading?<a class="headerlink" href="#does-gufo-snmp-support-python-free-threading" title="Permanent link">&para;</a></h3>
+<p>Not yet. We are currently experimenting with Python free-threading support.</p>
+<h3 id="is-gufo-snmp-used-in-large-scale-production-environments">Is Gufo SNMP used in large-scale production environments?<a class="headerlink" href="#is-gufo-snmp-used-in-large-scale-production-environments" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP is used in production environments monitoring large-scale networks. Some installations monitor more than one million network devices, demonstrating its ability to operate efficiently at very large scale.</p>
+<h2 id="python-api">Python API<a class="headerlink" href="#python-api" title="Permanent link">&para;</a></h2>
+<h3 id="is-gufo-snmp-synchronous-or-asynchronous">Is Gufo SNMP synchronous or asynchronous?<a class="headerlink" href="#is-gufo-snmp-synchronous-or-asynchronous" title="Permanent link">&para;</a></h3>
+<p>Both. Gufo SNMP provides separate synchronous and asynchronous APIs, so you can use it with standard Python code or asyncio applications.</p>
+<h3 id="can-i-use-gufo-snmp-with-asyncio">Can I use Gufo SNMP with asyncio?<a class="headerlink" href="#can-i-use-gufo-snmp-with-asyncio" title="Permanent link">&para;</a></h3>
+<p>Yes. Import SnmpSession from <code>gufo.snmp.async_client</code> and use it with <code>asyncio</code> applications.</p>
+<h3 id="can-i-use-gufo-snmp-from-synchronous-python-code">Can I use Gufo SNMP from synchronous Python code?<a class="headerlink" href="#can-i-use-gufo-snmp-from-synchronous-python-code" title="Permanent link">&para;</a></h3>
+<p>Yes. Import SnmpSession from <code>gufo.snmp.sync_client</code> and use it from regular synchronous Python code.</p>
+<h3 id="how-do-i-create-an-snmp-session">How do I create an SNMP session?<a class="headerlink" href="#how-do-i-create-an-snmp-session" title="Permanent link">&para;</a></h3>
+<p>Create an SnmpSession with the device address and SNMP credentials. For example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">gufo.snmp.sync_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">SnmpSession</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">with</span> <span class="n">SnmpSession</span><span class="p">(</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">addr</span><span class="o">=</span><span class="s2">"192.0.2.1"</span><span class="p">,</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">community</span><span class="o">=</span><span class="s2">"public"</span><span class="p">,</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="o">...</span>
+</code></pre></div>
+<p>For asynchronous applications, use <code>async with</code> with <code>SnmpSession</code> from <code>gufo.snmp.async_client</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">gufo.snmp.async_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">SnmpSession</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">async</span> <span class="k">with</span> <span class="n">SnmpSession</span><span class="p">(</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">addr</span><span class="o">=</span><span class="s2">"192.0.2.1"</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">community</span><span class="o">=</span><span class="s2">"public"</span><span class="p">,</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="o">...</span>
+</code></pre></div>
+<h3 id="how-do-i-specify-snmp-credentials">How do I specify SNMP credentials?<a class="headerlink" href="#how-do-i-specify-snmp-credentials" title="Permanent link">&para;</a></h3>
+<p>For SNMPv1 and SNMPv2c, specify the community string directly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">with</span> <span class="n">SnmpSession</span><span class="p">(</span><span class="n">addr</span><span class="o">=</span><span class="s2">"192.0.2.1"</span><span class="p">,</span> <span class="n">community</span><span class="o">=</span><span class="s2">"public"</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="o">...</span>
+</code></pre></div>
+<p>For SNMPv3, create a User with the required authentication and privacy keys:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">with</span> <span class="n">SnmpSession</span><span class="p">(</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">addr</span><span class="o">=</span><span class="s2">"192.0.2.1"</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="n">user</span><span class="o">=</span><span class="n">User</span><span class="p">(</span><span class="s2">"username"</span><span class="p">,</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">auth_key</span><span class="o">=</span><span class="n">Sha1Key</span><span class="p">(</span><span class="sa">b</span><span class="s2">"authpass"</span><span class="p">),</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">priv_key</span><span class="o">=</span><span class="n">Aes128Key</span><span class="p">(</span><span class="sa">b</span><span class="s2">"privpass"</span><span class="p">))</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="o">...</span>
+</code></pre></div>
+<h3 id="how-do-i-specify-a-timeout">How do I specify a timeout?<a class="headerlink" href="#how-do-i-specify-a-timeout" title="Permanent link">&para;</a></h3>
+<p>Set the timeout parameter when creating an SnmpSession. The timeout is specified as a floating-point value in seconds:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">with</span> <span class="n">SnmpSession</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="o">...</span>
+</code></pre></div>
+<h3 id="how-do-i-handle-snmp-errors">How do I handle SNMP errors?<a class="headerlink" href="#how-do-i-handle-snmp-errors" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP raises exceptions for SNMP and protocol errors. All Gufo SNMP exceptions inherit from SnmpError, so applications can catch all SNMP-related errors at once or handle specific errors individually.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">gufo.snmp</span><span class="w"> </span><span class="kn">import</span> <span class="n">SnmpError</span><span class="p">,</span> <span class="n">SnmpAuthError</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="k">with</span> <span class="n">SnmpSession</span><span class="p">(</span><span class="n">addr</span><span class="o">=</span><span class="s2">"192.0.2.1"</span><span class="p">,</span> <span class="n">community</span><span class="o">=</span><span class="s2">"public"</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"1.3.6.1.2.1.1.1.0"</span><span class="p">)</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="k">except</span> <span class="n">SnmpError</span><span class="p">:</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="o">...</span>
+</code></pre></div>
+<h3 id="how-are-snmp-values-represented-in-python">How are SNMP values represented in Python?<a class="headerlink" href="#how-are-snmp-values-represented-in-python" title="Permanent link">&para;</a></h3>
+<p>SNMP encodes the type of each value in the response using BER. Gufo SNMP uses this information to automatically convert SNMP values to the corresponding native Python types. See the <a href="../dev/types/">Supported BER Types</a> section for the complete mapping between BER and Python types.</p>
+<h3 id="how-are-oids-represented">How are OIDs represented?<a class="headerlink" href="#how-are-oids-represented" title="Permanent link">&para;</a></h3>
+<p>OIDs are represented as strings in Python. For example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">oid</span> <span class="o">=</span> <span class="s2">"1.3.6.1.2.1.1.1.0"</span>
+</code></pre></div>
+<h3 id="can-i-reuse-an-snmp-session-for-multiple-requests">Can I reuse an SNMP session for multiple requests?<a class="headerlink" href="#can-i-reuse-an-snmp-session-for-multiple-requests" title="Permanent link">&para;</a></h3>
+<p>Yes. An SnmpSession can be reused for multiple sequential requests. For concurrent requests, use a separate session for each concurrent operation.</p>
+<h3 id="can-i-use-one-snmp-session-with-multiple-devices">Can I use one SNMP session with multiple devices?<a class="headerlink" href="#can-i-use-one-snmp-session-with-multiple-devices" title="Permanent link">&para;</a></h3>
+<p>No. An SnmpSession is associated with a single SNMP device. Create a separate session for each device you want to communicate with.</p>
+<h2 id="snmpv3">SNMPv3<a class="headerlink" href="#snmpv3" title="Permanent link">&para;</a></h2>
+<h3 id="how-do-i-configure-snmpv3">How do I configure SNMPv3?<a class="headerlink" href="#how-do-i-configure-snmpv3" title="Permanent link">&para;</a></h3>
+<p>Create a <code>User</code> with the required authentication and privacy keys, then pass it to <code>SnmpSession</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">gufo.snmp</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span><span class="p">,</span> <span class="n">Sha1Key</span><span class="p">,</span> <span class="n">Aes128Key</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">gufo.snmp.sync_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">SnmpSession</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="k">with</span> <span class="n">SnmpSession</span><span class="p">(</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    <span class="n">addr</span><span class="o">=</span><span class="s2">"192.0.2.1"</span><span class="p">,</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>    <span class="n">user</span><span class="o">=</span><span class="n">User</span><span class="p">(</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>        <span class="s2">"username"</span><span class="p">,</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>        <span class="n">auth_key</span><span class="o">=</span><span class="n">Sha1Key</span><span class="p">(</span><span class="sa">b</span><span class="s2">"authpass"</span><span class="p">),</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>        <span class="n">priv_key</span><span class="o">=</span><span class="n">Aes128Key</span><span class="p">(</span><span class="sa">b</span><span class="s2">"privpass"</span><span class="p">),</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>    <span class="p">),</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"1.3.6.1.2.1.1.1.0"</span><span class="p">))</span>
+</code></pre></div>
+<h3 id="can-i-use-snmpv3-without-authentication-or-encryption">Can I use SNMPv3 without authentication or encryption?<a class="headerlink" href="#can-i-use-snmpv3-without-authentication-or-encryption" title="Permanent link">&para;</a></h3>
+<p>Yes. Simply omit the corresponding authentication and privacy keys when creating the User. For example, to use SNMPv3 without authentication or encryption:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="how-can-i-specify-snmpv3-keys">How can I specify SNMPv3 keys?<a class="headerlink" href="#how-can-i-specify-snmpv3-keys" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP accepts SNMPv3 keys in three forms: as a password, a master key, or a localized key. You can use whichever form you already have; Gufo SNMP automatically converts it to the form required for communication with the target device.</p>
+<h3 id="what-is-the-difference-between-a-password-a-master-key-and-a-localized-key">What is the difference between a password, a master key, and a localized key?<a class="headerlink" href="#what-is-the-difference-between-a-password-a-master-key-and-a-localized-key" title="Permanent link">&para;</a></h3>
+<p>A <strong>password</strong> is the human-readable secret used to derive an SNMPv3 key. A <strong>master key</strong> is the key derived from the password using the SNMPv3 key derivation algorithm. A <strong>localized key</strong> is derived from the master key and the SNMPv3 engine ID, making it specific to a particular SNMP engine.</p>
+<h3 id="can-i-use-a-pre-localized-snmpv3-key">Can I use a pre-localized SNMPv3 key?<a class="headerlink" href="#can-i-use-a-pre-localized-snmpv3-key" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP accepts localized keys directly. You don't need to convert them back to a password or master key.</p>
+<h3 id="can-gufo-snmp-derive-a-key-from-a-password">Can Gufo SNMP derive a key from a password?<a class="headerlink" href="#can-gufo-snmp-derive-a-key-from-a-password" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP can derive the required SNMPv3 key from a password automatically. You can provide a password, master key, or localized key, and Gufo SNMP handles the required conversion automatically.</p>
+<h3 id="is-blumenthal-key-expansion-supported">Is Blumenthal key expansion supported?<a class="headerlink" href="#is-blumenthal-key-expansion-supported" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP supports the Blumenthal key expansion scheme for AES-192 and AES-256 privacy keys.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">gufo.snmp</span><span class="w"> </span><span class="kn">import</span> <span class="n">KeyExpansion</span><span class="p">,</span> <span class="n">User</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>    <span class="s2">"myuser"</span><span class="p">,</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>    <span class="n">auth_key</span><span class="o">=...</span><span class="p">,</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="n">priv_key</span><span class="o">=...</span><span class="p">,</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>    <span class="n">key_expansion</span><span class="o">=</span><span class="n">KeyExpansion</span><span class="o">.</span><span class="n">Blumenthal</span><span class="p">,</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="p">)</span>
+</code></pre></div>
+<h3 id="is-ciscoreeder-key-expansion-supported">Is Cisco/Reeder key expansion supported?<a class="headerlink" href="#is-ciscoreeder-key-expansion-supported" title="Permanent link">&para;</a></h3>
+<p>Yes. Gufo SNMP supports the Cisco/Reeder key expansion scheme for AES-192 and AES-256 privacy keys.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">gufo.snmp</span><span class="w"> </span><span class="kn">import</span> <span class="n">KeyExpansion</span><span class="p">,</span> <span class="n">User</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    <span class="s2">"myuser"</span><span class="p">,</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>    <span class="n">auth_key</span><span class="o">=...</span><span class="p">,</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>    <span class="n">priv_key</span><span class="o">=...</span><span class="p">,</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>    <span class="n">key_expansion</span><span class="o">=</span><span class="n">KeyExpansion</span><span class="o">.</span><span class="n">Cisco</span><span class="p">,</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="p">)</span>
+</code></pre></div>
+<h3 id="what-are-noauthnopriv-authnopriv-and-authpriv">What are noAuthNoPriv, authNoPriv, and authPriv?<a class="headerlink" href="#what-are-noauthnopriv-authnopriv-and-authpriv" title="Permanent link">&para;</a></h3>
+<p>These are the three SNMPv3 security levels:</p>
+<ul>
+<li><code>noAuthNoPriv</code> — authentication and encryption are disabled.</li>
+<li><code>authNoPriv</code> — authentication is enabled, but encryption is disabled.</li>
+<li><code>authPriv</code> — both authentication and encryption are enabled.</li>
+</ul>
+<p>Gufo SNMP selects the corresponding security level based on the authentication and privacy keys provided in the User.</p>
+<h3 id="what-happens-if-snmpv3-authentication-fails">What happens if SNMPv3 authentication fails?<a class="headerlink" href="#what-happens-if-snmpv3-authentication-fails" title="Permanent link">&para;</a></h3>
+<p>If the device responds with an SNMPv3 authentication error, Gufo SNMP raises SnmpAuthError. Some devices may silently discard requests with invalid credentials instead of returning an error; in this case, the request eventually times out.</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="why-do-i-get-a-timeout">Why do I get a timeout?<a class="headerlink" href="#why-do-i-get-a-timeout" title="Permanent link">&para;</a></h3>
+<p>A timeout means that Gufo SNMP did not receive a response from the device within the configured timeout. Check that the device is reachable, SNMP is enabled and configured correctly, and the address, port, credentials, and SNMP version are correct. Some devices may silently discard requests with invalid SNMPv3 credentials, which also results in a timeout.</p>
+<h3 id="how-can-i-check-whether-the-snmp-agent-is-reachable">How can I check whether the SNMP agent is reachable?<a class="headerlink" href="#how-can-i-check-whether-the-snmp-agent-is-reachable" title="Permanent link">&para;</a></h3>
+<p>The simplest way is to send an SNMP request to the device. If the request returns a response, the SNMP agent is reachable. For example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">with</span> <span class="n">SnmpSession</span><span class="p">(</span><span class="n">addr</span><span class="o">=</span><span class="s2">"192.0.2.1"</span><span class="p">,</span> <span class="n">community</span><span class="o">=</span><span class="s2">"public"</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"1.3.6.1.2.1.1.3.0"</span><span class="p">))</span>
+</code></pre></div>
+<p>If the request times out, check network connectivity, the SNMP agent configuration, and the device address and port.</p>
+<h3 id="why-does-get-work-but-getbulk-fail">Why does GET work but GETBULK fail?<a class="headerlink" href="#why-does-get-work-but-getbulk-fail" title="Permanent link">&para;</a></h3>
+<p>GETBULK is available only in SNMPv2c and SNMPv3. It is not supported by SNMPv1. If GET works but GETBULK fails, check the SNMP version and whether the device supports GETBULK. Some devices also have limitations on the maximum number of variables returned in a single GETBULK response.</p>
+<h3 id="why-does-an-snmpv3-request-fail-authentication">Why does an SNMPv3 request fail authentication?<a class="headerlink" href="#why-does-an-snmpv3-request-fail-authentication" title="Permanent link">&para;</a></h3>
+<p>SNMPv3 authentication can fail if the username, authentication protocol, or authentication key is incorrect. Check that the configured credentials match the user configured on the SNMP agent. Also make sure that the SNMPv3 engine ID has been discovered correctly, as the engine ID is used to localize authentication keys.</p>
+<h3 id="how-do-i-troubleshoot-snmpv3-encryption-errors">How do I troubleshoot SNMPv3 encryption errors?<a class="headerlink" href="#how-do-i-troubleshoot-snmpv3-encryption-errors" title="Permanent link">&para;</a></h3>
+<p>Check that the username, privacy protocol, and privacy key match the configuration on the SNMP agent. Gufo SNMP supports DES and AES-128 privacy protocols. If the device silently discards requests with invalid credentials, the request may result in a timeout rather than an explicit error.</p>
+<h3 id="how-do-i-handle-an-snmp-error-status-response">How do I handle an SNMP error-status response?<a class="headerlink" href="#how-do-i-handle-an-snmp-error-status-response" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP converts SNMP error-status responses into Python exceptions. You can catch SnmpError to handle SNMP errors or catch a specific exception when you need to handle a particular condition.</p>
+<h3 id="how-does-gufo-snmp-handle-nosuchobject">How does Gufo SNMP handle noSuchObject?<a class="headerlink" href="#how-does-gufo-snmp-handle-nosuchobject" title="Permanent link">&para;</a></h3>
+<p>When an SNMP agent returns <code>noSuchObject</code>, Gufo SNMP returns <code>None</code> to the application.</p>
+<h3 id="how-does-gufo-snmp-handle-nosuchinstance">How does Gufo SNMP handle noSuchInstance?<a class="headerlink" href="#how-does-gufo-snmp-handle-nosuchinstance" title="Permanent link">&para;</a></h3>
+<p>When an SNMP agent returns <code>noSuchInstance</code>, Gufo SNMP raises <code>NoSuchInstance</code>.</p>
+<h3 id="how-does-gufo-snmp-handle-endofmibview">How does Gufo SNMP handle endOfMibView?<a class="headerlink" href="#how-does-gufo-snmp-handle-endofmibview" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP handles endOfMibView automatically when walking an SNMP tree. It is used internally to detect the end of the MIB and is not exposed to the application.</p>
+<h2 id="development">Development<a class="headerlink" href="#development" title="Permanent link">&para;</a></h2>
+<h3 id="where-is-the-gufo-snmp-source-code">Where is the Gufo SNMP source code?<a class="headerlink" href="#where-is-the-gufo-snmp-source-code" title="Permanent link">&para;</a></h3>
+<p>The Gufo SNMP source code is available on GitHub. See the <a href="https://github.com/gufolabs/gufo_snmp">Gufo SNMP repository</a> for the source code, tests, benchmarks, and development tools.</p>
+<h3 id="how-is-gufo-snmp-structured">How is Gufo SNMP structured?<a class="headerlink" href="#how-is-gufo-snmp-structured" title="Permanent link">&para;</a></h3>
+<p>Gufo SNMP is organized into several components, including the Python API and the Rust-powered core. See the <a href="../dev/codebase/">Project's Code Base</a> for an overview of the project structure and the role of its main components.</p>
+<h3 id="how-do-i-build-gufo-snmp-from-source">How do I build Gufo SNMP from source?<a class="headerlink" href="#how-do-i-build-gufo-snmp-from-source" title="Permanent link">&para;</a></h3>
+<p>See the <a href="../dev/testing/">Building and Testing</a> for instructions on setting up the development environment and building Gufo SNMP from source.</p>
+<h3 id="how-do-i-run-the-tests">How do I run the tests?<a class="headerlink" href="#how-do-i-run-the-tests" title="Permanent link">&para;</a></h3>
+<p>See the <a href="../dev/testing/">Building and Testing</a> for instructions on running the Gufo SNMP test suite.</p>
+<h3 id="how-do-i-run-the-benchmarks">How do I run the benchmarks?<a class="headerlink" href="#how-do-i-run-the-benchmarks" title="Permanent link">&para;</a></h3>
+<p>See the <a href="../benchmarks/">Python SNMP Clients Benchmarks</a> for benchmark results and instructions on running the benchmarks.</p>
+<h3 id="how-can-i-contribute-to-gufo-snmp">How can I contribute to Gufo SNMP?<a class="headerlink" href="#how-can-i-contribute-to-gufo-snmp" title="Permanent link">&para;</a></h3>
+<p>See the <a href="../dev/CONTRIBUTING/">Contributing Guide</a> for information on contributing to Gufo SNMP.</p>
+<h3 id="how-can-i-report-a-bug">How can I report a bug?<a class="headerlink" href="#how-can-i-report-a-bug" title="Permanent link">&para;</a></h3>
+<p>Report bugs through <a href="https://github.com/gufolabs/gufo_snmp/issues">GitHub Issues</a>. Please include enough information to reproduce the problem.</p>
+<h3 id="how-can-i-request-a-feature">How can I request a feature?<a class="headerlink" href="#how-can-i-request-a-feature" title="Permanent link">&para;</a></h3>
+<p>Have an idea for Gufo SNMP? Start a discussion in <a href="https://github.com/gufolabs/gufo_snmp/discussions">GitHub Discussions</a>. Tell us what you would like to do, why it matters, and what kind of API or behavior you have in mind.</p>
+<h2 id="about-gufo">About Gufo<a class="headerlink" href="#about-gufo" title="Permanent link">&para;</a></h2>
+<h3 id="what-does-gufo-mean">What does "Gufo" mean?<a class="headerlink" href="#what-does-gufo-mean" title="Permanent link">&para;</a></h3>
+<p><em>Gufo</em> means <em>the Owl</em> in Italian.</p>
+<h3 id="why-the-owls">Why the owls?<a class="headerlink" href="#why-the-owls" title="Permanent link">&para;</a></h3>
+<p>We love owls and the viable parts of our technologies were proven at the project named "the Owl".</p>
+<h3 id="what-is-gufo-labs">What is "Gufo Labs"?<a class="headerlink" href="#what-is-gufo-labs" title="Permanent link">&para;</a></h3>
+<p><a href="https://gufolabs.com/">Gufo Labs</a> is the Italian company specialized in network and IT consulting and software research.</p>
+<h3 id="what-is-gufo-stack">What is "Gufo Stack"?<a class="headerlink" href="#what-is-gufo-stack" title="Permanent link">&para;</a></h3>
+<p>We've extracted core components behind <a href="https://getnoc.com/">NOC</a> and released them as independent packages, available under the terms of the 3-clause BSD license.</p>
+<p>Our software shares common code quality standards and is battle-proven under high load. We hope our key components will help engineers and developers build reliable networks and robust network management software.</p>
+<p>See <a href="https://gufolabs.com/products/gufo-stack/">more details</a>.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+  
+
+
+  
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+        
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../dev/types/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Supported BER Types">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Supported BER Types
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../CHANGELOG/" class="md-footer__link md-footer__link--next" aria-label="Next: Changelog">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Changelog
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2023-25, Gufo Labs
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["content.action.edit", "navigation.tabs", "navigation.tabs.sticky", "navigation.footer"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>
