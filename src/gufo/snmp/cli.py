@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: Cli command
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-25, Gufo Labs
+# Copyright (C) 2023-26, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 """
@@ -15,20 +15,10 @@ Attributes:
 import argparse
 import re
 import sys
+from collections.abc import Callable, Sequence
 from enum import Enum, IntEnum
 from operator import itemgetter
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    NoReturn,
-    Optional,
-    Sequence,
-    Type,
-    Union,
-    cast,
-)
+from typing import Any, NoReturn, cast
 
 # Gufo SNMP modules
 from gufo.snmp import (
@@ -105,7 +95,7 @@ MIN_PRINTABLE = 0x20
 MAX_PRINTABLE = 0x7F
 
 
-class Formatter(object):
+class Formatter:
     """Pretty format output."""
 
     def __init__(
@@ -206,8 +196,8 @@ class CollectOFlags(argparse.Action):
         self,
         parser: argparse.ArgumentParser,
         namespace: argparse.Namespace,
-        values: Union[str, Sequence[Any], None],
-        option_string: Optional[str] = None,
+        values: str | Sequence[Any] | None,
+        option_string: str | None = None,
     ) -> None:
         """
         Process a single -O argument occurrence.
@@ -226,7 +216,7 @@ class CollectOFlags(argparse.Action):
                 e.g., "-O" (may be None when called programmatically).
         """
         # Get existing flags (if any)
-        flags = getattr(namespace, self.dest, set()) or set()
+        flags: set[str] = getattr(namespace, self.dest, set()) or set()
         # Add each character in the new -O value
         if values:
             for ch in values:
@@ -243,22 +233,22 @@ OFLAGS_HELP = {
     "v": "print values only (not OID = value)",
 }
 
-AUTH_PROTOCOL: Dict[str, Type[BaseAuthKey]] = {"MD5": Md5Key, "SHA": Sha1Key}
-PRIV_PROTOCOL: Dict[str, Type[BasePrivKey]] = {"DES": DesKey, "AES": Aes128Key}
+AUTH_PROTOCOL: dict[str, type[BaseAuthKey]] = {"MD5": Md5Key, "SHA": Sha1Key}
+PRIV_PROTOCOL: dict[str, type[BasePrivKey]] = {"DES": DesKey, "AES": Aes128Key}
 
 
-class Cli(object):
+class Cli:
     """`gufo-snmp` utility class."""
 
     @classmethod
-    def die(cls, msg: Optional[str] = None) -> NoReturn:
+    def die(cls, msg: str | None = None) -> NoReturn:
         """Die with message."""
         if msg:
             print(msg)
         sys.exit(1)
 
     @classmethod
-    def parse_args(cls, args: List[str]) -> argparse.Namespace:
+    def parse_args(cls, args: list[str]) -> argparse.Namespace:
         """
         Parse arguments.
 
@@ -536,7 +526,7 @@ class Cli(object):
             timeout=3.0,
         )
 
-    def run(self, args: List[str]) -> ExitCode:
+    def run(self, args: list[str]) -> ExitCode:
         """
         Parse command-line arguments and run appropriative command.
 
@@ -565,7 +555,7 @@ class Cli(object):
             self.die("ERROR: Authentication failed")
 
     def run_get(
-        self, session: SnmpSession, oids: List[str], formatter: Formatter
+        self, session: SnmpSession, oids: list[str], formatter: Formatter
     ) -> ExitCode:
         """
         Perform GET request.
@@ -581,7 +571,7 @@ class Cli(object):
         return ExitCode.OK
 
     def run_get_many(
-        self, session: SnmpSession, oids: List[str], formatter: Formatter
+        self, session: SnmpSession, oids: list[str], formatter: Formatter
     ) -> ExitCode:
         """
         Perform multi-value GET request.
@@ -597,7 +587,7 @@ class Cli(object):
         return ExitCode.OK
 
     def run_getnext(
-        self, session: SnmpSession, oids: List[str], formatter: Formatter
+        self, session: SnmpSession, oids: list[str], formatter: Formatter
     ) -> ExitCode:
         """
         Perform GETNEXT.
@@ -613,7 +603,7 @@ class Cli(object):
         return ExitCode.OK
 
     def run_getbulk(
-        self, session: SnmpSession, oids: List[str], formatter: Formatter
+        self, session: SnmpSession, oids: list[str], formatter: Formatter
     ) -> ExitCode:
         """
         Perform GETBULK.
@@ -629,6 +619,6 @@ class Cli(object):
         return ExitCode.OK
 
 
-def main(args: Optional[List[str]] = None) -> int:
+def main(args: list[str] | None = None) -> int:
     """Run `gufo-ping` with command-line arguments."""
     return Cli().run(sys.argv[1:] if args is None else args).value

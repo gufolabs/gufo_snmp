@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo Labs: Project structure tests
 # ---------------------------------------------------------------------
-# Copyright (C) 2022-25, Gufo Labs
+# Copyright (C) 2022-26, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -10,7 +10,6 @@ import inspect
 import os
 import sys
 from pathlib import Path
-from typing import Tuple, Union
 
 # Third-party modules
 import pytest
@@ -22,7 +21,7 @@ def _get_root() -> str:
     return os.path.abspath(os.path.join(rel_root, ".."))
 
 
-def _get_project_info() -> Tuple[str, str]:
+def _get_project_info() -> tuple[str, str]:
     """
     Get project information.
 
@@ -101,7 +100,7 @@ REQUIRED_FILES = [
 
 
 def test_required_is_sorted() -> None:
-    def q(name: Union[str, Tuple[str, ...]]) -> Tuple[str, ...]:
+    def q(name: str | tuple[str, ...]) -> tuple[str, ...]:
         if isinstance(name, str):
             return (name,)
         return name
@@ -111,7 +110,7 @@ def test_required_is_sorted() -> None:
 
 
 @pytest.mark.parametrize("name", REQUIRED_FILES)
-def test_required_files(name: Union[str, Tuple[str, ...]]) -> None:
+def test_required_files(name: str | tuple[str, ...]) -> None:
     if isinstance(name, str):
         full_path = os.path.join(ROOT, name)
         assert os.path.exists(full_path), f"File {name} is missed"

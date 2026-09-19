@@ -18,7 +18,7 @@ rx_name = re.compile(r"^Name \(time in (\S+)\)")
 
 
 @dataclass
-class BenchmarkItem(object):
+class BenchmarkItem:
     """
     Single benchmark item.
 
@@ -44,7 +44,7 @@ class BenchmarkItem(object):
 
 
 @dataclass
-class Benchmark(object):
+class Benchmark:
     """Benchmark descriptor.
 
     Attributes:
@@ -202,7 +202,7 @@ def build_barchart(bench: Benchmark, data: list[BenchmarkItem]) -> None:
     plt.gca().xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:,.0f}"))
     # Adding text annotations for ratio between each bar and smallest one
     min_value = min(values)
-    for test, value in zip(tests, values):
+    for test, value in zip(tests, values, strict=False):
         ratio = value / min_value
         fontweight = "bold" if is_gufo_snmp(test) else "normal"
         plt.text(

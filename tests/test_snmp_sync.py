@@ -7,7 +7,7 @@
 
 # Python modules
 import sys
-from typing import Any, Dict, Optional, cast
+from typing import Any, cast
 
 # Third-party modules
 import pytest
@@ -40,7 +40,7 @@ def test_snmpd_version(snmpd: Snmpd) -> None:
 
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
-def test_timeout_get(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_timeout_get(cfg: dict[str, Any], snmpd: Snmpd) -> None:
     with (
         pytest.raises(TimeoutError),
         SnmpSession(
@@ -55,7 +55,7 @@ def test_timeout_get(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
 
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
-def test_timeout_get_many(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_timeout_get_many(cfg: dict[str, Any], snmpd: Snmpd) -> None:
     with (
         pytest.raises(TimeoutError),
         SnmpSession(
@@ -70,7 +70,7 @@ def test_timeout_get_many(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
 
 
 def snmp_get(
-    cfg: Dict[str, Any], engine_id: Optional[bytes], oid: str
+    cfg: dict[str, Any], engine_id: bytes | None, oid: str
 ) -> ValueType:
     with SnmpSession(
         addr=SNMPD_ADDRESS,
@@ -91,7 +91,7 @@ def snmp_get(
     ],
 )
 def test_get(
-    cfg: Dict[str, Any], oid: str, expected: ValueType, snmpd: Snmpd
+    cfg: dict[str, Any], oid: str, expected: ValueType, snmpd: Snmpd
 ) -> None:
     r = snmp_get(cfg, snmpd.engine_id, oid)
     assert r == expected
@@ -106,27 +106,27 @@ def test_get(
     ],
 )
 def test_get_wo_engine_id(
-    cfg: Dict[str, Any], oid: str, expected: ValueType, snmpd: Snmpd
+    cfg: dict[str, Any], oid: str, expected: ValueType, snmpd: Snmpd
 ) -> None:
     r = snmp_get(cfg, None, oid)
     assert r == expected
 
 
 @pytest.mark.parametrize("cfg", V2 + V3, ids=ids)
-def test_get_nosuchinstance(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_get_nosuchinstance(cfg: dict[str, Any], snmpd: Snmpd) -> None:
     with pytest.raises(NoSuchInstance):
         snmp_get(cfg, snmpd.engine_id, "1.3.6.1.2.1.1.6")
 
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
-def test_sys_uptime(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_sys_uptime(cfg: dict[str, Any], snmpd: Snmpd) -> None:
     """sysUptime.0 returns TimeTicks type."""
     r = snmp_get(cfg, snmpd.engine_id, "1.3.6.1.2.1.1.3.0")
     assert isinstance(r, int)
 
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
-def test_sys_objectid(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_sys_objectid(cfg: dict[str, Any], snmpd: Snmpd) -> None:
     """sysObjectId.0 returns OBJECT IDENTIFIER type."""
     r = snmp_get(cfg, snmpd.engine_id, "1.3.6.1.2.1.1.2.0")
     assert isinstance(r, str)
@@ -134,7 +134,7 @@ def test_sys_objectid(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
 
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
-def test_get_many(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_get_many(cfg: dict[str, Any], snmpd: Snmpd) -> None:
     with SnmpSession(
         addr=SNMPD_ADDRESS,
         port=SNMPD_PORT,
@@ -164,7 +164,7 @@ def test_get_many(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
 
 
 @pytest.mark.parametrize("cfg", V2 + V3, ids=ids)
-def test_get_many_skip(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_get_many_skip(cfg: dict[str, Any], snmpd: Snmpd) -> None:
     with SnmpSession(
         addr=SNMPD_ADDRESS,
         port=SNMPD_PORT,
@@ -190,7 +190,7 @@ def test_get_many_skip(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
 
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
-def test_get_many_long_request(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_get_many_long_request(cfg: dict[str, Any], snmpd: Snmpd) -> None:
     with SnmpSession(
         addr=SNMPD_ADDRESS,
         port=SNMPD_PORT,
@@ -214,7 +214,7 @@ def test_get_many_long_request(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
 
 
 @pytest.mark.parametrize("cfg", V1 + V2 + V3[:1], ids=ids)
-def test_getnext(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_getnext(cfg: dict[str, Any], snmpd: Snmpd) -> None:
     """Iterate over whole MIB."""
     n = 0
     with SnmpSession(
@@ -230,7 +230,7 @@ def test_getnext(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
 
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
-def test_getnext_single(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_getnext_single(cfg: dict[str, Any], snmpd: Snmpd) -> None:
     """Test single value is returned with bulk."""
     n = 0
     with SnmpSession(
@@ -248,7 +248,7 @@ def test_getnext_single(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
 
 
 @pytest.mark.parametrize("cfg", V2 + V3, ids=ids)
-def test_getbulk(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_getbulk(cfg: dict[str, Any], snmpd: Snmpd) -> None:
     """Iterate over whole MIB."""
     n = 0
     with SnmpSession(
@@ -264,7 +264,7 @@ def test_getbulk(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
 
 
 @pytest.mark.parametrize("cfg", V2 + V3)
-def test_getbulk_max_repetitions(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_getbulk_max_repetitions(cfg: dict[str, Any], snmpd: Snmpd) -> None:
     n = 0
     with SnmpSession(
         addr=SNMPD_ADDRESS, port=SNMPD_PORT, timeout=1.0, **cfg
@@ -277,7 +277,7 @@ def test_getbulk_max_repetitions(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
 
 
 @pytest.mark.parametrize("cfg", V2 + V3, ids=ids)
-def test_getbulk_single(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
+def test_getbulk_single(cfg: dict[str, Any], snmpd: Snmpd) -> None:
     """Test single value is returned with bulk."""
     n = 0
     with SnmpSession(
@@ -296,7 +296,7 @@ def test_getbulk_single(cfg: Dict[str, Any], snmpd: Snmpd) -> None:
 
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
 @pytest.mark.parametrize("allow_bulk", [False, True])
-def test_fetch(cfg: Dict[str, Any], allow_bulk: bool, snmpd: Snmpd) -> None:
+def test_fetch(cfg: dict[str, Any], allow_bulk: bool, snmpd: Snmpd) -> None:
     with SnmpSession(
         addr=SNMPD_ADDRESS,
         port=SNMPD_PORT,
@@ -314,7 +314,7 @@ def test_fetch(cfg: Dict[str, Any], allow_bulk: bool, snmpd: Snmpd) -> None:
 @pytest.mark.parametrize("cfg", ALL, ids=ids)
 @pytest.mark.parametrize("allow_bulk", [False, True])
 def test_fetch_file_not_found(
-    cfg: Dict[str, Any], allow_bulk: bool, snmpd: Snmpd
+    cfg: dict[str, Any], allow_bulk: bool, snmpd: Snmpd
 ) -> None:
     """Test issue #1 condition."""
     for _ in range(10):
@@ -330,7 +330,7 @@ def test_fetch_file_not_found(
 
 
 @pytest.mark.parametrize("cfg", V3, ids=ids)
-def test_get_engine_id(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
+def test_get_engine_id(snmpd: Snmpd, cfg: dict[str, Any]) -> None:
     with SnmpSession(
         addr=SNMPD_ADDRESS, port=SNMPD_PORT, timeout=1.0, **cfg
     ) as session:
@@ -340,7 +340,7 @@ def test_get_engine_id(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
 
 
 @pytest.mark.parametrize("cfg", V2)
-def test_shift(snmpd: Snmpd, cfg: Dict[str, Any]) -> None:
+def test_shift(snmpd: Snmpd, cfg: dict[str, Any]) -> None:
     with SyncShiftProxy() as proxy:
         addr, port = proxy.addr
         with SnmpSession(addr=addr, port=port, timeout=2.0, **cfg) as session:

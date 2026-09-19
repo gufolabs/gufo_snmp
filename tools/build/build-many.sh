@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------
 # Build wheel in the manylinux
 # Usage:
-# ./tools/build/build-many 3.9 3.10 3.11 3.11 3.12 3.13 3.14
+# ./tools/build/build-many 3.10 3.11 3.12 3.13 3.14
 # expects RUST_VERSION and RUST_ARCH
 # ------------------------------------------------------------------------
 # Copyright (C) 2022-25, Gufo Labs
@@ -88,8 +88,6 @@ do
     header "Building for Python $1"
     # Convert version to ABI
     case "$1" in
-        3.8) ABI=cp38-cp38 ;;
-        3.9) ABI=cp39-cp39 ;;
         3.10) ABI=cp310-cp310 ;;
         3.11) ABI=cp311-cp311 ;;
         3.12) ABI=cp312-cp312 ;;

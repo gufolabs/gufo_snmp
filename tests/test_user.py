@@ -1,12 +1,9 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: Authentication primitives test
 # ---------------------------------------------------------------------
-# Copyright (C) 2023-24, Gufo Labs
+# Copyright (C) 2023-26, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
-
-# Python modules
-from typing import Type
 
 # Third-party modules
 import pytest
@@ -20,7 +17,7 @@ AUTH = [Md5Key, Sha1Key]
 
 
 @pytest.mark.parametrize("kls", AUTH)
-def test_auth_subclass(kls: Type[object]) -> None:
+def test_auth_subclass(kls: type[object]) -> None:
     assert issubclass(kls, BaseAuthKey), "Must be subclass of BaseKey"
 
 
@@ -39,7 +36,7 @@ def test_auth_subclass(kls: Type[object]) -> None:
     ],
 )
 def test_key_padding(
-    kls: Type[BaseAuthKey], key: bytes, key_type: KeyType
+    kls: type[BaseAuthKey], key: bytes, key_type: KeyType
 ) -> None:
     k = kls(key, key_type=key_type)
     if key_type == KeyType.Password:

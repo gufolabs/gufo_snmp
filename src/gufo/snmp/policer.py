@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------
 # Gufo SNMP: Query policers
 # ---------------------------------------------------------------------
-# Copyright (C) 2023, Gufo Labs
+# Copyright (C) 2023-26, Gufo Labs
 # See LICENSE.md for details
 # ---------------------------------------------------------------------
 
@@ -11,7 +11,6 @@
 import asyncio
 from abc import ABC, abstractmethod
 from time import perf_counter_ns, sleep
-from typing import Optional
 
 NS = 1_000_000_000.0
 ZERO = 0.0
@@ -33,7 +32,7 @@ class BasePolicer(ABC):
     """
 
     @abstractmethod
-    def get_timeout(self, ts: int) -> Optional[int]:
+    def get_timeout(self, ts: int) -> int | None:
         """
         Get sleep timeout.
 
@@ -91,13 +90,13 @@ class RPSPolicer(BasePolicer):
         if rps <= ZERO:
             msg = "Invalid RPS"
             raise ValueError(msg)
-        self._prev: Optional[int] = None
+        self._prev: int | None = None
         self._delta: int = int(NS / rps)
         if not self._delta:
             msg = "RPS is too high"
             raise ValueError(msg)
 
-    def get_timeout(self, ts: int) -> Optional[int]:
+    def get_timeout(self, ts: int) -> int | None:
         """
         Get sleep timeout.
 

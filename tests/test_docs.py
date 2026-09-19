@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------
 # Gufo Traceroute: docs tests
 # ----------------------------------------------------------------------
-# Copyright (C) 2022-25, Gufo Labs
+# Copyright (C) 2022-26, Gufo Labs
 # See LICENSE.md for details
 # ----------------------------------------------------------------------
 
@@ -9,7 +9,6 @@
 import os
 import re
 from functools import lru_cache
-from typing import List, Set
 
 # Third-party modules
 import pytest
@@ -23,8 +22,8 @@ rx_datatracker_ietf = re.compile(
 
 
 @lru_cache(maxsize=1)
-def get_docs() -> List[str]:
-    doc_files: List[str] = []
+def get_docs() -> list[str]:
+    doc_files: list[str] = []
     for root, _, files in os.walk("docs"):
         for f in files:
             if f.endswith(".md") and not f.startswith("."):
@@ -40,8 +39,8 @@ def get_file(path: str) -> str:
 @pytest.mark.parametrize("doc", get_docs())
 def test_links(doc: str) -> None:
     data = get_file(doc)
-    links: Set[str] = set()
-    defs: Set[str] = set()
+    links: set[str] = set()
+    defs: set[str] = set()
     for match in rx_link.finditer(data):
         links.add(match.group(2))
     for match in rx_footnote.finditer(data):

@@ -6,7 +6,8 @@
 # ---------------------------------------------------------------------
 
 # Python modules
-from typing import Any, Dict, Iterable, List
+from collections.abc import Iterable
+from typing import Any
 
 # Third-party modules
 import pytest
@@ -30,7 +31,7 @@ from .util import (
 users = {u.name: u for u in SNMP_USERS}
 
 
-def user_opts(name: str, oid: str) -> List[str]:
+def user_opts(name: str, oid: str) -> list[str]:
     """
     Generate command-line options for user.
 
@@ -166,7 +167,7 @@ def test_die() -> None:
         ],
     ],
 )
-def test_invalid_options(args: List[str]) -> None:
+def test_invalid_options(args: list[str]) -> None:
     with pytest.raises(SystemExit):
         main(args)
 
@@ -207,7 +208,7 @@ def test_invalid_options(args: List[str]) -> None:
     ],
 )
 def test_parse_version(
-    args: List[str], expected_str: str, expected_version: SnmpVersion
+    args: list[str], expected_str: str, expected_version: SnmpVersion
 ) -> None:
     ns = Cli.parse_args(args)
     assert ns.version
@@ -222,7 +223,7 @@ def test_parse_version(
         (["-c", "public", "--port=10000", SNMPD_ADDRESS, "1.3.6"], 10000),
     ],
 )
-def test_parse_port(args: List[str], expected: int) -> None:
+def test_parse_port(args: list[str], expected: int) -> None:
     ns = Cli.parse_args(args)
     assert ns.port
     assert ns.port == expected
@@ -282,7 +283,7 @@ def test_is_valid_oid(oid: str, expected: bool) -> None:
         "str-repr",
     ],
 )
-def test_format_value(cfg: Dict[str, Any], v: Any, expected: str) -> None:
+def test_format_value(cfg: dict[str, Any], v: Any, expected: str) -> None:
     formatter = Formatter(**cfg)
     r = formatter.format_value(v)
     assert r == expected
@@ -330,7 +331,7 @@ def test_format_value(cfg: Dict[str, Any], v: Any, expected: str) -> None:
         "v3-sha1-aes128",
     ],
 )
-def test_get(args: List[str], snmpd: Snmpd) -> None:
+def test_get(args: list[str], snmpd: Snmpd) -> None:
     r = main(args)
     assert r == ExitCode.OK.value
 
@@ -361,7 +362,7 @@ def test_get(args: List[str], snmpd: Snmpd) -> None:
     ids=["default", "a", "x", "T", "q", "Q", "v", "vx", "v-x", "v-T"],
 )
 def test_get_format(
-    fmt: List[str], expected: str, capsys: pytest.CaptureFixture, snmpd: Snmpd
+    fmt: list[str], expected: str, capsys: pytest.CaptureFixture, snmpd: Snmpd
 ) -> None:
     r = main(
         [
@@ -452,7 +453,7 @@ def test_get_format(
     ids=["default", "a", "x", "T", "q", "Q", "v", "vx", "v-x", "v-T"],
 )
 def test_get_many_format(
-    fmt: List[str], expected: str, capsys: pytest.CaptureFixture, snmpd: Snmpd
+    fmt: list[str], expected: str, capsys: pytest.CaptureFixture, snmpd: Snmpd
 ) -> None:
     r = main(
         [
@@ -555,7 +556,7 @@ def test_get_many_format(
     ],
 )
 def test_get_table(
-    args: List[str],
+    args: list[str],
     expected: Iterable[str],
     capsys: pytest.CaptureFixture,
     snmpd: Snmpd,
@@ -698,6 +699,6 @@ def test_get_table(
         "getbulk-v3",
     ],
 )
-def test_auth_error(args: List[str], snmpd: Snmpd) -> None:
+def test_auth_error(args: list[str], snmpd: Snmpd) -> None:
     with pytest.raises(SystemExit):
         main(args)

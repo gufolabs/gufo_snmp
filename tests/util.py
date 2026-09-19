@@ -10,10 +10,11 @@ import random
 import socket
 import threading
 import time
+from collections.abc import Iterable
 from contextlib import suppress
 from itertools import product
 from types import TracebackType
-from typing import Any, Iterable, Optional, Tuple, Type
+from typing import Any
 
 # Gufo SNMP Modules
 from gufo.snmp import SnmpVersion
@@ -79,7 +80,7 @@ def _get_user(name: str) -> User:
         msg = f"Invalid key type: {code}"
         raise ValueError(msg)
 
-    def get_auth_key(name: str) -> Optional[BaseAuthKey]:
+    def get_auth_key(name: str) -> BaseAuthKey | None:
         alg_code = name[4]
         key_type = get_key_type(name[5])
         secret = (
@@ -94,7 +95,7 @@ def _get_user(name: str) -> User:
         msg = f"Invalid auth protocol: {alg_code}"
         raise ValueError(msg)
 
-    def get_priv_key(name: str) -> Optional[BasePrivKey]:
+    def get_priv_key(name: str) -> BasePrivKey | None:
         alg_code = name[6]
         key_type = get_key_type(name[7])
         secret = (
@@ -157,7 +158,7 @@ def ids(x: Any) -> str:
     return str(x)
 
 
-class SyncShiftProxy(object):
+class SyncShiftProxy:
     """
     A shifting proxy, sync version.
 
@@ -168,9 +169,9 @@ class SyncShiftProxy(object):
     def __init__(self) -> None:
         self._listen_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._listen_sock.bind(("127.0.0.1", 0))
-        self._addr: Tuple[str, int] = self._listen_sock.getsockname()
+        self._addr: tuple[str, int] = self._listen_sock.getsockname()
         self._proxy_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._thread: Optional[threading.Thread] = None
+        self._thread: threading.Thread | None = None
 
     def __enter__(self) -> "SyncShiftProxy":
         """Context management entry."""
@@ -181,9 +182,9 @@ class SyncShiftProxy(object):
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> None:
         """Context management exit."""
         print(exc_type, time.time())
@@ -193,7 +194,7 @@ class SyncShiftProxy(object):
             self._thread = None
 
     @property
-    def addr(self) -> Tuple[str, int]:
+    def addr(self) -> tuple[str, int]:
         """
         Get address info.
 

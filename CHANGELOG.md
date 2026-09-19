@@ -12,9 +12,19 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ## [Unreleased]
 
+### Fixed
+
+* #64 - BUG: IPv6 requires bracketed address in Gufo
+
+### Removed
+
+* Python 3.9 support.
+
 ### Infrastructure
 
 * Rust 1.98.1
+* mypy 2.1.0
+* ruff 0.15.18
 
 ## 0.12.0 - 2026-04-13
 
