@@ -6,6 +6,7 @@
 // ------------------------------------------------------------------------
 
 use super::SnmpAuth;
+use super::ZEROES;
 use crate::error::SnmpResult;
 use digest::Digest;
 use std::marker::PhantomData;
@@ -38,7 +39,6 @@ impl<D: Digest, const KS: usize, const SS: usize, const PKS: usize, const BS: us
     }
 }
 
-const ZEROES: [u8; 128] = [0; 128];
 const IPAD_VALUE: u8 = 0x36;
 const OPAD_VALUE: u8 = 0x5c;
 const MEGABYTE: usize = 1_048_576;
