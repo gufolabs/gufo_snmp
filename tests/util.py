@@ -8,6 +8,7 @@
 # Python modules
 import random
 import socket
+import sys
 import threading
 import time
 from collections.abc import Iterable
@@ -178,6 +179,45 @@ def _get_user(name: str) -> User:
     )
 
 
+if sys.platform == "darwin":
+    _ignored_users: set[str] = {
+        "v3-user1030",  # MD5 + password + AES192 Blumenthal + password
+        "v3-user1031",  # MD5 + password + AES192 Blumenthal + master
+        "v3-user1040",  # MD5 + password + AES192 Cisco + password
+        "v3-user1041",  # MD5 + password + AES192 Cisco + master
+        "v3-user1050",  # MD5 + password + AES256 Blumenthal + password
+        "v3-user1051",  # MD5 + password + AES256 Blumenthal + master
+        "v3-user1060",  # MD5 + password + AES256 Cisco + password
+        "v3-user1061",  # MD5 + password + AES256 Cisco + master
+        "v3-user1130",  # MD5 + master + AES192 Blumenthal + password
+        "v3-user1131",  # MD5 + master + AES192 Blumenthal + master
+        "v3-user1140",  # MD5 + master + AES192 Cisco + password
+        "v3-user1141",  # MD5 + master + AES192 Cisco + master
+        "v3-user1150",  # MD5 + master + AES256 Blumenthal + password
+        "v3-user1151",  # MD5 + master + AES256 Blumenthal + master
+        "v3-user1160",  # MD5 + master + AES256 Cisco + password
+        "v3-user1161",  # MD5 + master + AES256 Cisco + master
+        "v3-user2030",  # SHA1 + password + AES192 Blumenthal + password
+        "v3-user2031",  # SHA1 + password + AES192 Blumenthal + master
+        "v3-user2040",  # SHA1 + password + AES192 Cisco + password
+        "v3-user2041",  # SHA1 + password + AES192 Cisco + master
+        "v3-user2050",  # SHA1 + password + AES256 Blumenthal + password
+        "v3-user2051",  # SHA1 + password + AES256 Blumenthal + master
+        "v3-user2060",  # SHA1 + password + AES256 Cisco + password
+        "v3-user2061",  # SHA1 + password + AES256 Cisco + master
+        "v3-user2130",  # SHA1 + master + AES192 Blumenthal + password
+        "v3-user2131",  # SHA1 + master + AES192 Blumenthal + master
+        "v3-user2140",  # SHA1 + master + AES192 Cisco + password
+        "v3-user2141",  # SHA1 + master + AES192 Cisco + master
+        "v3-user2150",  # SHA1 + master + AES256 Blumenthal + password
+        "v3-user2151",  # SHA1 + master + AES256 Blumenthal + master
+        "v3-user2160",  # SHA1 + master + AES256 Cisco + password
+        "v3-user2161",  # SHA1 + master + AES256 Cisco + master
+    }
+else:
+    _ignored_users: set[str] = set()
+
+
 def _iter_users() -> Iterable[User]:
     """Generate all users."""
     key_types = "01"
@@ -190,9 +230,10 @@ def _iter_users() -> Iterable[User]:
             continue  # All zeroes for no auth
         if priv_alg == "0" and priv_key_type != "0":
             continue  # No key type for no priv
-        yield _get_user(
-            f"user{auth_alg}{auth_key_type}{priv_alg}{priv_key_type}"
-        )
+        user_name = f"user{auth_alg}{auth_key_type}{priv_alg}{priv_key_type}"
+        if user_name in _ignored_users:
+            continue
+        yield _get_user(user_name)
 
 
 SNMP_USERS = list(_iter_users())
