@@ -69,6 +69,10 @@ Gufo SNMP supports the following SNMPv3 authentication methods:
 
 * **MD5**
 * **SHA-1**
+* **SHA-224**
+* **SHA-256**
+* **SHA-384**
+* **SHA-512**
 
 ### Which SNMPv3 privacy protocols are supported?
 

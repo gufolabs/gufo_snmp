@@ -219,6 +219,38 @@ class Sha1Key(BaseAuthKey):
     SNMPD_PREFIX = "SHA"
 
 
+class Sha224Key(BaseAuthKey):
+    """SHA-224 Key."""
+
+    AUTH_ALG = 7  #  8 - Blumenthal, 9 - Cisco
+    KEY_LENGTH = 28
+    SNMPD_PREFIX = "SHA-224"
+
+
+class Sha256Key(BaseAuthKey):
+    """SHA-256 Key."""
+
+    AUTH_ALG = 10
+    KEY_LENGTH = 32
+    SNMPD_PREFIX = "SHA-256"
+
+
+class Sha384Key(BaseAuthKey):
+    """SHA-384 Key."""
+
+    AUTH_ALG = 11
+    KEY_LENGTH = 48
+    SNMPD_PREFIX = "SHA-384"
+
+
+class Sha512Key(BaseAuthKey):
+    """SHA-512 Key."""
+
+    AUTH_ALG = 12
+    KEY_LENGTH = 64
+    SNMPD_PREFIX = "SHA-512"
+
+
 class BasePrivKey(BaseKey):
     """Privacy key base class."""
 

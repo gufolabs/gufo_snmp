@@ -190,7 +190,7 @@ jobs:
         run: ./tools/build/setup-snmpd.sh
 
       - name: Run Tests
-        run: pytest -v tests/
+        run: pytest -v --maxfail=50 tests/
 
   py-test-darwin:
     runs-on: macos-latest
@@ -235,4 +235,4 @@ jobs:
         run: ./tools/build/setup-snmpd.sh
 
       - name: Run Tests
-        run: pytest -v tests/
+        run: pytest -v --maxfail=50 tests/

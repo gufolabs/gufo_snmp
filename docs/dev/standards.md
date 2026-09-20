@@ -13,7 +13,8 @@ Gufo SNMP implements and is guided by the following standards:
 * [RFC-3412][RFC-3412]: Message Processing and Dispatching for the Simple Network Management Protocol (SNMP)
 * [RFC-3414][RFC-3414]: User-based Security Model (USM) for version 3 of the Simple Network Management Protocol (SNMPv3)
 * [RFC-3826][RFC-3826]: The Advanced Encryption Standard (AES) Cipher Algorithm in the SNMP User-based Security Model
-
+* [RFC-7860][RFC-7860]: HMAC-SHA-2 Authentication Protocols in User-Based Security Model (USM) for SNMPv3
+* 
 ## IETF Internet-Drafts
 
 * [draft-blumenthal-aes-usm-04][draft-blumenthal-aes-usm-04]: The AES Cipher Algorithm in the SNMP's User-based Security Model.
@@ -38,6 +39,7 @@ Gufo SNMP implements and is guided by the following standards:
 [RFC-3412]: https://www.rfc-editor.org/rfc/rfc3412.html
 [RFC-3414]: https://www.rfc-editor.org/rfc/rfc3414.html
 [RFC-3826]: https://www.rfc-editor.org/rfc/rfc3826.html
+[RFC-7860]: https://www.rfc-editor.org/rfc/rfc7860.html
 [draft-blumenthal-aes-usm-04]: [https://datatracker.ietf.org/doc/draft-blumenthal-aes-usm-04/](https://datatracker.ietf.org/doc/draft-blumenthal-aes-usm-04/)
 [draft-reeder-snmpv3-usm-3desede-00]: [https://datatracker.ietf.org/doc/draft-reeder-snmpv3-usm-3desede-00/](https://datatracker.ietf.org/doc/draft-reeder-snmpv3-usm-3desede-00/)
 [PEP8]: https://peps.python.org/pep-0008/
