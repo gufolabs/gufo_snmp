@@ -122,8 +122,6 @@ gufo-snmp -v2c -c public 127.0.0.1 1.3.6.1.2.1.1.6.0
 
 ## Further Roadmap
 
-* SHA2 family of hashes.
-* AES256 encryption.
 * SNMP Trap and Inform collector.
 * Incorporation of the [NOC's][NOC] *Compiled MIB* infrastructure.
 
