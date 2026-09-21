@@ -28,7 +28,7 @@ and socket IO, implemented in the
 The querying of the single MIB key is a simple task:
 
 ``` py
-from gufo.snmp import SnmpSession
+from gufo.snmp.aio import SnmpSession
 
 async with SnmpSession(addr="127.0.0.1", community="public") as session:
     r = await session.get("1.3.6.1.2.1.1.3.0")
