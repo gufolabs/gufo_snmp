@@ -12,6 +12,8 @@ Attributes:
 """
 
 # Python modules
+from __future__ import annotations
+
 import argparse
 import re
 import sys
@@ -23,11 +25,17 @@ from typing import Any, NoReturn, cast
 # Gufo SNMP modules
 from gufo.snmp import (
     Aes128Key,
+    Aes192Key,
+    Aes256Key,
     BaseAuthKey,
     BasePrivKey,
     DesKey,
     Md5Key,
     Sha1Key,
+    Sha224Key,
+    Sha256Key,
+    Sha384Key,
+    Sha512Key,
     SnmpAuthError,
     SnmpVersion,
     User,
@@ -86,9 +94,13 @@ class StrFormat(Enum):
     ASCII_HEX = "asciihex"
 
     @classmethod
-    def default(cls) -> "StrFormat":
-        """Get default value."""
-        return StrFormat.ASCII
+    def default(cls) -> StrFormat:
+        """Get the default string format.
+
+        Returns:
+            The default string format.
+        """
+        return cls.ASCII
 
 
 MIN_PRINTABLE = 0x20
@@ -107,13 +119,18 @@ class Formatter:
     ) -> None:
         self.show_key = show_key
         self.sep = sep
-        self._format_str: Callable[[ValueType], str] = getattr(
+        self._format_str: Callable[[bytes], str] = getattr(
             self, f"_format_str_{str_format.value}"
         )
 
     @classmethod
     def validate(cls, parser: argparse.ArgumentParser, opts: str) -> None:
-        """Check options."""
+        """Validate output formatting options.
+
+        Args:
+            parser: Argument parser used to report validation errors.
+            opts: Output formatting options.
+        """
         if not opts:
             return
         invalid = list(set(opts) - set(OFLAGS_HELP))
@@ -123,73 +140,136 @@ class Formatter:
             parser.error(f"Invalid format options: {', '.join(invalid)}")
 
     @classmethod
-    def from_opts(cls, opts: str) -> "Formatter":
-        """Build formatter from options."""
+    def from_opts(cls, opts: str) -> Formatter:
+        """Build a formatter from output formatting options.
+
+        Args:
+            opts: Output formatting options.
+
+        Returns:
+            Configured formatter.
+        """
         show_key = True
         sep = DEFAULT_SEP
         str_format = StrFormat.default()
         for opt in opts:
-            if opt == "a":
-                str_format = StrFormat.ASCII
-            elif opt == "x":
-                str_format = StrFormat.HEX
-            elif opt == "q":
-                sep = " "
-            elif opt == "Q":
-                sep = " = "
-            elif opt == "T":
-                str_format = StrFormat.ASCII_HEX
-            elif opt == "v":
-                show_key = False
-                sep = ""
-        return Formatter(show_key=show_key, sep=sep, str_format=str_format)
+            match opt:
+                case "a":
+                    str_format = StrFormat.ASCII
+                case "x":
+                    str_format = StrFormat.HEX
+                case "q":
+                    sep = " "
+                case "Q":
+                    sep = " = "
+                case "T":
+                    str_format = StrFormat.ASCII_HEX
+                case "v":
+                    show_key = False
+                    sep = ""
+                case _:
+                    pass
+        return Formatter(
+            show_key=show_key,
+            sep=sep,
+            str_format=str_format,
+        )
 
     def format_value(self, value: ValueType) -> str:
-        """Format value."""
-        if value is None:
-            return "null"
-        if isinstance(value, (int, float)):
-            return str(value)
-        if isinstance(value, str):
-            return value  # OID
-        if isinstance(value, bytes):
-            return self._format_str(value)
-        return self._format_str_repr(value)
+        """Format a value.
+
+        Args:
+            value: Value to format.
+
+        Returns:
+            Formatted value.
+        """
+        match value:
+            case None:
+                return "null"
+            case int() | float():
+                return str(value)
+            case str():
+                return value  # OID
+            case bytes():
+                return self._format_str(value)
+            case _:
+                return self._format_str_repr(value)
 
     def format(self, oid: str, value: ValueType) -> str:
-        """Format line."""
+        """Format an OID and its value.
+
+        Args:
+            oid: Object identifier.
+            value: Value to format.
+
+        Returns:
+            Formatted OID and value.
+        """
         v = self.format_value(value)
         return f"{oid if self.show_key else ''}{self.sep}{v}"
 
     @staticmethod
     def _format_str_ascii(s: bytes) -> str:
+        """Format bytes as printable ASCII.
+
+        Args:
+            s: Bytes to format.
+
+        Returns:
+            ASCII representation with non-printable bytes replaced by dots.
+        """
         return "".join(
             chr(b) if MIN_PRINTABLE <= b < MAX_PRINTABLE else "." for b in s
         )
 
     @staticmethod
     def _format_str_asciihex(s: bytes) -> str:
+        """Format bytes as ASCII and hexadecimal.
+
+        Args:
+            s: Bytes to format.
+
+        Returns:
+            ASCII representation followed by a hexadecimal representation.
+        """
         a = Formatter._format_str_ascii(s)
         x = Formatter._format_str_hex(s)
         return f"{a} {x}"
 
     @staticmethod
     def _format_str_hex(s: bytes) -> str:
+        """Format bytes as hexadecimal.
+
+        Args:
+            s: Bytes to format.
+
+        Returns:
+            Space-separated hexadecimal representation.
+        """
         return " ".join(f"{b:02X}" for b in s)
 
     @staticmethod
     def _format_str_repr(s: bytes) -> str:
+        """Format bytes using ``repr()``.
+
+        Args:
+            s: Bytes to format.
+
+        Returns:
+            Python representation of the bytes.
+        """
         return repr(s)
 
 
 class CollectOFlags(argparse.Action):
-    """
-    Argparse action for collecting multiple -O option flags.
+    """Collect flags from a single ``-O`` option occurrence.
 
-    This action mimics the behavior of Net-SNMP's `-O` option, which can be
-    specified multiple times (e.g., `-On -Oq -Ov`) or combined in a single
-    token (e.g., `-Onqv`). Each occurrence contributes its flag characters
-    to a set stored in the destination attribute.
+    Args:
+        parser: Argument parser invoking this action.
+        namespace: Namespace where the parsed flags are stored.
+        values: Flag characters passed to ``-O``.
+        option_string: Option string that triggered this action.
     """
 
     def __call__(
@@ -215,12 +295,8 @@ class CollectOFlags(argparse.Action):
             option_string: The option string that triggered this action,
                 e.g., "-O" (may be None when called programmatically).
         """
-        # Get existing flags (if any)
         flags: set[str] = getattr(namespace, self.dest, set()) or set()
-        # Add each character in the new -O value
-        if values:
-            for ch in values:
-                flags.add(ch)
+        flags.update(values or ())
         setattr(namespace, self.dest, flags)
 
 
@@ -233,8 +309,21 @@ OFLAGS_HELP = {
     "v": "print values only (not OID = value)",
 }
 
-AUTH_PROTOCOL: dict[str, type[BaseAuthKey]] = {"MD5": Md5Key, "SHA": Sha1Key}
-PRIV_PROTOCOL: dict[str, type[BasePrivKey]] = {"DES": DesKey, "AES": Aes128Key}
+AUTH_PROTOCOL: dict[str, type[BaseAuthKey]] = {
+    "MD5": Md5Key,
+    "SHA": Sha1Key,
+    "SHA224": Sha224Key,
+    "SHA256": Sha256Key,
+    "SHA384": Sha384Key,
+    "SHA512": Sha512Key,
+}
+PRIV_PROTOCOL: dict[str, type[BasePrivKey]] = {
+    "DES": DesKey,
+    "AES": Aes128Key,
+    "AES128": Aes128Key,
+    "AES192": Aes192Key,
+    "AES256": Aes256Key,
+}
 
 
 class Cli:
@@ -242,21 +331,24 @@ class Cli:
 
     @classmethod
     def die(cls, msg: str | None = None) -> NoReturn:
-        """Die with message."""
+        """Print an error message and terminate the process.
+
+        Args:
+            msg: Error message to print.
+        """
         if msg:
             print(msg)
         sys.exit(1)
 
     @classmethod
     def parse_args(cls, args: list[str]) -> argparse.Namespace:
-        """
-        Parse arguments.
+        """Parse and validate command-line arguments.
 
         Args:
-            args: Arguments list.
+            args: Command-line arguments.
 
         Returns:
-            Parsed namespace.
+            Parsed and validated arguments.
         """
         # Prepare parser
         parser = argparse.ArgumentParser(
@@ -365,15 +457,13 @@ class Cli:
 
     @classmethod
     def is_valid_oid(cls, oid: str) -> bool:
-        """
-        Check oid is valid.
+        """Check whether an OID is valid.
 
         Args:
-            oid: Object id as string.
+            oid: Object identifier to validate.
 
         Returns:
-            True: if oid is valid.
-            False: otherwise.
+            ``True`` if the OID is valid, otherwise ``False``.
         """
         return bool(cls.rx_oid.match(oid))
 
@@ -381,12 +471,11 @@ class Cli:
     def _validate_community(
         cls, parser: argparse.ArgumentParser, ns: argparse.Namespace
     ) -> None:
-        """
-        Validate community-based security options.
+        """Validate community-based security options.
 
         Args:
-            parser: Argument parser.
-            ns: Parsed namespace.
+            parser: Argument parser used to report validation errors.
+            ns: Parsed command-line arguments.
         """
         if not ns.community:
             parser.error(f"SNMP {ns.version} requires -c/--community")
@@ -403,12 +492,11 @@ class Cli:
     def _validate_usm(
         cls, parser: argparse.ArgumentParser, ns: argparse.Namespace
     ) -> None:
-        """
-        Validate USM security options.
+        """Validate USM security options.
 
         Args:
-            parser: Argument parser.
-            ns: Parsed namespace.
+            parser: Argument parser used to report validation errors.
+            ns: Parsed command-line arguments.
         """
         if not ns.user:
             parser.error(f"SNMP {ns.version} requires -u/--user")
@@ -437,56 +525,54 @@ class Cli:
             )
 
     def get_version(self, ns: argparse.Namespace) -> SnmpVersion:
-        """
-        Parse SNMP version from arguments.
+        """Get the SNMP version from command-line arguments.
 
         Args:
-            ns: Parsed namespace.
+            ns: Parsed command-line arguments.
 
         Returns:
-            Protocol version
+            SNMP protocol version.
         """
         return VERSION_MAP[ns.version]
 
     def get_command(self, ns: argparse.Namespace) -> Command:
-        """
-        Get command from arguments.
+        """Determine the command to execute.
 
         Args:
-            ns: Parsed namespace.
+            ns: Parsed command-line arguments.
 
         Returns:
-            Parsed command.
+            Command to execute.
         """
-        if ns.command == "GET" and len(ns.oids) == 1:
-            return Command.GET
-        if ns.command == "GETNEXT":
-            return Command.GETNEXT
-        if ns.command == "GETBULK":
-            return Command.GETBULK
-        return Command.GETMANY
+        match ns.command:
+            case "GET" if len(ns.oids) == 1:
+                return Command.GET
+            case "GETNEXT":
+                return Command.GETNEXT
+            case "GETBULK":
+                return Command.GETBULK
+            case _:
+                return Command.GETMANY
 
     def get_community(self, ns: argparse.Namespace) -> str:
-        """
-        Get SNMP community from arguments.
+        """Get the SNMP community from command-line arguments.
 
         Args:
-            ns: Parsed namespace.
+            ns: Parsed command-line arguments.
 
         Returns:
-            SNMP community
+            SNMP community string.
         """
         return cast(str, ns.community)
 
     def get_user(self, ns: argparse.Namespace) -> User:
-        """
-        Get USM configuration from arguments.
+        """Build the USM user configuration from command-line arguments.
 
         Args:
-            ns: Parsed namespace.
+            ns: Parsed command-line arguments.
 
         Returns:
-            USM configuration
+            Configured USM user.
         """
         # Process auth key
         auth_key = None
@@ -501,14 +587,13 @@ class Cli:
         return User(ns.user, auth_key=auth_key, priv_key=priv_key)
 
     def get_session(self, ns: argparse.Namespace) -> SnmpSession:
-        """
-        Construct SnmpSession from args.
+        """Build an SNMP session from command-line arguments.
 
         Args:
-            ns: Parsed namespace.
+            ns: Parsed command-line arguments.
 
         Returns:
-            SnmpSession
+            Configured SNMP session.
         """
         version = self.get_version(ns)
         community = (
@@ -527,28 +612,30 @@ class Cli:
         )
 
     def run(self, args: list[str]) -> ExitCode:
-        """
-        Parse command-line arguments and run appropriative command.
+        """Parse arguments and run the appropriate command.
 
         Args:
-            args: List of command-line arguments
+            args: Command-line arguments.
+
         Returns:
-            ExitCode
+            Command exit code.
         """
         ns = self.parse_args(args)
         cmd = self.get_command(ns)
         formatter = Formatter.from_opts(ns.oflags or "")
         try:
             with self.get_session(ns) as session:
-                if cmd == Command.GET:
-                    return self.run_get(session, ns.oids, formatter)
-                if cmd == Command.GETMANY:
-                    return self.run_get_many(session, ns.oids, formatter)
-                if cmd == Command.GETNEXT:
-                    return self.run_getnext(session, ns.oids, formatter)
-                if cmd == Command.GETBULK:
-                    return self.run_getbulk(session, ns.oids, formatter)
-                return ExitCode.ERR
+                match cmd:
+                    case Command.GET:
+                        return self.run_get(session, ns.oids, formatter)
+                    case Command.GETMANY:
+                        return self.run_get_many(session, ns.oids, formatter)
+                    case Command.GETNEXT:
+                        return self.run_getnext(session, ns.oids, formatter)
+                    case Command.GETBULK:
+                        return self.run_getbulk(session, ns.oids, formatter)
+                    case _:
+                        return ExitCode.ERR
         except TimeoutError:
             self.die("ERROR: Timed out")
         except SnmpAuthError:
@@ -557,13 +644,15 @@ class Cli:
     def run_get(
         self, session: SnmpSession, oids: list[str], formatter: Formatter
     ) -> ExitCode:
-        """
-        Perform GET request.
+        """Perform a GET request.
 
         Args:
-            session: Configured session.
-            oids: List of oid, we must be sure, only one is used.
-            formatter: Formatter instance.
+            session: Configured SNMP session.
+            oids: List of OIDs. Exactly one OID is expected.
+            formatter: Formatter used to format the response.
+
+        Returns:
+            Command exit code.
         """
         oid = oids[0]
         r = session.get(oid)
@@ -573,13 +662,15 @@ class Cli:
     def run_get_many(
         self, session: SnmpSession, oids: list[str], formatter: Formatter
     ) -> ExitCode:
-        """
-        Perform multi-value GET request.
+        """Perform a GET request for multiple OIDs.
 
         Args:
-            session: Configured session.
-            oids: List of oids.
-            formatter: Formatter instance.
+            session: Configured SNMP session.
+            oids: OIDs to request.
+            formatter: Formatter used to format the responses.
+
+        Returns:
+            Command exit code.
         """
         r = session.get_many(oids)
         for k, v in sorted(r.items(), key=itemgetter(0)):
@@ -589,13 +680,15 @@ class Cli:
     def run_getnext(
         self, session: SnmpSession, oids: list[str], formatter: Formatter
     ) -> ExitCode:
-        """
-        Perform GETNEXT.
+        """Perform GETNEXT requests.
 
         Args:
-            session: Configured session.
-            oids: List of oids.
-            formatter: Formatter instance.
+            session: Configured SNMP session.
+            oids: OIDs to use as starting points.
+            formatter: Formatter used to format the responses.
+
+        Returns:
+            Command exit code.
         """
         for oid in oids:
             for k, v in session.getnext(oid):
@@ -605,13 +698,15 @@ class Cli:
     def run_getbulk(
         self, session: SnmpSession, oids: list[str], formatter: Formatter
     ) -> ExitCode:
-        """
-        Perform GETBULK.
+        """Perform GETBULK requests.
 
         Args:
-            session: Configured session.
-            oids: List of oids.
-            formatter: Formatter instance.
+            session: Configured SNMP session.
+            oids: OIDs to use as starting points.
+            formatter: Formatter used to format the responses.
+
+        Returns:
+            Command exit code.
         """
         for oid in oids:
             for k, v in session.getbulk(oid):
@@ -620,5 +715,12 @@ class Cli:
 
 
 def main(args: list[str] | None = None) -> int:
-    """Run `gufo-ping` with command-line arguments."""
+    """Run ``gufo-snmp`` with command-line arguments.
+
+    Args:
+        args: Command-line arguments. If ``None``, use ``sys.argv``.
+
+    Returns:
+        Process exit code.
+    """
     return Cli().run(sys.argv[1:] if args is None else args).value
