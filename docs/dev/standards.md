@@ -40,8 +40,8 @@ Gufo SNMP implements and is guided by the following standards:
 [RFC-3414]: https://www.rfc-editor.org/rfc/rfc3414.html
 [RFC-3826]: https://www.rfc-editor.org/rfc/rfc3826.html
 [RFC-7860]: https://www.rfc-editor.org/rfc/rfc7860.html
-[draft-blumenthal-aes-usm-04]: [https://datatracker.ietf.org/doc/draft-blumenthal-aes-usm-04/](https://datatracker.ietf.org/doc/draft-blumenthal-aes-usm-04/)
-[draft-reeder-snmpv3-usm-3desede-00]: [https://datatracker.ietf.org/doc/draft-reeder-snmpv3-usm-3desede-00/](https://datatracker.ietf.org/doc/draft-reeder-snmpv3-usm-3desede-00/)
+[draft-blumenthal-aes-usm-04]: https://datatracker.ietf.org/doc/draft-blumenthal-aes-usm-04/
+[draft-reeder-snmpv3-usm-3desede-00]: https://datatracker.ietf.org/doc/draft-reeder-snmpv3-usm-3desede-00/
 [PEP8]: https://peps.python.org/pep-0008/
 [PEP484]: https://peps.python.org/pep-0484/
 [PEP561]: https://peps.python.org/pep-0561/

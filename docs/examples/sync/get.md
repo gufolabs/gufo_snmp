@@ -17,7 +17,7 @@ Import `sys` module to parse the CLI argument.
 
 !!! warning
 
-    We use `sys.argv` only for demonstration purposes. Use `argsparse` or alternatives
+    We use `sys.argv` only for demonstration purposes. Use `argparse` or alternatives
     in real-world applications.
 
 ``` py title="get.py" linenums="1" hl_lines="3"
@@ -25,7 +25,7 @@ Import `sys` module to parse the CLI argument.
 ```
 
 `SnmpSession` object holds all necessary API. We're using a synchronous
-version from `gufo.snmp.sync_client`.
+version from `gufo.snmp.sync`.
 
 ``` py title="get.py" linenums="1" hl_lines="6"
 --8<-- "examples/sync/get.py"
@@ -48,7 +48,7 @@ the client automatically closes all connections on the exit of context,
 so its lifetime is defined explicitly.
 
 `SnmpSession` constructor offers lots of configuration variables for fine-tuning. Refer to the 
-[SnmpSession reference][gufo.snmp.sync_client.SnmpSession]
+[SnmpSession reference][gufo.snmp.sync.SnmpSession]
 for further details. In our example, we set the agent's address and SNMP community
 to the given values.
 
@@ -56,7 +56,7 @@ to the given values.
 --8<-- "examples/sync/get.py"
 ```
 
-We use `SnmpSession.get()` function to query OID. See [SnmpSession.get() reference][gufo.snmp.sync_client.SnmpSession.get] for further details.
+We use `SnmpSession.get()` function to query OID. See [SnmpSession.get() reference][gufo.snmp.sync.SnmpSession.get] for further details.
 
 ``` py title="get.py" linenums="1" hl_lines="9"
 --8<-- "examples/sync/get.py"
@@ -69,7 +69,8 @@ In our example we just print it.
 --8<-- "examples/sync/get.py"
 ```
 
-Lets run our `main()` function pass first command-line parameters as address, community, and OID.
+Let's run our `main()` function and pass the address, community, and OID as
+command-line parameters.
 
 ## Running
 

@@ -27,7 +27,7 @@ Let's see the details.
 ```
 
 `SnmpSession` object holds all necessary API. We're using a synchronous
-version from `gufo.snmp.sync_client`.
+version from `gufo.snmp.sync`.
 
 
 ``` py title="debugging.py" linenums="1" hl_lines="5"
@@ -48,7 +48,7 @@ and [getnext](getnext.md) examples for additional details.
 
 Both `Snmpd` and `SnmpSession` are highly configurable, so refer to the
 [Snmpd][gufo.snmp.snmpd.Snmpd] and
-[SnmpSession][gufo.snmp.sync_client.SnmpSession]
+[SnmpSession][gufo.snmp.sync.SnmpSession]
 references.
 
 ``` py title="debugging.py" linenums="1" hl_lines="7"
@@ -57,7 +57,7 @@ references.
 
 We use `SnmpSession.getnext()` function to iterate within base OID. The function is an
 iterator yielding pairs of `(OID, value)`, so we use `for` construction to iterate over the values.
-See [SnmpSession.getnext() reference][gufo.snmp.sync_client.SnmpSession.getnext]
+See [SnmpSession.getnext() reference][gufo.snmp.sync.SnmpSession.getnext]
 for further details. 
 
 ``` py title="debugging.py" linenums="1" hl_lines="8"
@@ -71,7 +71,7 @@ In our example we just print it.
 --8<-- "examples/sync/debugging.py"
 ```
 
-Lets run our `main()` function.
+Let's run our `main()` function.
 
 ## Running
 

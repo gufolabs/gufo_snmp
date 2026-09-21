@@ -1,12 +1,12 @@
 import asyncio
 import sys
 
-from gufo.snmp import SnmpSession
+from gufo.snmp.aio import SnmpSession
 
 
 async def main(addr: str, community: str, oid: str) -> None:
     async with SnmpSession(
-        addr=addr, community=community, allow_bulk=True
+        addr=addr, community=community, allow_bulk=True, limit_rps=10
     ) as session:
         async for k, v in session.fetch(oid):
             print(f"{k}: {v}")
