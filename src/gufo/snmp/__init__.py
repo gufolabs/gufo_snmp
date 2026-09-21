@@ -22,6 +22,8 @@ from ._fast import (
 from .typing import ValueType
 from .user import (
     Aes128Key,
+    Aes192Key,
+    Aes256Key,
     BaseAuthKey,
     BasePrivKey,
     DesKey,
@@ -39,6 +41,8 @@ from .version import SnmpVersion
 __version__: str = "0.12.0"
 __all__ = [
     "Aes128Key",
+    "Aes192Key",
+    "Aes256Key",
     "BaseAuthKey",
     "BasePrivKey",
     "DesKey",
