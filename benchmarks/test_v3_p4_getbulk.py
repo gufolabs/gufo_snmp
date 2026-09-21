@@ -12,9 +12,9 @@ import concurrent.futures
 # Third-party modules
 # from pysnmp.hlapi import v3arch
 from gufo.snmp import SnmpVersion
-from gufo.snmp.async_client import SnmpSession as AsyncSnmpSession
+from gufo.snmp.aio import SnmpSession as AsyncSnmpSession
 from gufo.snmp.snmpd import Snmpd
-from gufo.snmp.sync_client import SnmpSession as SyncSnmpSession
+from gufo.snmp.sync import SnmpSession as SyncSnmpSession
 from gufo.snmp.user import Aes128Key, KeyType, Sha1Key, User
 
 BASE_OID = "1.3.6"

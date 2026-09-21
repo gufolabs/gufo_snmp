@@ -20,7 +20,7 @@ Import `sys` module to parse the CLI argument.
 
 !!! warning
 
-    We use `sys.argv` only for demonstration purposes. Use `argsparse` or alternatives
+    We use `sys.argv` only for demonstration purposes. Use `argparse` or alternatives
     in real-world applications.
 
 ``` py title="fetch.py" linenums="1" hl_lines="3"
@@ -28,7 +28,7 @@ Import `sys` module to parse the CLI argument.
 ```
 
 `SnmpSession` object holds all necessary API. We're using a synchronous
-version from `gufo.snmp.sync_client`.
+version from `gufo.snmp.sync`.
 
 
 ``` py title="fetch.py" linenums="1" hl_lines="6"
@@ -61,7 +61,7 @@ version allows it or to deny bulk requests in any case.
 | v3      | getnext | getbulk |
 
 `SnmpSession` constructor offers lots of configuration variables for fine-tuning. Refer to the 
-[SnmpSession reference][gufo.snmp.sync_client.SnmpSession]
+[SnmpSession reference][gufo.snmp.sync.SnmpSession]
 for further details. In our example, we set the agent's address and SNMP community
 to the given values.
 
@@ -73,7 +73,7 @@ We use `SnmpSession.fetch()` function to iterate within base OID just like the
 `SnmpSession.getnext()` and `SnmpSession.getbulk()`.
 
 The function is an iterator returning pairs of `(OID, value)`, so we use `for` construction to iterate over the values.
-See [SnmpSession.getbulk() reference][gufo.snmp.sync_client.SnmpSession.getbulk]
+See [SnmpSession.getbulk() reference][gufo.snmp.sync.SnmpSession.getbulk]
 for further details. 
 
 ``` py title="fetch.py" linenums="1" hl_lines="11"
@@ -87,7 +87,8 @@ In our example we just print it.
 --8<-- "examples/sync/fetch.py"
 ```
 
-Lets run our `main()` function and pass first command-line parameters as address, community, and oid.
+Let's run our `main()` function and pass the address, community, and OID as
+command-line parameters.
 
 ## Running
 

@@ -15,7 +15,7 @@ import pytest
 
 # Gufo Labs modules
 from gufo.snmp import NoSuchInstance, SnmpAuthError, ValueType
-from gufo.snmp.async_client import SnmpSession
+from gufo.snmp.aio import SnmpSession
 from gufo.snmp.snmpd import Snmpd
 
 from .util import (

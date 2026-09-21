@@ -1,7 +1,7 @@
 import sys
 
 from gufo.snmp import Aes128Key, DesKey, Md5Key, Sha1Key, User
-from gufo.snmp.sync_client import SnmpSession
+from gufo.snmp.sync import SnmpSession
 
 AUTH_ALG = {
     "md5": Md5Key,

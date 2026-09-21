@@ -19,7 +19,6 @@ from ._fast import (
     SnmpEncodeError,
     SnmpError,
 )
-from .async_client import SnmpSession
 from .typing import ValueType
 from .user import (
     Aes128Key,
@@ -55,7 +54,6 @@ __all__ = [
     "SnmpDecodeError",
     "SnmpEncodeError",
     "SnmpError",
-    "SnmpSession",
     "SnmpVersion",
     "User",
     "ValueType",

@@ -1,7 +1,8 @@
 import asyncio
 import sys
 
-from gufo.snmp import Aes128Key, DesKey, Md5Key, Sha1Key, SnmpSession, User
+from gufo.snmp import Aes128Key, DesKey, Md5Key, Sha1Key, User
+from gufo.snmp.aio import SnmpSession
 
 AUTH_ALG = {
     "md5": Md5Key,

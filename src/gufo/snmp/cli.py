@@ -33,7 +33,7 @@ from gufo.snmp import (
     User,
     ValueType,
 )
-from gufo.snmp.sync_client import SnmpSession
+from gufo.snmp.sync import SnmpSession
 
 NAME = "gufo-snmp"
 

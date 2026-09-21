@@ -51,7 +51,7 @@ Yes. Gufo SNMP provides pre-built binary wheels for supported platforms. You don
 Create an SnmpSession with the device address and community, then use `get()` to retrieve an OID:
 
 ```python
-from gufo.snmp.sync_client import SnmpSession
+from gufo.snmp.sync import SnmpSession
 
 with SnmpSession(addr="192.0.2.1", community="public") as session:
     print(session.get("1.3.6.1.2.1.1.1.0"))
@@ -170,18 +170,18 @@ Both. Gufo SNMP provides separate synchronous and asynchronous APIs, so you can 
 
 ### Can I use Gufo SNMP with asyncio?
 
-Yes. Import SnmpSession from `gufo.snmp.async_client` and use it with `asyncio` applications.
+Yes. Import SnmpSession from `gufo.snmp.aio` and use it with `asyncio` applications.
 
 ### Can I use Gufo SNMP from synchronous Python code?
 
-Yes. Import SnmpSession from `gufo.snmp.sync_client` and use it from regular synchronous Python code.
+Yes. Import SnmpSession from `gufo.snmp.sync` and use it from regular synchronous Python code.
 
 ### How do I create an SNMP session?
 
 Create an SnmpSession with the device address and SNMP credentials. For example:
 
 ```python
-from gufo.snmp.sync_client import SnmpSession
+from gufo.snmp.sync import SnmpSession
 
 with SnmpSession(
     addr="192.0.2.1",
@@ -190,10 +190,10 @@ with SnmpSession(
     ...
 ```
 
-For asynchronous applications, use `async with` with `SnmpSession` from `gufo.snmp.async_client`:
+For asynchronous applications, use `async with` with `SnmpSession` from `gufo.snmp.aio`:
 
 ```python
-from gufo.snmp.async_client import SnmpSession
+from gufo.snmp.aio import SnmpSession
 
 async with SnmpSession(
     addr="192.0.2.1",
@@ -274,7 +274,7 @@ Create a `User` with the required authentication and privacy keys, then pass it 
 
 ```python
 from gufo.snmp import User, Sha1Key, Aes128Key
-from gufo.snmp.sync_client import SnmpSession
+from gufo.snmp.sync import SnmpSession
 
 with SnmpSession(
     addr="192.0.2.1",

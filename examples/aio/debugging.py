@@ -1,6 +1,6 @@
 import asyncio
 
-from gufo.snmp import SnmpSession
+from gufo.snmp.aio import SnmpSession
 from gufo.snmp.snmpd import Snmpd
 
 

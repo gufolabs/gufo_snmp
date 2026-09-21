@@ -1,7 +1,8 @@
 import asyncio
 import sys
 
-from gufo.snmp import SnmpSession, User
+from gufo.snmp import User
+from gufo.snmp.aio import SnmpSession
 
 
 async def main(addr: str, user_name: str) -> None:

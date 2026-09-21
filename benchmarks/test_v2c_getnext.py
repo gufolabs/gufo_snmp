@@ -13,9 +13,9 @@ import asyncio
 from easysnmp import snmp_walk as e_snmp_walk
 
 # Gufo SNMP modules
-from gufo.snmp.async_client import SnmpSession as AsyncSnmpSession
+from gufo.snmp.aio import SnmpSession as AsyncSnmpSession
 from gufo.snmp.snmpd import Snmpd
-from gufo.snmp.sync_client import SnmpSession as SyncSnmpSession
+from gufo.snmp.sync import SnmpSession as SyncSnmpSession
 
 BASE_OID = "1.3.6"
 SNMP_COMMUNITY = "public"

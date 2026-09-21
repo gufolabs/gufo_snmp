@@ -12,7 +12,7 @@ import socket
 # Gufo SNMP Modules
 from gufo.snmp.user import User, Md5Key, KeyType, DesKey, Aes128Key, Sha1Key
 from gufo.snmp.snmpd import Snmpd
-from gufo.snmp.sync_client import SnmpSession as SyncSnmpSession
+from gufo.snmp.sync import SnmpSession as SyncSnmpSession
 
 SNMPD_ADDRESS = "127.0.0.1"
 SNMPD_PATH = "/usr/sbin/snmpd"

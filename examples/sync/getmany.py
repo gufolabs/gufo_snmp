@@ -1,6 +1,6 @@
 import sys
 
-from gufo.snmp.sync_client import SnmpSession
+from gufo.snmp.sync import SnmpSession
 
 
 def main(addr: str, community: str, oids: list[str]) -> None:

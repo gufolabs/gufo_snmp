@@ -21,7 +21,7 @@ Import `sys` module to parse the CLI argument.
 
 !!! warning
 
-    We use `sys.argv` only for demonstration purposes. Use `argsparse` or alternatives
+    We use `sys.argv` only for demonstration purposes. Use `argparse` or alternatives
     in real-world applications.
 
 ``` py title="get.py" linenums="1" hl_lines="3"
@@ -34,7 +34,7 @@ We need to import `User` class and key algorithm helpers.
 ```
 
 `SnmpSession` object holds all necessary API. We're using a synchronous
-version from `gufo.snmp.sync_client`.
+version from `gufo.snmp.sync`.
 
 ``` py title="get.py" linenums="1" hl_lines="6 7 8 9"
 --8<-- "examples/sync/get-v3.py::15"
@@ -66,18 +66,18 @@ This function processes command-line arguments and returns an instance of the `U
 ``` py title="get.py" linenums="17" hl_lines="2"
 --8<-- "examples/sync/get-v3.py:17:29"
 ```
-We get user name from 3-rd command-line positional parameters.
+We get the user name from the second command-line positional parameter.
 
 ``` py title="get.py" linenums="17" hl_lines="3"
 --8<-- "examples/sync/get-v3.py:17:29"
 ```
-Authentication options are optionals, so we're checking
-for 5-th command-line parameter.
+Authentication options are optional, so we check the fourth command-line
+parameter.
 
 ``` py title="get.py" linenums="17" hl_lines="4 5"
 --8<-- "examples/sync/get-v3.py:17:29"
 ```
-If privacy option is set, we consider it has format of `<alg>:<key>`,
+If an authentication option is set, it must have the format `<alg>:<key>`,
 where:
 
 * `<alg>` - authentication algorithm, which must be one of `AUTH_ALG` keys.
@@ -85,18 +85,15 @@ where:
 
 !!! note
 
-    SNMPv3 intoduces 3 form of keys:
+    SNMPv3 introduces three forms of keys:
 
         * Password
         * Master key
         * Localized key
 
-    Such a variety often introduces a mess and you need
-    to have a clear meaning of which of key you really passing.
-    *Gufo SNMP* supports all three forms of keys which may
-    be specified as additional optional parameters for
-    `*Key` classes. We use default settings (password)
-    for this example.
+    Choose the form deliberately. *Gufo SNMP* supports all three forms,
+    which can be selected through optional parameters of the `*Key` classes.
+    This example uses the default form: a password.
 
 Then we find a proper key class via `AUTH_ALG` mapping
 and pass a key.
@@ -110,22 +107,22 @@ and pass a key.
 --8<-- "examples/sync/get-v3.py:17:29"
 ```
 
-If privacy key is not found, set it to `None`
-to disable privacy settings.
+If no authentication key is provided, set it to `None`
+to disable authentication.
 
 ``` py title="get.py" linenums="17" hl_lines="8 9 10 11 12"
 --8<-- "examples/sync/get-v3.py:17:29"
 ```
-The privacy settings are handled just like as the authentication
-ones. We expect privacy settings in 6-th command-line parameter,
+Privacy settings are handled just like authentication settings. We expect
+them in the fifth command-line parameter,
 and then use `PRIV_ALG` mapping to get a proper algorithm.
 
-Just like a privacy settings, `None` value means no encryption.
+As with authentication, `None` means no encryption.
 
 ``` py title="get.py" linenums="17" hl_lines="13"
 --8<-- "examples/sync/get-v3.py:17:29"
 ```
-Then we construct and return an `User` instance.
+Then we construct and return a `User` instance.
 
 
 ``` py title="get.py" linenums="32" hl_lines="1"
@@ -149,15 +146,15 @@ the client automatically closes all connections on the exit of context,
 so its lifetime is defined explicitly.
 
 `SnmpSession` constructor offers lots of configuration variables for fine-tuning. Refer to the 
-[SnmpSession reference][gufo.snmp.sync_client.SnmpSession]
-for further details. In our example, we set the agent's address and SNMP community
-to the given values.
+[SnmpSession reference][gufo.snmp.sync.SnmpSession]
+for further details. In our example, we set the agent's address and `User`
+instance.
 
 ``` py title="get.py" linenums="32" hl_lines="3"
 --8<-- "examples/sync/get-v3.py:32:35"
 ```
 
-We use `SnmpSession.get()` function to query OID. See [SnmpSession.get() reference][gufo.snmp.sync_client.SnmpSession.get] for further details.
+We use `SnmpSession.get()` function to query OID. See [SnmpSession.get() reference][gufo.snmp.sync.SnmpSession.get] for further details.
 
 ``` py title="get.py" linenums="32" hl_lines="4"
 --8<-- "examples/sync/get-v3.py:32:35"
@@ -170,8 +167,9 @@ In our example we just print it.
 --8<-- "examples/sync/get-v3.py:38:38"
 ```
 
-Lets run our `main()` function.
-Pass first command-line parameters as address, construct user via `get_user` function, and pass OID.
+Let's run our `main()` function.
+Pass the address as the first command-line parameter, construct the user with
+`get_user()`, and pass the OID as the third parameter.
 
 ## Running
 

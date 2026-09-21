@@ -12,6 +12,12 @@ To see unreleased changes, please see the [CHANGELOG on the main branch guide](h
 
 ## [Unreleased]
 
+### Breaking changes
+
+* `gufo.snmp.sync_client` has been renamed to `gufo.snmp.sync`.
+* `gufo.snmp.async_client` has been renamed to `gufo.snmp.aio`.
+* `SnmpSession` is no longer exported from `gufo.snmp`. Import it directly from `gufo.snmp.aio`.
+
 ### Fixed
 
 * #64 - BUG: IPv6 requires bracketed address in Gufo

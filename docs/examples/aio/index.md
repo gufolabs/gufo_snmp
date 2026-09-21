@@ -1,7 +1,7 @@
 # Gufo SNMP Examples: Async Mode
 
 This part of the documentation contains a detailed
-explanation of the samples from the [examples/async/][examples] folder.
+explanation of the samples from the [examples/aio/][examples] folder.
 
 * [get.py](get.md): Single Get Request
 * [getmany.py](getmany.md): Multi Items Get Request
