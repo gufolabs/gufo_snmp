@@ -15,7 +15,6 @@ from gufo.snmp.snmpd import Snmpd
 from gufo.snmp.sync import SnmpSession as SyncSnmpSession
 
 SNMPD_ADDRESS = "127.0.0.1"
-SNMPD_PATH = "/usr/sbin/snmpd"
 SNMP_COMMUNITY = "public"
 SNMP_LOCATION = "Gufo SNMP Test"
 SNMP_CONTACT = "test <test@example.com>"
@@ -142,7 +141,6 @@ def run_getbulk_v3_sync(snmpd: Snmpd, user: User) -> None:
 
 def main() -> None:
     with Snmpd(
-        path=SNMPD_PATH,
         address=SNMPD_ADDRESS,
         port=get_free_port(),
         community=SNMP_COMMUNITY,
