@@ -38,7 +38,7 @@ from .user import (
 )
 from .version import SnmpVersion
 
-__version__: str = "0.12.0"
+__version__: str = "0.13.0"
 __all__ = [
     "Aes128Key",
     "Aes192Key",
